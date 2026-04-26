@@ -232,7 +232,10 @@ Tier 1은 단일 파일 이하, 즉시 되돌릴 수 있는 작업으로 Validat
 Tier 1 기본 commit + push 순서:
 
 ```powershell
-git add {변경된 파일들}
+# 1. 세션 로그 갱신 확인 (파일 변경이 1건이라도 있으면 필수 — 생략 시 commit 금지)
+#    logs/sessions/SESSION-{YYYYMMDD}-{NNN}.md 에 이번 Task 인라인 보고 원문 기록 완료 여부 확인
+
+git add {변경된 파일들} {세션 로그 파일}
 git commit -m "[{TASK-ID}] {변경 내용 요약}"
 git push origin main
 ```

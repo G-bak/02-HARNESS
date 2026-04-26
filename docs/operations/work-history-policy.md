@@ -240,7 +240,22 @@ commit/merge/push는 항상 세트다. 모든 작업은 push까지 완료해야 
 - `logs/tasks/TASK-{ID}.jsonl`에 `TASK_COMPLETED`가 존재해야 한다.
 - 보고서 게이트에 따라 `reports/TASK-{ID}.md`가 작성되어야 한다.
 - 품질 점수 게이트에 따라 `logs/quality-scores.jsonl`에 점수가 기록되어야 한다.
-- 세션이 존재하면 `logs/sessions/SESSION-{YYYYMMDD}-{NNN}.md`에 요약이 반영되어야 한다.
+- 파일 변경이 1건이라도 있으면 `logs/sessions/SESSION-{YYYYMMDD}-{NNN}.md` 갱신이 **commit보다 먼저** 완료되어야 한다.
+
+**세션 로그 갱신은 git add/commit 이전 마지막 단계다. 순서를 바꾸지 않는다.**
+
+```
+올바른 순서:
+1. TASK_COMPLETED 기록
+2. 세션 로그 갱신  ← 여기를 빠뜨리지 않는다
+3. git add (세션 로그 포함)
+4. git commit
+5. git push
+
+금지:
+TASK_COMPLETED → git commit → 세션 로그 (순서 역전)
+TASK_COMPLETED → git commit → 세션 로그 생략
+```
 
 Tier 2/3 추가 완료 조건:
 
