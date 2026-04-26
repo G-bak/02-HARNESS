@@ -1,6 +1,6 @@
 # Analyst 역할 문서
 
-**버전:** 2.2 | **최종 수정:** 2026-04-26
+**버전:** 2.3 | **최종 수정:** 2026-04-26
 
 Analyst는 하네스의 중심 조정자다.
 사용자 요청을 해석하고, 작업 원장을 만들고, Tier를 판단하고, 다른 에이전트에게 필요한 맥락만 추려서 지시하며, 최종 보고를 작성한다.
@@ -202,21 +202,26 @@ Researcher는 외부 기술 조사 전용이다. 항상 Codex CLI + `gpt-5.4`를
 codex exec -a never -s workspace-write --json -m gpt-5.4 "{프롬프트}"
 ```
 
-> 코드베이스·문서 읽기는 Analyst가 직접 처리한다 — Researcher 투입 불필요.
+| 옵션 | 기본값 (하네스) | 가능한 값 | 의미 |
+|---|---|---|---|
+| `-a` / `--approval` | `never` | `never` · `on-failure` · `always` | 실행 중 사용자 승인 요청 시점. `never` = 전혀 묻지 않음 (자동화 필수) |
+| `-s` / `--sandbox` | `workspace-write` | `none` · `workspace-read` · `workspace-write` · `full` | 파일 접근 범위. `workspace-write` = 작업 디렉토리 읽기+쓰기, 외부 접근 차단 |
+| `--json` | (항상 사용) | flag (값 없음) | 결과를 JSON으로 출력. 없으면 plain text — 파싱 불가 |
+| `-m` / `--model` | `gpt-5.4` | 모델 ID 문자열 | 사용할 모델. 오타 시 즉시 abort |
+| `-q` / `--quiet` | (선택) | flag (값 없음) | 진행 로그 숨김. `--json`과 함께 쓰면 출력이 JSON만 남음 |
 
 #### Codex CLI 모델 선택표
 
 | 모델 ID | 속도 | 입력 비용(credits/1M) | 최적 용도 | 사용 가능 여부 |
 |---|---|---|---|---|
-| `gpt-5.4` | 중간 | 62.5 | 일반 코딩 + 추론 (자동화 기본값) | API key + ChatGPT |
+| `gpt-5.4` | 중간 | 62.5 | 일반 추론 · 외부 기술 조사 (하네스 기본값) | API key + ChatGPT |
 | `gpt-5.4-mini` | 빠름 | 18.75 | 고빈도 자동화 · 비용 절감 | API key + ChatGPT |
 | `gpt-5.3-codex` | 빠름 (61.9 tok/s) | 43.75 | 터미널/CLI 자동화 · 순수 코드 | API key + ChatGPT |
 | `gpt-5.2` | 중간 | 43.75 | 레거시 호환 | API key |
-| `gpt-5.5` | 중간 | 125 | 최상위 복잡 작업 | ChatGPT 계정 전용 (API key 불가) ❌ |
-| `gpt-5.3-codex-spark` | 매우 빠름 | 비공개 | 실시간 대화형 코딩 | ChatGPT Pro 전용 (Research Preview) ❌ |
+| `gpt-5.5` | 중간 | 125 | — | API key 불가 ❌ |
+| `gpt-5.3-codex-spark` | 매우 빠름 | 비공개 | — | ChatGPT Pro 전용 ❌ |
 
-> **자동화 추천**: `gpt-5.4` (범용) 또는 `gpt-5.3-codex` (터미널 특화).  
-> `gpt-5.5`·`gpt-5.3-codex-spark`는 API key로 호출 불가 — 자동화에 사용 금지.
+> `gpt-5.5`·`gpt-5.3-codex-spark`는 API key 미지원 — 자동화 스크립트 사용 금지.
 
 **모델 ID 오류 시 동작:**
 
@@ -227,27 +232,6 @@ codex exec -a never -s workspace-write --json -m gpt-5.4 "{프롬프트}"
 | 메타데이터 없음 | 경고 + 성능 저하 상태로 계속 실행 |
 
 > 모델 ID는 정확히 입력해야 한다. 오타는 즉시 abort를 유발한다.
-
-#### Codex CLI Bash 호출 템플릿
-
-```bash
-codex exec \
-  -a never \
-  -s workspace-write \
-  --json \
-  -m gpt-5.4 \
-  "{프롬프트}"
-```
-
-| 옵션 | 기본값 (하네스) | 가능한 값 | 의미 |
-|---|---|---|---|
-| `-a` / `--approval` | `never` | `never` · `on-failure` · `always` | 실행 중 사용자 승인 요청 시점. `never` = 전혀 묻지 않음 (자동화 필수) |
-| `-s` / `--sandbox` | `workspace-write` | `none` · `workspace-read` · `workspace-write` · `full` | 파일 접근 범위. `workspace-write` = 작업 디렉토리 읽기+쓰기, 외부 접근 차단 |
-| `--json` | (항상 사용) | flag (값 없음) | 결과를 JSON으로 출력. 없으면 plain text — 파싱 불가 |
-| `-m` / `--model` | `gpt-5.4` | 모델 ID 문자열 | 사용할 모델. 오타 시 즉시 abort (위 모델 선택표 참고) |
-| `-q` / `--quiet` | (선택) | flag (값 없음) | 진행 로그 숨김. `--json`과 함께 쓰면 출력이 JSON만 남음 |
-
-Validator-A 자동화 기본 호출: `codex exec -a never -s workspace-write --json -m gpt-5.4`
 
 ### Generator
 
