@@ -1,6 +1,6 @@
 # Task Spec — 스키마 정의
 
-**버전:** 1.3 | **최종 수정:** 2026-04-26  
+**버전:** 1.4 | **최종 수정:** 2026-04-26  
 **작성자:** Analyst | **소비자:** Generator, Validator (일부 필드는 Researcher)
 
 ---
@@ -57,6 +57,12 @@ tasks/specs/TASK-{YYYYMMDD}-{NNN}.json
 logs/tasks/TASK-{YYYYMMDD}-{NNN}.jsonl 의 TASK_CREATED 이벤트 details.spec
 ```
 
+경로 참조 방식:
+
+```text
+logs/tasks/TASK-{ID}.jsonl 의 TASK_CREATED.details.spec_path = "tasks/specs/TASK-{ID}.json"
+```
+
 규칙:
 
 - Validator에게 전달되는 success_criteria는 이 저장본과 의미가 같아야 한다.
@@ -64,6 +70,8 @@ logs/tasks/TASK-{YYYYMMDD}-{NNN}.jsonl 의 TASK_CREATED 이벤트 details.spec
 - 단순 요약만 원장에 남기고 Task Spec 원본을 보존하지 않는 것은 금지한다.
 - 초소형 Tier 1이라도 `TASK_CREATED.details.spec`에 목표와 성공 기준을 보존한다.
 - `tasks/specs/` 디렉터리가 없으면 Analyst가 생성한다.
+- 신규 strict Task는 `tasks/specs/TASK-{ID}.json`, `TASK_CREATED.details.spec`, `TASK_CREATED.details.spec_path` 중 하나가 없으면 `validate-ledger`에서 실패한다.
+- 과거 legacy Task에 원본 Spec이 없으면 기존 이벤트를 수정하지 않고 `CORRECTION.details.legacy_spec_omission_reason`을 append 한다.
 
 ---
 

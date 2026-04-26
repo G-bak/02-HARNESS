@@ -25,18 +25,18 @@
 | Validator 역할·검증 절차 | `docs/agents/validator.md` | v1.4 | 2026-04-26 |
 | Generator 역할 | `docs/agents/generator.md` | v1.4 | 2026-04-26 |
 | Researcher 역할 | `docs/agents/researcher.md` | v1.2 | 2026-04-26 |
-| 머지 조건·승인 주체 (권위) | `docs/operations/git-branch-policy.md` | v1.5 | 2026-04-26 |
-| 도구 권한 | `docs/operations/tool-permissions.md` | v1.6 | 2026-04-26 |
+| 머지 조건·승인 주체 (권위) | `docs/operations/git-branch-policy.md` | v1.6 | 2026-04-26 |
+| 도구 권한 | `docs/operations/tool-permissions.md` | v1.7 | 2026-04-26 |
 | 외부 알림 정책 | `docs/operations/notification-policy.md` | v1.6 | 2026-04-26 |
-| 작업 이력 저장 정책 | `docs/operations/work-history-policy.md` | v1.7 | 2026-04-26 |
+| 작업 이력 저장 정책 | `docs/operations/work-history-policy.md` | v1.8 | 2026-04-26 |
 | Tier 분류 기준 | `docs/workflows/tier-classification.md` | v1.3 | 2026-04-26 |
-| Task 수명 주기 | `docs/workflows/task-lifecycle.md` | v1.15 | 2026-04-26 |
+| Task 수명 주기 | `docs/workflows/task-lifecycle.md` | v1.16 | 2026-04-26 |
 | 실패 처리 | `docs/workflows/failure-handling.md` | v1.3 | 2026-04-25 |
 | 컨텍스트 관리 | `docs/workflows/context-management.md` | v1.0 | 2026-04-24 |
-| Task Spec 스키마 | `docs/schemas/task-spec.md` | v1.3 | 2026-04-26 |
+| Task Spec 스키마 | `docs/schemas/task-spec.md` | v1.4 | 2026-04-26 |
 | 에이전트 출력 형식 | `docs/schemas/output-formats.md` | v1.14 | 2026-04-26 |
 | 품질 루브릭 | `QUALITY_SCORE.md` | v1.3 | 2026-04-26 |
-| 실행 비용·리소스 관측 | `docs/operations/eval-harness.md` | v1.6 | 2026-04-26 |
+| 실행 비용·리소스 관측 | `docs/operations/eval-harness.md` | v1.7 | 2026-04-26 |
 | 보고서 예시 | `reports/TASK-EXAMPLE.md` | v1.6 | 2026-04-26 |
 
 ---
@@ -71,6 +71,12 @@
 - **Non-git 작업공간 모드**: git 저장소가 아닌 경우 브랜치/커밋/머지 이벤트를 기록하지 않고 `branch_omission_reason`을 원장에 남긴 뒤 로컬 검증과 보고서/품질 점수 게이트로 완료 판단.
 - **세션 로그 기준**: 작업 세션에는 세션 로그를 생성하거나 기존 세션 로그를 재사용한다. 초소형 Task에서 생략하면 `session_log_skipped_reason`을 완료 이벤트에 기록.
 - **자동 감사 스크립트**: `scripts/check-doc-headers.mjs`, `scripts/validate-ledger.mjs`, `scripts/check-completion-gates.mjs`로 권위 문서 헤더, 작업 원장 JSONL, 완료 게이트/보고서 stale 문구를 점검.
+- **단일 감사 명령**: `npm run audit:harness`로 문서 헤더, 원장, 완료 게이트, 품질 점수 최근값 산정을 순차 점검.
+- **활성 Task 감지**: 완료 게이트는 `CURRENT_STATE.md`뿐 아니라 `logs/tasks/*.jsonl`의 미완료 원장을 함께 확인해 작업 중 dirty 상태를 직전 완료 Task 오류로 오판하지 않음.
+- **Task Spec SSOT 감사**: 신규 strict Task는 `tasks/specs/TASK-{ID}.json`, `TASK_CREATED.details.spec`, `TASK_CREATED.details.spec_path` 중 하나가 필수이며 legacy 누락은 `CORRECTION.details.legacy_spec_omission_reason`으로만 보정.
+- **품질 점수 최근값 기준**: 최근 5건 평균은 append 순서가 아니라 `recorded_at` 및 `task_id` 기준으로 산정.
+- **문서 클래스 구분**: Authority / Operational guide / Product/runtime doc / Plan/archive를 구분하고, 권위 규칙은 Authority 문서에만 둠.
+- **Push 포함 완료 조건**: 사용자가 push까지 요청했거나 Task Spec에 push가 포함되면 `git push origin main`과 push 후 상태 확인을 완료 조건에 포함.
 - **대표 보고용 품질 점수 표시**: 보고서에는 JSON 원문보다 `95점 / 100점 (S등급)` 형식의 요약, 구분 표, 좋았던 점, 감점/주의를 먼저 표시. JSON은 내부 원장 또는 부록용.
 
 ---
@@ -78,15 +84,14 @@
 ## 활성 Task
 
 현재 진행 중인 Task 없음.  
-마지막 완료 Task: TASK-20260426-058 Git 작업 인수인계 및 main squash merge (2026-04-26)
+마지막 완료 Task: TASK-20260426-060 전체 하네스 개선 및 commit/merge/push 문서화 (2026-04-26)
 
 ---
 
 ## 남은 작업
 
-현재 미완료 작업 없음. 문서 체계 1차 완성 상태.  
-Git 인수인계: 로컬 `main`은 `origin/main`보다 앞서 있으며, 원격 push는 아직 수행하지 않았다. 다음 세션은 `git status --short --branch`로 ahead 수를 확인해 먼저 보고한다.  
-다음 재개 시 예상 시작점: 실제 에이전트 운영 첫 Task 실행, push 요청 처리, 또는 추가 피드백 반영.
+현재 미완료 작업 없음. 문서 체계 2차 보강 완료 상태.  
+Git 인수인계: TASK-20260426-060 완료 시 `main` squash merge 후 `origin/main` push까지 수행한다. 다음 세션은 `git status --short --branch`로 동기화 상태를 먼저 확인해 보고한다.
 
 ---
 

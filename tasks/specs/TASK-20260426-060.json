@@ -1,0 +1,65 @@
+{
+  "task_id": "TASK-20260426-060",
+  "created_at": "2026-04-26T20:30:40.7084112+09:00",
+  "complexity_tier": "Tier2",
+  "tier_rationale": "복수 운영 문서, 감사 스크립트, legacy 원장 보정 및 git 운영 절차 개선. 제품 코드, 보안/인증 로직, DB 스키마, 외부 공개 API breaking change 없음.",
+  "status": "ACTIVE",
+  "depends_on": [],
+  "request_summary": "전체 개선점 반영 및 커밋·머지·푸쉬 가이드 문서화",
+  "goal": "직전 전체 설계 검토에서 발견한 모든 개선점을 반영하고, 작업 완료 시 커밋·main squash merge·push까지 잊지 않도록 운영 가이드에 명시한다.",
+  "constraints": {
+    "positive": [
+      "active Task 상태와 completion gate dirty worktree 검사가 충돌하지 않게 한다.",
+      "Task Spec SSOT 존재 여부를 신규 작업에서 자동 감사로 강제한다.",
+      "legacy missing spec 원장은 append-only CORRECTION으로 보정 근거를 남긴다.",
+      "품질 점수 최근 N건 산정 기준을 기록 시간 또는 task_id 기준으로 명확히 한다.",
+      "권위 문서와 보조 문서의 감사 범위를 문서 클래스로 구분한다.",
+      "감사 스크립트 3종을 단일 명령으로 실행할 수 있게 한다.",
+      "커밋, main squash merge, push까지 최종 작업 절차에 문서화한다.",
+      "변경 사항을 task 브랜치 커밋 후 main에 squash merge하고 origin/main에 push한다."
+    ],
+    "negative": [
+      "API 키, 비밀번호, 토큰, PII를 기록하지 않는다.",
+      "기존 원장 이벤트를 수정하지 않고 append-only 보정만 사용한다.",
+      "제품 코드나 배포 설정은 변경하지 않는다.",
+      "Validator PASS 없이 main 머지하지 않는다."
+    ]
+  },
+  "success_criteria": [
+    "check-completion-gates가 active Task 존재 시 합법적 작업 중 dirty 상태를 직전 완료 Task 실패로 오판하지 않는다.",
+    "validate-ledger가 신규 strict Task의 Task Spec SSOT 누락을 감지한다.",
+    "legacy missing spec 원장에는 CORRECTION 이벤트로 생략 사유가 기록된다.",
+    "품질 점수 최근값 산정 기준이 문서화되고 스크립트/명령으로 점검 가능하다.",
+    "문서 클래스별 감사 범위가 운영 문서에 명시된다.",
+    "감사 스크립트 3종을 단일 npm script로 실행할 수 있다.",
+    "커밋, main squash merge, push 절차가 git/work-history/task-lifecycle 문서에 반영된다.",
+    "check-doc-headers, validate-ledger, check-completion-gates, npm audit script가 PASS한다.",
+    "TASK-20260426-060 변경 사항이 task 브랜치에 커밋되고 main에 squash merge된 뒤 origin/main에 push된다."
+  ],
+  "assigned_agents": [
+    "Analyst",
+    "Validator-A"
+  ],
+  "context": {
+    "relevant_history": "TASK-20260426-059에서 전체 설계 평가 결과 8.7/10으로 평가했고 active Task dirty gate, Task Spec SSOT 강제, 품질 점수 최근값 산정, 보조 문서 범위, 자동 감사 실행 방식, push 절차 문서화를 개선점으로 도출했다.",
+    "reference_docs": [
+      "docs/workflows/task-lifecycle.md",
+      "docs/operations/work-history-policy.md",
+      "docs/operations/git-branch-policy.md",
+      "docs/operations/eval-harness.md",
+      "docs/schemas/task-spec.md",
+      "docs/schemas/output-formats.md",
+      "docs/operations/tool-permissions.md",
+      "scripts/check-completion-gates.mjs",
+      "scripts/validate-ledger.mjs"
+    ],
+    "artifact_refs": [
+      {
+        "source_task_id": "TASK-20260426-059",
+        "artifact_type": "ledger",
+        "path": "logs/tasks/TASK-20260426-059.jsonl",
+        "description": "개선점 목록과 우선순위"
+      }
+    ]
+  }
+}

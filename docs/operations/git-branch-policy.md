@@ -1,6 +1,6 @@
 # Git Branch Policy — 브랜치 격리 정책
 
-**버전:** 1.5 | **최종 수정:** 2026-04-26  
+**버전:** 1.6 | **최종 수정:** 2026-04-26  
 **원칙:** 모든 생성 작업은 전용 브랜치에서 수행한다. Generator는 main에 직접 접근하지 않는다.  
 **권위 문서:** 머지 조건·승인 주체에 관한 규칙은 이 문서가 단일 기준(Single Source of Truth)이다. SECURITY.md와 각 에이전트 문서는 이 문서를 참조하며 독자적인 규칙을 정의하지 않는다.
 
@@ -171,6 +171,31 @@ main squash merge 후 push까지 요청받지 않았다면 push하지 않는다.
 ```
 
 다음 세션의 첫 에이전트는 재진입 체크 중 `git status --short --branch`를 실행해 이 상태를 보고해야 한다.
+
+사용자가 push까지 요청했거나 Task Spec의 success_criteria에 push가 포함되어 있으면 아래 순서까지 완료해야 한다.
+
+```powershell
+git status --short --branch
+git push origin main
+git status --short --branch
+```
+
+push 완료 후 필수 기록:
+
+```text
+[ ] `MERGE_COMPLETED.details.push_status`를 `PUSHED`로 기록
+[ ] push 대상 remote/branch 기록 (`origin/main`)
+[ ] push 전후 `git status --short --branch` 결과를 원장 또는 보고서에 요약
+[ ] `CURRENT_STATE.md`의 origin ahead 인수인계를 제거하거나 "동기화 완료"로 갱신
+```
+
+금지:
+
+```text
+[ ] push하지 않았는데 원격 반영 완료로 보고
+[ ] push 실패를 Task COMPLETE로 숨기기
+[ ] push 요청이 없는데 임의로 push
+```
 
 ### Squash 머지 커밋 메시지 형식
 

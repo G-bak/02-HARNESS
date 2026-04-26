@@ -142,12 +142,32 @@ function currentStateHasNoActiveTask() {
   return /현재 진행 중인 Task 없음/.test(state);
 }
 
+function activeTaskIdsFromLedgers(files) {
+  const active = new Set();
+
+  for (const file of files) {
+    const taskId = file.replace(/\.jsonl$/, '');
+    const events = parseJsonl(path.join(taskDir, file));
+    const created = events.some((event) => eventType(event) === 'TASK_CREATED');
+    const completed = events.some((event) => eventType(event) === 'TASK_COMPLETED');
+    const finalStatus = [...events].reverse().find((event) => event.status)?.status;
+
+    if (created && !completed && finalStatus !== 'COMPLETE' && finalStatus !== 'FAILED') {
+      active.add(taskId);
+    }
+  }
+
+  return active;
+}
+
 const qualityTaskIds = new Set(parseJsonl(qualityPath).map((row) => row.task_id).filter(Boolean));
 const dirtyFiles = gitDirtyFiles();
 const latestSessionPath = latestSessionFile();
 const taskFiles = fs.readdirSync(taskDir)
   .filter((name) => /^TASK-\d{8}-\d{3}\.jsonl$/.test(name))
   .sort();
+const activeTaskIds = activeTaskIdsFromLedgers(taskFiles);
+const noActiveTask = currentStateHasNoActiveTask() && activeTaskIds.size === 0;
 const latestCompletedTaskId = taskFiles
   .map((file) => file.replace(/\.jsonl$/, ''))
   .filter((taskId) => {
@@ -208,7 +228,7 @@ for (const file of taskFiles) {
   if (
     taskId === latestCompletedTaskId
     && taskNumber(taskId) >= strictCutoff
-    && currentStateHasNoActiveTask()
+    && noActiveTask
     && dirtyFiles
     && dirtyFiles.length > 0
     && details.branch_required !== false
@@ -226,7 +246,7 @@ for (const reportFile of fs.readdirSync(path.join(root, 'reports')).filter((name
   }
 }
 
-if (latestSessionPath && currentStateHasNoActiveTask()) {
+if (latestSessionPath && noActiveTask) {
   const session = fs.readFileSync(latestSessionPath, 'utf8');
   const nextSteps = sectionBody(session, '다음 단계');
   const hasActionBullets = /^-\s+(?!없음\b).+/m.test(nextSteps);

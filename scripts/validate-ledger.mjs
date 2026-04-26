@@ -3,6 +3,7 @@ import path from 'node:path';
 
 const root = process.cwd();
 const taskDir = path.join(root, 'logs', 'tasks');
+const specDir = path.join(root, 'tasks', 'specs');
 const strictCutoff = 38;
 const validTaskStatuses = new Set(['ACTIVE', 'HOLD', 'PENDING_VALIDATION', 'RETRYING', 'COMPLETE', 'PARTIAL', 'FAILED']);
 const validTiers = new Set(['Tier1', 'Tier2', 'Tier3']);
@@ -88,6 +89,17 @@ function effectiveDetails(finalEvent, events) {
   return merged;
 }
 
+function hasTaskSpecSource(taskId, events) {
+  const created = events.find((event) => eventType(event) === 'TASK_CREATED');
+  const details = created?.details ?? {};
+  const specPath = details.spec_path ? path.join(root, details.spec_path) : path.join(specDir, `${taskId}.json`);
+
+  return Boolean(details.spec)
+    || Boolean(details.spec_path && fs.existsSync(specPath))
+    || fs.existsSync(path.join(specDir, `${taskId}.json`))
+    || hasCorrection(events, (correctionDetails) => Boolean(correctionDetails.legacy_spec_omission_reason));
+}
+
 if (!fs.existsSync(taskDir)) {
   reportError('logs/tasks directory not found');
   process.exit(1);
@@ -121,6 +133,10 @@ for (const file of files) {
 
   if (!hasCreated) {
     reportError(`${file}: missing TASK_CREATED`);
+  }
+
+  if (taskNumber(taskId) >= strictCutoff && hasCreated && !hasTaskSpecSource(taskId, events)) {
+    reportError(`${file}: strict-era TASK_CREATED requires Task Spec SSOT or legacy_spec_omission_reason CORRECTION`);
   }
 
   for (const event of events) {

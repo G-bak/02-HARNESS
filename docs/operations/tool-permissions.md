@@ -1,6 +1,6 @@
 # Tool Permissions — 도구 권한 정책
 
-**버전:** 1.6 | **최종 수정:** 2026-04-26  
+**버전:** 1.7 | **최종 수정:** 2026-04-26  
 **원칙:** 각 에이전트는 해당 작업에 필요한 최소 권한만 보유한다.
 
 ---
@@ -76,6 +76,8 @@ reports/TASK-EXAMPLE.md
 scripts/check-*.mjs
 scripts/validate-*.mjs
 scripts/notify-*.mjs
+scripts/audit-*.mjs
+package.json
 ```
 
 조건:
