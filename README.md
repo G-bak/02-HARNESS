@@ -1,5 +1,11 @@
 # LandingHub
 
+## 저장소
+
+| | URL |
+|---|---|
+| GitHub | https://github.com/G-bak/02-HARNESS |
+
 국내 랜딩페이지 쇼케이스 + 뉴스레터 관리 시스템
 
 ## 배포 URL
