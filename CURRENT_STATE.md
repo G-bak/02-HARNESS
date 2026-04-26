@@ -3,7 +3,7 @@
 > Analyst가 유지·갱신하는 파일입니다. 새 세션 시작 시 이 파일을 먼저 읽으세요.  
 > 새 세션 시작 방법: `/clear` 후 → "CURRENT_STATE.md를 읽고 이어서 진행해줘."
 
-**마지막 갱신:** 2026-04-26 (TASK-20260426-040 완료 — 운영 문서 개선 및 자동 검사 스크립트 추가)
+**마지막 갱신:** 2026-04-26 (TASK-20260426-041 완료 — 대표 보고용 품질 점수 표시 개선)
 
 ---
 
@@ -35,9 +35,9 @@
 | 컨텍스트 관리 | `docs/workflows/context-management.md` | v1.0 | 2026-04-24 |
 | Task Spec 스키마 | `docs/schemas/task-spec.md` | v1.2 | 2026-04-26 |
 | 에이전트 출력 형식 | `docs/schemas/output-formats.md` | v1.12 | 2026-04-26 |
-| 품질 루브릭 | `QUALITY_SCORE.md` | v1.2 | 2026-04-26 |
+| 품질 루브릭 | `QUALITY_SCORE.md` | v1.3 | 2026-04-26 |
 | 실행 비용·리소스 관측 | `docs/operations/eval-harness.md` | v1.5 | 2026-04-26 |
-| 보고서 예시 | `reports/TASK-EXAMPLE.md` | v1.4 | 2026-04-26 |
+| 보고서 예시 | `reports/TASK-EXAMPLE.md` | v1.5 | 2026-04-26 |
 
 ---
 
@@ -71,13 +71,14 @@
 - **Non-git 작업공간 모드**: git 저장소가 아닌 경우 브랜치/커밋/머지 이벤트를 기록하지 않고 `branch_omission_reason`을 원장에 남긴 뒤 로컬 검증과 보고서/품질 점수 게이트로 완료 판단.
 - **세션 로그 기준**: 작업 세션에는 세션 로그를 생성하거나 기존 세션 로그를 재사용한다. 초소형 Task에서 생략하면 `session_log_skipped_reason`을 완료 이벤트에 기록.
 - **자동 감사 스크립트**: `scripts/check-doc-headers.mjs`, `scripts/validate-ledger.mjs`, `scripts/check-completion-gates.mjs`로 권위 문서 헤더, 작업 원장 JSONL, 완료 게이트/보고서 stale 문구를 점검.
+- **대표 보고용 품질 점수 표시**: 보고서에는 JSON 원문보다 `95점 / 100점 (S등급)` 형식의 요약, 구분 표, 좋았던 점, 감점/주의를 먼저 표시. JSON은 내부 원장 또는 부록용.
 
 ---
 
 ## 활성 Task
 
 현재 진행 중인 Task 없음.  
-마지막 완료 Task: TASK-20260426-040 운영 문서 개선 및 자동 검사 스크립트 추가 (2026-04-26)
+마지막 완료 Task: TASK-20260426-041 대표 보고용 품질 점수 표시 개선 (2026-04-26)
 
 ---
 
