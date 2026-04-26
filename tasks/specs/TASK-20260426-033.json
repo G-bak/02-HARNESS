@@ -1,0 +1,60 @@
+{
+  "task_id": "TASK-20260426-033",
+  "created_at": "2026-04-26T15:00:06+09:00",
+  "complexity_tier": "Tier2",
+  "tier_rationale": "Multiple guide documents are updated to resolve operational rule conflicts; no application code or production configuration is changed.",
+  "status": "ACTIVE",
+  "depends_on": [
+    "TASK-20260426-032"
+  ],
+  "request_summary": "Apply all recommended multi-agent harness documentation fixes and require verbatim inline reports in session logs.",
+  "goal": "Make the harness guide internally consistent and strengthen session logs so every inline user-facing update is preserved verbatim.",
+  "constraints": {
+    "positive": [
+      "Resolve the reentry gate versus TASK_CREATED ordering conflict",
+      "Align Analyst tool permissions with required audit and logging duties",
+      "Clarify Tier 1 branch exceptions",
+      "Separate task status, notification status, and severity enums",
+      "Define Task Spec SSOT storage",
+      "Define quality score storage policy",
+      "Require verbatim preservation of inline reports in session logs"
+    ],
+    "negative": [
+      "Do not change application behavior",
+      "Do not include secrets or environment variable values",
+      "Do not remove append-only history requirements"
+    ]
+  },
+  "success_criteria": [
+    "Updated documents state the session reentry exception to TASK_CREATED-first ordering",
+    "Tool permissions allow limited Analyst audit shell usage while preserving safety boundaries",
+    "Generator and git branch policies agree on Tier 1 and non-git workspace exceptions",
+    "Output and notification schemas distinguish task_status, notification_status, and severity",
+    "Task Spec schema defines a persistent SSOT location",
+    "Work history and output format policies require verbatim inline report preservation",
+    "CURRENT_STATE.md authority table reflects updated document versions"
+  ],
+  "assigned_agents": [
+    "Analyst"
+  ],
+  "context": {
+    "relevant_history": "TASK-20260426-032 identified the documentation gaps and priority improvements.",
+    "reference_docs": [
+      "AGENTS.md",
+      "docs/workflows/task-lifecycle.md",
+      "docs/operations/tool-permissions.md",
+      "docs/operations/git-branch-policy.md",
+      "docs/operations/work-history-policy.md",
+      "docs/schemas/output-formats.md",
+      "docs/schemas/task-spec.md"
+    ],
+    "artifact_refs": [
+      {
+        "source_task_id": "TASK-20260426-032",
+        "artifact_type": "review",
+        "path": "logs/tasks/TASK-20260426-032.jsonl",
+        "description": "Prior review findings used as the basis for this update"
+      }
+    ]
+  }
+}

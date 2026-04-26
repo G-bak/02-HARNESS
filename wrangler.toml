@@ -1,0 +1,19 @@
+name = "landinghub-api"
+main = "api/worker.js"
+compatibility_date = "2024-01-01"
+
+[assets]
+directory = "./public"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "landinghub-newsletter"
+database_id = "76e858f3-f81d-40fc-a2ce-14c970786037"
+
+[vars]
+ALLOWED_ORIGIN = "*"
+
+# 로컬 개발용 환경변수는 .dev.vars 파일에 저장 (gitignore 필수)
+# 배포 시 아래 명령어로 시크릿 설정:
+#   wrangler secret put RESEND_API_KEY
+#   wrangler secret put ADMIN_PASSWORD_HASH

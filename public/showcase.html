@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="ko" class="scroll-smooth">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>LandingHub — 국내 최고의 랜딩페이지 쇼케이스</title>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: { sans: ['Inter','system-ui','sans-serif'] },
+      colors: {
+        bg:'#05050f', surface:'#0e0e1f', s2:'#161628', s3:'#1e1e35',
+        accent:'#7c6af5', a2:'#a78bfa', cyan:'#22d3ee', pink:'#f472b6', gold:'#fbbf24',
+      },
+      animation: {
+        'float1':'floatOrb 14s ease-in-out infinite',
+        'float2':'floatOrb 18s ease-in-out infinite reverse',
+        'float3':'floatOrb 11s ease-in-out infinite 3s',
+        'marquee':'marquee 28s linear infinite',
+        'shimmer':'shimmer 1.8s infinite',
+        'blink':'blink 1.6s ease-in-out infinite',
+        'grad':'gradShift 6s ease infinite',
+        'scroll':'scrollDot 2s ease-in-out infinite',
+      },
+      keyframes: {
+        floatOrb:{'0%,100%':{transform:'translate(0,0)'},'33%':{transform:'translate(40px,-30px)'},'66%':{transform:'translate(-25px,35px)'}},
+        marquee:{'0%':{transform:'translateX(0)'},'100%':{transform:'translateX(-50%)'}},
+        shimmer:{'0%':{backgroundPosition:'200% 0'},'100%':{backgroundPosition:'-200% 0'}},
+        blink:{'0%,100%':{opacity:'1'},'50%':{opacity:'0.2'}},
+        gradShift:{'0%,100%':{backgroundPosition:'0%'},'50%':{backgroundPosition:'100%'}},
+        scrollDot:{'0%':{transform:'translateY(0)',opacity:'1'},'100%':{transform:'translateY(12px)',opacity:'0'}},
+      },
+    },
+  },
+}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#05050f;color:#ede9ff;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* noise */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;opacity:.45;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E")}
+
+/* gradient text */
+.g-text{background:linear-gradient(100deg,#a78bfa 0%,#22d3ee 50%,#f472b6 100%);background-size:200%;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:gradShift 6s ease infinite}
+
+/* gradient border card */
+.g-border{position:relative}
+.g-border::before{content:'';position:absolute;inset:-1px;border-radius:inherit;
+  background:linear-gradient(135deg,rgba(124,106,245,.5),rgba(34,211,238,.2),rgba(244,114,182,.2));
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;padding:1px;pointer-events:none;opacity:0;transition:opacity .3s}
+.g-border:hover::before{opacity:1}
+
+/* shimmer */
+.sk{background:linear-gradient(90deg,#161628 25%,rgba(255,255,255,.04) 50%,#161628 75%);background-size:200% 100%;animation:shimmer 1.8s infinite}
+
+/* glow btn */
+.glow-btn{position:relative;overflow:hidden}
+.glow-btn::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at var(--x,50%) var(--y,50%),rgba(255,255,255,.15),transparent 60%);opacity:0;transition:opacity .3s}
+.glow-btn:hover::before{opacity:1}
+
+/* pill / filter */
+.fpill{display:inline-flex;align-items:center;gap:5px;padding:7px 16px;border-radius:999px;font-size:.8rem;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.1);color:#8b8aaa;background:transparent;font-family:inherit;transition:all .2s;white-space:nowrap;flex-shrink:0}
+.fpill:hover{color:#ede9ff;border-color:rgba(255,255,255,.22);background:rgba(255,255,255,.05)}
+.fpill.on{background:linear-gradient(135deg,#7c6af5,#8b5cf6);border-color:transparent;color:#fff;box-shadow:0 4px 20px rgba(124,106,245,.4)}
+.fpill .n{padding:2px 7px;background:rgba(255,255,255,.15);border-radius:999px;font-size:.68rem}
+.fpill.on .n{background:rgba(255,255,255,.28)}
+
+/* lp card */
+.lp-card{background:#0e0e1f;border:1px solid rgba(255,255,255,.07);border-radius:18px;overflow:hidden;transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s,border-color .3s;cursor:pointer;display:none;position:relative}
+.lp-card:hover{transform:translateY(-8px);border-color:rgba(124,106,245,.4);box-shadow:0 24px 64px rgba(0,0,0,.6),0 0 0 1px rgba(124,106,245,.18),inset 0 1px 0 rgba(255,255,255,.07)}
+.lp-card .thumb{position:relative;aspect-ratio:16/10;overflow:hidden;background:#161628}
+.lp-card .thumb img{width:100%;height:100%;object-fit:cover;transition:transform .55s ease}
+.lp-card:hover .thumb img{transform:scale(1.06)}
+.thumb-ov{position:absolute;inset:0;background:linear-gradient(180deg,transparent 35%,rgba(5,5,15,.9));opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px}
+.lp-card:hover .thumb-ov{opacity:1}
+.ov-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;background:rgba(255,255,255,.95);color:#111;border-radius:8px;font-size:.8rem;font-weight:700;text-decoration:none;backdrop-filter:blur(10px);transition:background .15s}
+.cat-badge{position:absolute;top:12px;left:12px;padding:3px 10px;background:rgba(5,5,15,.75);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12);border-radius:999px;font-size:.68rem;font-weight:700;color:#fff;letter-spacing:.04em}
+.like-btn{flex-shrink:0;width:30px;height:30px;border-radius:7px;border:1px solid rgba(255,255,255,.08);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#4a4a6a;transition:all .2s;font-family:inherit}
+.like-btn:hover,.like-btn.on{border-color:#f472b6;color:#f472b6;background:rgba(244,114,182,.08)}
+.ctag{padding:3px 9px;background:rgba(124,106,245,.12);color:#a78bfa;border-radius:5px;font-size:.7rem;font-weight:600;border:1px solid rgba(124,106,245,.14)}
+
+/* cat sidebar */
+.crow{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:10px;font-size:.84rem;font-weight:500;color:#8b8aaa;cursor:pointer;transition:all .15s}
+.crow:hover{background:rgba(255,255,255,.04);color:#ede9ff}
+.crow.on{background:rgba(124,106,245,.1);color:#a78bfa;font-weight:700}
+.cbadge{padding:2px 8px;border-radius:999px;font-size:.68rem;background:rgba(255,255,255,.06);color:#4a4a6a}
+.crow.on .cbadge{background:rgba(124,106,245,.2);color:#a78bfa}
+
+/* reveal */
+.rv{opacity:0;transform:translateY(22px);transition:opacity .55s ease,transform .55s ease}
+.rv.show{opacity:1;transform:none}
+
+/* notify input */
+.notify-input{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:11px 16px;font-size:.88rem;color:#ede9ff;font-family:inherit;outline:none;width:100%;transition:border-color .2s,box-shadow .2s}
+.notify-input::placeholder{color:#4a4a6a}
+.notify-input:focus{border-color:rgba(124,106,245,.5);box-shadow:0 0 0 4px rgba(124,106,245,.1)}
+
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:#05050f}
+::-webkit-scrollbar-thumb{background:#252540;border-radius:3px}
+select option{background:#0e0e1f;color:#ede9ff}
+#notifyMsg{display:none;font-size:.8rem;margin-top:10px;padding:8px 14px;border-radius:8px;transition:opacity .3s}
+#notifyMsg.success{background:rgba(124,106,245,.12);color:#a78bfa;border:1px solid rgba(124,106,245,.25)}
+#notifyMsg.error{background:rgba(244,114,182,.1);color:#f472b6;border:1px solid rgba(244,114,182,.2)}
+
+/* ── 모바일 nav 메뉴 링크 ── */
+.mob-nav-link{display:block;width:100%;text-align:center;padding:14px;border-radius:12px;font-size:1.15rem;font-weight:600;color:#8b8aaa;text-decoration:none;transition:all .2s;border:1px solid transparent}
+.mob-nav-link:hover{color:#ede9ff;background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1)}
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE — showcase.html
+══════════════════════════════════════════════════ */
+
+/* ── 폰 (< 640px) ───────────────────────────────── */
+@media (max-width:639px){
+  /* 히어로 제목: 모바일에 맞게 축소 */
+  .hero-title{font-size:clamp(1.9rem,8.5vw,2.8rem) !important}
+
+  /* 히어로 섹션 패딩 축소 */
+  section.min-h-screen{padding-top:6rem;padding-bottom:4rem}
+
+  /* stats row → 2×2 그리드 */
+  .stats-row{
+    display:grid !important;
+    grid-template-columns:1fr 1fr;
+  }
+  .stats-row > div{
+    padding:14px 12px !important;
+    border-right:none !important;
+  }
+  .stats-row > div:nth-child(1),
+  .stats-row > div:nth-child(3){border-right:1px solid rgba(255,255,255,.07) !important}
+  .stats-row > div:nth-child(1),
+  .stats-row > div:nth-child(2){border-bottom:1px solid rgba(255,255,255,.07)}
+
+  /* 카드 그리드: 최소 너비 축소 */
+  #cardGrid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr)) !important}
+  #skelWrap{grid-template-columns:repeat(auto-fill,minmax(260px,1fr)) !important}
+
+  /* showcase main: 패딩 축소 */
+  #showcase{padding-top:2.5rem;padding-bottom:4rem}
+
+  /* 광고 스트립: wrap */
+  #showcase ~ div[class*="flex items-center justify-center"]{flex-wrap:wrap;text-align:center}
+}
+
+/* ── 태블릿·모바일 (< 1024px) — aside 숨김 ──────── */
+@media (max-width:1023px){
+  #showcase aside{display:none !important}
+  #showcase{grid-template-columns:1fr !important}
+  /* grid 자식이 컬럼 너비 이상으로 팽창하는 것을 방지 */
+  #showcase main{min-width:0;overflow-x:hidden}
+  /* 필터 pills: 가로 스크롤 */
+  #filterPills{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;scrollbar-width:none;min-width:0}
+  #filterPills::-webkit-scrollbar{display:none}
+}
+
+/* ── 태블릿 (640px ~ 1023px) ─────────────────────── */
+@media (min-width:640px) and (max-width:1023px){
+  .hero-title{font-size:clamp(2.6rem,5.5vw,4rem) !important}
+  #cardGrid{grid-template-columns:repeat(auto-fill,minmax(280px,1fr)) !important}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════ NAV ═══════ -->
+<nav class="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-4 md:px-8 h-[62px] border-b border-white/[.06]" style="background:rgba(5,5,15,.75);backdrop-filter:blur(24px) saturate(180%)">
+  <a href="#" class="flex items-center gap-2.5 no-underline">
+    <div class="w-[32px] h-[32px] rounded-[9px] flex items-center justify-center flex-shrink-0" style="background:linear-gradient(145deg,#6156f0,#22d3ee);box-shadow:0 0 0 1px rgba(255,255,255,.08) inset,0 4px 20px rgba(124,106,245,.5)">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <rect x="0" y="0" width="8" height="8" rx="2" fill="white"/>
+        <rect x="10" y="0" width="8" height="8" rx="2" fill="rgba(255,255,255,.5)"/>
+        <rect x="0" y="10" width="8" height="8" rx="2" fill="rgba(255,255,255,.5)"/>
+        <rect x="10" y="10" width="8" height="8" rx="2" fill="rgba(255,255,255,.25)"/>
+      </svg>
+    </div>
+    <span class="text-[1rem] font-extrabold tracking-[-0.04em] text-[#ede9ff]">Landing<span class="text-a2">Hub</span></span>
+  </a>
+
+  <div class="hidden md:flex items-center gap-1 text-sm">
+    <a href="#showcase" class="px-3 py-1.5 rounded-lg text-[#8b8aaa] hover:text-[#ede9ff] hover:bg-white/[.05] transition-all no-underline">쇼케이스</a>
+    <a href="#notify"   class="px-3 py-1.5 rounded-lg text-[#8b8aaa] hover:text-[#ede9ff] hover:bg-white/[.05] transition-all no-underline">알림 받기</a>
+    <a href="#"         class="px-3 py-1.5 rounded-lg text-[#8b8aaa] hover:text-[#ede9ff] hover:bg-white/[.05] transition-all no-underline">소개</a>
+  </div>
+
+  <div class="flex items-center gap-2">
+    <div class="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold text-a2 border border-accent/30" style="background:rgba(124,106,245,.1)">
+      <span class="w-1.5 h-1.5 rounded-full bg-cyan animate-blink" style="box-shadow:0 0 6px #22d3ee"></span>
+      Beta
+    </div>
+    <button class="glow-btn hidden md:flex px-5 py-2 text-sm font-bold text-white rounded-[9px] transition-all hover:-translate-y-px" style="background:linear-gradient(135deg,#7c6af5,#8b5cf6);box-shadow:0 4px 20px rgba(124,106,245,.35)">
+      작품 제출하기
+    </button>
+    <!-- 모바일 햄버거 -->
+    <button id="mobNavBtn" class="md:hidden w-9 h-9 flex items-center justify-center rounded-lg border border-white/[.1] text-[#8b8aaa] hover:text-[#ede9ff] hover:bg-white/[.06] transition-all" style="background:rgba(255,255,255,.04)">
+      <svg id="mobNavIcon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+<!-- ═══════ MOBILE NAV MENU ═══════ -->
+<div id="mobNav" class="fixed inset-0 z-[55] flex-col items-center justify-center gap-8" style="display:none;background:rgba(5,5,15,.97);backdrop-filter:blur(24px)" onclick="handleMobNavBgClick(event)">
+  <!-- close button -->
+  <button onclick="closeMobNav()" aria-label="메뉴 닫기" style="position:absolute;top:14px;right:14px;width:40px;height:40px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#8b8aaa;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s" onmouseover="this.style.color='#ede9ff';this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.color='#8b8aaa';this.style.background='rgba(255,255,255,.05)'">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+  </button>
+  <div id="mobNavContent" class="flex flex-col items-center gap-2 w-full px-8">
+    <a href="#showcase" onclick="closeMobNav()" class="mob-nav-link">쇼케이스</a>
+    <a href="#notify"   onclick="closeMobNav()" class="mob-nav-link">알림 받기</a>
+    <a href="#"         onclick="closeMobNav()" class="mob-nav-link">소개</a>
+  </div>
+  <div class="w-16 h-px" style="background:rgba(255,255,255,.1)"></div>
+  <button class="glow-btn px-8 py-3 text-base font-bold text-white rounded-[10px]" onclick="closeMobNav()" style="background:linear-gradient(135deg,#7c6af5,#8b5cf6);box-shadow:0 4px 24px rgba(124,106,245,.4)">
+    작품 제출하기
+  </button>
+</div>
+
+
+<!-- ═══════ HERO ═══════ -->
+<section class="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-28 pb-24 overflow-hidden">
+
+  <!-- mesh bg -->
+  <div class="absolute inset-0 pointer-events-none">
+    <div class="absolute -top-32 -left-56 w-[700px] h-[700px] rounded-full animate-float1 blur-[100px]" style="background:radial-gradient(circle,rgba(124,106,245,.22) 0%,transparent 65%)"></div>
+    <div class="absolute top-40 -right-40 w-[550px] h-[550px] rounded-full animate-float2 blur-[90px]" style="background:radial-gradient(circle,rgba(34,211,238,.14) 0%,transparent 65%)"></div>
+    <div class="absolute bottom-0 left-[25%] w-[450px] h-[450px] rounded-full animate-float3 blur-[90px]" style="background:radial-gradient(circle,rgba(244,114,182,.11) 0%,transparent 65%)"></div>
+    <!-- grid -->
+    <div class="absolute inset-0" style="background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);background-size:64px 64px;mask-image:radial-gradient(ellipse 85% 55% at 50% 50%,black,transparent)"></div>
+  </div>
+
+  <div class="relative z-10 inline-flex items-center gap-2 px-4 py-[7px] rounded-full text-[.73rem] font-semibold uppercase tracking-[.07em] text-a2 mb-7 border" style="background:rgba(124,106,245,.08);border-color:rgba(124,106,245,.22)">
+    <span class="w-1.5 h-1.5 rounded-full bg-cyan animate-blink" style="box-shadow:0 0 7px #22d3ee"></span>
+    국내 프론트엔드 개발자 쇼케이스
+  </div>
+
+  <h1 class="hero-title relative z-10 font-black leading-[1.04] tracking-[-0.045em] mb-5" style="font-size:clamp(3.2rem,7.5vw,6rem)">
+    좋은 랜딩페이지는<br>
+    <span class="g-text">여기서 시작됩니다</span>
+  </h1>
+
+  <p class="relative z-10 text-[1.05rem] text-[#7b7999] max-w-[460px] leading-[1.78] mb-11">
+    국내 프론트엔드 개발자들이 만든 랜딩페이지를 엄선해 소개합니다. 영감을 찾고, 레퍼런스를 발견하세요.
+  </p>
+
+  <!-- search -->
+  <div class="relative z-10 w-full max-w-[820px] mb-14">
+    <div class="flex items-center gap-3 px-5 py-3.5 rounded-2xl border border-white/[.1] transition-all focus-within:border-accent/50 focus-within:shadow-[0_0_0_4px_rgba(124,106,245,.1)]" style="background:rgba(255,255,255,.04);backdrop-filter:blur(14px)">
+      <svg class="w-[17px] h-[17px] text-[#4a4a6a] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input id="searchInput" type="text" placeholder="SaaS, 다크 테마, 포트폴리오..." class="flex-1 bg-transparent outline-none text-[.93rem] text-[#ede9ff] placeholder:text-[#4a4a6a]"/>
+      <div class="hidden sm:flex gap-1 flex-shrink-0">
+        <kbd class="px-1.5 py-0.5 rounded text-[.65rem] text-[#4a4a6a] font-medium border border-white/[.1]" style="background:rgba(255,255,255,.05)">⌘K</kbd>
+      </div>
+    </div>
+  </div>
+
+  <!-- stats row -->
+  <div class="stats-row relative z-10 flex overflow-hidden rounded-xl border border-white/[.07]" style="background:rgba(255,255,255,.02);backdrop-filter:blur(12px)">
+    <div class="px-8 py-4 text-center border-r border-white/[.07]">
+      <div id="totalCount" class="text-[1.7rem] font-black tracking-[-0.04em]">0</div>
+      <div class="text-[.68rem] text-[#4a4a6a] mt-1 uppercase tracking-widest font-medium">등록 작품</div>
+    </div>
+    <div class="px-8 py-4 text-center border-r border-white/[.07]">
+      <div class="text-[1.7rem] font-black tracking-[-0.04em]">5</div>
+      <div class="text-[.68rem] text-[#4a4a6a] mt-1 uppercase tracking-widest font-medium">카테고리</div>
+    </div>
+    <div class="px-8 py-4 text-center border-r border-white/[.07]">
+      <div class="text-[1.7rem] font-black tracking-[-0.04em]">무료</div>
+      <div class="text-[.68rem] text-[#4a4a6a] mt-1 uppercase tracking-widest font-medium">등록 비용</div>
+    </div>
+    <div class="px-8 py-4 text-center">
+      <div class="text-[1.7rem] font-black tracking-[-0.04em]">곧</div>
+      <div class="text-[.68rem] text-[#4a4a6a] mt-1 uppercase tracking-widest font-medium">첫 작품 예정</div>
+    </div>
+  </div>
+
+  <!-- scroll cue -->
+  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 text-[#3a3a5a] text-[.65rem] font-semibold uppercase tracking-[.12em]">
+    <div class="w-5 h-8 border-2 border-[#3a3a5a] rounded-full flex justify-center" style="padding-top:5px">
+      <div class="w-0.5 h-[7px] bg-[#6a6a8a] rounded-full animate-scroll"></div>
+    </div>
+    scroll
+  </div>
+</section>
+
+
+<!-- ═══════ MARQUEE ═══════ -->
+<div class="overflow-hidden border-y border-white/[.06] py-3.5" style="background:rgba(14,14,31,.7)">
+  <div class="flex animate-marquee whitespace-nowrap">
+    <!-- 두 세트 반복 -->
+    <template id="marqueeTpl">
+      <span class="mx-6 text-[.75rem] font-semibold text-[#5a5a7a] uppercase tracking-widest">HTML</span>
+      <span class="mx-2 text-[#3a3a55]">✦</span>
+      <span class="mx-6 text-[.75rem] font-semibold text-[#5a5a7a] uppercase tracking-widest">CSS</span>
+      <span class="mx-2 text-[#3a3a55]">✦</span>
+      <span class="mx-6 text-[.75rem] font-semibold text-[#5a5a7a] uppercase tracking-widest">JavaScript</span>
+      <span class="mx-2 text-[#3a3a55]">✦</span>
+      <span class="mx-6 text-[.75rem] font-semibold text-[#7c6af5] uppercase tracking-widest">Tailwind CSS</span>
+      <span class="mx-2 text-[#3a3a55]">✦</span>
+      <span class="mx-6 text-[.75rem] font-semibold text-[#5a5a7a] uppercase tracking-widest">React</span>
+      <span class="mx-2 text-[#3a3a55]">✦</span>
+      <span class="mx-6 text-[.75rem] font-semibold text-[#5a5a7a] uppercase tracking-widest">Vue</span>
+      <span class="mx-2 text-[#3a3a55]">✦</span>
+      <span class="mx-6 text-[.75rem] font-semibold text-[#22d3ee] uppercase tracking-widest">Framer Motion</span>
+      <span class="mx-2 text-[#3a3a55]">✦</span>
+      <span class="mx-6 text-[.75rem] font-semibold text-[#5a5a7a] uppercase tracking-widest">GSAP</span>
+      <span class="mx-2 text-[#3a3a55]">✦</span>
+      <span class="mx-6 text-[.75rem] font-semibold text-[#f472b6] uppercase tracking-widest">Three.js</span>
+      <span class="mx-2 text-[#3a3a55]">✦</span>
+      <span class="mx-6 text-[.75rem] font-semibold text-[#5a5a7a] uppercase tracking-widest">Svelte</span>
+      <span class="mx-2 text-[#3a3a55]">✦</span>
+      <span class="mx-6 text-[.75rem] font-semibold text-[#5a5a7a] uppercase tracking-widest">Next.js</span>
+      <span class="mx-2 text-[#3a3a55]">✦</span>
+      <span class="mx-6 text-[.75rem] font-semibold text-[#fbbf24] uppercase tracking-widest">Astro</span>
+      <span class="mx-2 text-[#3a3a55]">✦</span>
+    </template>
+  </div>
+</div>
+
+
+<!-- ═══════ AD STRIP ═══════ -->
+<div class="flex items-center justify-center gap-3 px-8 py-3 text-[.8rem] text-yellow-600 border-b border-yellow-400/[.1]" style="background:rgba(251,191,36,.04)">
+  <span class="px-2 py-0.5 rounded text-[.62rem] font-black tracking-widest text-yellow-800 border border-yellow-400/20" style="background:rgba(251,191,36,.1)">AD</span>
+  이 자리에 귀사의 광고를 게재할 수 있습니다 —
+  <span class="font-bold cursor-pointer hover:text-yellow-400 transition-colors">광고 문의하기 →</span>
+</div>
+
+
+<!-- ═══════ MAIN ═══════ -->
+<div id="showcase" class="max-w-[1360px] mx-auto px-6 lg:px-8 pt-14 pb-24 grid lg:grid-cols-[1fr_288px] gap-10 items-start">
+<main>
+
+  <!-- BENTO header: category label + filter + sort -->
+  <div class="rv flex flex-wrap items-center justify-between gap-3 mb-7">
+    <div class="flex flex-wrap gap-2" id="filterPills">
+      <button data-f="all"      class="fpill on">전체       <span class="n" id="cnt-all">0</span></button>
+      <button data-f="SaaS"     class="fpill">SaaS         <span class="n" id="cnt-SaaS">0</span></button>
+      <button data-f="포트폴리오" class="fpill">포트폴리오 <span class="n" id="cnt-포트폴리오">0</span></button>
+      <button data-f="커머스"   class="fpill">커머스       <span class="n" id="cnt-커머스">0</span></button>
+      <button data-f="스타트업" class="fpill">스타트업     <span class="n" id="cnt-스타트업">0</span></button>
+      <button data-f="앱"       class="fpill">앱 소개      <span class="n" id="cnt-앱">0</span></button>
+    </div>
+    <div class="flex items-center gap-2">
+      <!-- view toggle -->
+      <div class="flex gap-0.5 p-1 rounded-xl border border-white/[.07]" style="background:#0e0e1f">
+        <button id="gvBtn" class="w-9 h-8 flex items-center justify-center rounded-lg text-sm transition-all bg-white/[.08] text-[#ede9ff]">⊞</button>
+        <button id="lvBtn" class="w-9 h-8 flex items-center justify-center rounded-lg text-sm transition-all text-[#4a4a6a] hover:text-[#ede9ff]">☰</button>
+      </div>
+      <select id="sortSel" class="px-3 py-2 rounded-xl border border-white/[.07] text-[.8rem] text-[#8b8aaa] outline-none cursor-pointer transition" style="background:#0e0e1f">
+        <option value="latest">최신순</option>
+        <option value="popular">인기순</option>
+      </select>
+    </div>
+  </div>
+
+  <p class="rv text-[.8rem] text-[#4a4a6a] mb-5">총 <strong id="visCnt" class="text-[#8b8aaa] font-semibold">0</strong>개의 작품</p>
+
+  <!-- card grid -->
+  <div id="cardGrid" class="rv grid gap-5" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">
+
+    <!-- empty state -->
+    <!-- <div id="emptyState" class="col-span-full flex flex-col items-center justify-center py-24 text-center">
+      <div class="relative w-24 h-24 rounded-3xl flex items-center justify-center text-4xl mb-6 border border-white/[.07]" style="background:#0e0e1f">
+        🎨
+        <div class="absolute inset-[-1px] rounded-3xl -z-10 opacity-50 blur-lg" style="background:linear-gradient(135deg,rgba(124,106,245,.5),rgba(34,211,238,.25))"></div>
+      </div>
+      <h3 class="text-[1.2rem] font-extrabold tracking-tight mb-2">첫 번째 작품을 기다리고 있어요</h3>
+      <p class="text-[.88rem] text-[#6b6b8a] max-w-[320px] leading-relaxed">엄선된 랜딩페이지들이 곧 등록됩니다.<br>직접 만든 작품을 제출해 보세요!</p>
+    </div> -->
+
+    <!-- skeleton -->
+    <div id="skelWrap" class="col-span-full grid gap-5" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">
+      <div class="rounded-[18px] border border-white/[.07] overflow-hidden" style="background:#0e0e1f">
+        <div class="sk aspect-[16/10]"></div>
+        <div class="p-5 space-y-2.5">
+          <div class="sk h-3 rounded-full w-full"></div>
+          <div class="sk h-3 rounded-full w-3/5"></div>
+          <div class="sk h-3 rounded-full w-2/5"></div>
+        </div>
+      </div>
+      <div class="rounded-[18px] border border-white/[.07] overflow-hidden" style="background:#0e0e1f">
+        <div class="sk aspect-[16/10]"></div>
+        <div class="p-5 space-y-2.5">
+          <div class="sk h-3 rounded-full w-full"></div>
+          <div class="sk h-3 rounded-full w-3/5"></div>
+          <div class="sk h-3 rounded-full w-2/5"></div>
+        </div>
+      </div>
+      <div class="rounded-[18px] border border-white/[.07] overflow-hidden" style="background:#0e0e1f">
+        <div class="sk aspect-[16/10]"></div>
+        <div class="p-5 space-y-2.5">
+          <div class="sk h-3 rounded-full w-full"></div>
+          <div class="sk h-3 rounded-full w-3/5"></div>
+          <div class="sk h-3 rounded-full w-2/5"></div>
+        </div>
+      </div>
+      <div class="rounded-[18px] border border-white/[.07] overflow-hidden" style="background:#0e0e1f">
+        <div class="sk aspect-[16/10]"></div>
+        <div class="p-5 space-y-2.5">
+          <div class="sk h-3 rounded-full w-full"></div>
+          <div class="sk h-3 rounded-full w-3/5"></div>
+          <div class="sk h-3 rounded-full w-2/5"></div>
+        </div>
+      </div>
+      <div class="rounded-[18px] border border-white/[.07] overflow-hidden" style="background:#0e0e1f">
+        <div class="sk aspect-[16/10]"></div>
+        <div class="p-5 space-y-2.5">
+          <div class="sk h-3 rounded-full w-full"></div>
+          <div class="sk h-3 rounded-full w-3/5"></div>
+          <div class="sk h-3 rounded-full w-2/5"></div>
+        </div>
+      </div>
+      <div class="rounded-[18px] border border-white/[.07] overflow-hidden" style="background:#0e0e1f">
+        <div class="sk aspect-[16/10]"></div>
+        <div class="p-5 space-y-2.5">
+          <div class="sk h-3 rounded-full w-full"></div>
+          <div class="sk h-3 rounded-full w-3/5"></div>
+          <div class="sk h-3 rounded-full w-2/5"></div>
+        </div>
+      </div>
+      <div class="rounded-[18px] border border-white/[.07] overflow-hidden" style="background:#0e0e1f">
+        <div class="sk aspect-[16/10]"></div>
+        <div class="p-5 space-y-2.5">
+          <div class="sk h-3 rounded-full w-full"></div>
+          <div class="sk h-3 rounded-full w-3/5"></div>
+          <div class="sk h-3 rounded-full w-2/5"></div>
+        </div>
+      </div>
+      <div class="rounded-[18px] border border-white/[.07] overflow-hidden" style="background:#0e0e1f">
+        <div class="sk aspect-[16/10]"></div>
+        <div class="p-5 space-y-2.5">
+          <div class="sk h-3 rounded-full w-full"></div>
+          <div class="sk h-3 rounded-full w-3/5"></div>
+          <div class="sk h-3 rounded-full w-2/5"></div>
+        </div>
+      </div>
+      <div class="rounded-[18px] border border-white/[.07] overflow-hidden" style="background:#0e0e1f">
+        <div class="sk aspect-[16/10]"></div>
+        <div class="p-5 space-y-2.5">
+          <div class="sk h-3 rounded-full w-full"></div>
+          <div class="sk h-3 rounded-full w-3/5"></div>
+          <div class="sk h-3 rounded-full w-2/5"></div>
+        </div>
+      </div>
+    </div>
+    
+
+  </div><!-- /cardGrid -->
+</main>
+
+
+<!-- ─── SIDEBAR ─── -->
+<aside class="flex flex-col gap-4 lg:sticky lg:top-[76px]">
+
+  <!-- 카테고리 -->
+  <div class="rv rounded-2xl p-5 border border-white/[.07]" style="background:#0e0e1f">
+    <p class="text-[.65rem] font-black tracking-[.12em] uppercase text-[#4a4a6a] mb-3.5">카테고리</p>
+    <div class="flex flex-col gap-0.5" id="catList">
+      <div data-f="all"       class="crow on">전체     <span class="cbadge" id="sb-all">0</span></div>
+      <div data-f="SaaS"      class="crow">SaaS        <span class="cbadge" id="sb-SaaS">0</span></div>
+      <div data-f="포트폴리오" class="crow">포트폴리오 <span class="cbadge" id="sb-포트폴리오">0</span></div>
+      <div data-f="커머스"    class="crow">커머스      <span class="cbadge" id="sb-커머스">0</span></div>
+      <div data-f="스타트업"  class="crow">스타트업    <span class="cbadge" id="sb-스타트업">0</span></div>
+      <div data-f="앱"        class="crow">앱 소개     <span class="cbadge" id="sb-앱">0</span></div>
+    </div>
+  </div>
+
+  <!-- 사이드 광고 -->
+  <div class="rv rounded-2xl p-4 border border-yellow-400/[.1]" style="background:rgba(251,191,36,.03)">
+    <p class="text-[.62rem] font-black tracking-[.12em] uppercase mb-3 text-yellow-600/60">광고</p>
+    <div class="aspect-square rounded-xl flex flex-col items-center justify-center gap-1.5 text-yellow-700 text-[.76rem] font-bold border border-dashed border-yellow-400/[.18]"
+         style="background:repeating-linear-gradient(45deg,rgba(251,191,36,.03) 0,rgba(251,191,36,.03) 1px,transparent 1px,transparent 10px)">
+      <span>광고 영역</span>
+      <span class="text-[.64rem] opacity-50 font-normal">250 × 250</span>
+    </div>
+  </div>
+
+  <!-- 작품 제출 -->
+  <div class="rv rounded-2xl p-5 border border-accent/[.18]" style="background:linear-gradient(135deg,rgba(124,106,245,.08),rgba(34,211,238,.04))">
+    <p class="text-[.65rem] font-black tracking-[.12em] uppercase text-[#4a4a6a] mb-2.5">내 작품 등록하기</p>
+    <p class="text-[.82rem] text-[#6b6b8a] leading-relaxed mb-3.5">직접 만든 랜딩페이지를 LandingHub에 소개하고 싶으신가요?</p>
+    <a href="#" class="flex items-center justify-center gap-2 w-full py-2.5 text-white text-[.83rem] font-bold rounded-xl no-underline transition-all hover:opacity-90 hover:-translate-y-px" style="background:linear-gradient(135deg,#7c6af5,#8b5cf6);box-shadow:0 4px 18px rgba(124,106,245,.3)">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7-7 7 7"/></svg>
+      제출 신청하기
+    </a>
+  </div>
+
+  <!-- 큐레이터 픽 -->
+  <!-- <div class="rv rounded-2xl p-5 border border-white/[.07] overflow-hidden relative" style="background:#0e0e1f">
+    <div class="absolute top-0 right-0 w-32 h-32 rounded-full blur-[40px] pointer-events-none" style="background:radial-gradient(circle,rgba(244,114,182,.15),transparent)"></div>
+    <p class="text-[.65rem] font-black tracking-[.12em] uppercase text-[#4a4a6a] mb-3.5">🏆 큐레이터 픽</p>
+    <div class="aspect-[3/2] rounded-xl bg-s2 border border-white/[.05] flex items-center justify-center mb-3">
+      <span class="text-[.78rem] text-[#4a4a6a] font-medium">첫 픽을 기다리는 중</span>
+    </div>
+    <p class="text-[.8rem] font-semibold text-[#ede9ff] mb-1">곧 업데이트 예정</p>
+    <p class="text-[.72rem] text-[#5a5a7a]">매주 가장 인상적인 작품을 선정합니다.</p>
+  </div> -->
+
+  <!-- 인기 태그 -->
+  <div class="rv rounded-2xl p-5 border border-white/[.07]" style="background:#0e0e1f">
+    <p class="text-[.65rem] font-black tracking-[.12em] uppercase text-[#4a4a6a] mb-3">인기 태그</p>
+    <div class="flex flex-wrap gap-1.5">
+      <span class="cloud-tag">다크 테마</span><span class="cloud-tag">미니멀</span>
+      <span class="cloud-tag">애니메이션</span><span class="cloud-tag">그라디언트</span>
+      <span class="cloud-tag">모바일 퍼스트</span><span class="cloud-tag">인터랙션</span>
+      <span class="cloud-tag">3D</span><span class="cloud-tag">타이포그래피</span>
+      <span class="cloud-tag">파티클</span><span class="cloud-tag">스크롤</span>
+    </div>
+  </div>
+
+</aside>
+</div><!-- /main layout -->
+
+
+<!-- ═══════ NOTIFY SECTION ═══════ -->
+<section id="notify" class="relative overflow-hidden border-y border-white/[.06] py-20 px-6">
+  <div class="absolute inset-0 pointer-events-none">
+    <div class="absolute inset-0" style="background:radial-gradient(ellipse 70% 70% at 50% 50%,rgba(124,106,245,.1),transparent)"></div>
+    <div class="absolute inset-0" style="background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black,transparent)"></div>
+  </div>
+  <div class="relative z-10 max-w-[520px] mx-auto text-center">
+    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[.72rem] font-semibold text-pink border mb-5" style="background:rgba(244,114,182,.08);border-color:rgba(244,114,182,.2)">
+      🔔 새 작품 알림
+    </div>
+    <h2 class="text-[clamp(1.8rem,4vw,2.6rem)] font-black tracking-[-0.04em] leading-tight mb-4">
+      새 작품이 올라오면<br/><span class="g-text">바로 알려드릴게요</span>
+    </h2>
+    <p class="text-[.92rem] text-[#6b6b8a] leading-relaxed mb-8">이메일을 남겨두시면 LandingHub에 새 작품이 등록될 때 알림을 보내드립니다.</p>
+    <div class="flex flex-col sm:flex-row gap-3">
+      <input id="notifyEmail" type="email" placeholder="이메일 주소 입력" class="notify-input flex-1"/>
+      <button id="notifyBtn" class="glow-btn px-6 py-3 text-sm font-bold text-white rounded-xl flex-shrink-0 transition-all hover:-translate-y-px" style="background:linear-gradient(135deg,#7c6af5,#8b5cf6);box-shadow:0 4px 20px rgba(124,106,245,.35)">
+        알림 받기
+      </button>
+    </div>
+    <div id="notifyMsg"></div>
+    <p class="text-[.72rem] text-[#4a4a6a] mt-3">스팸은 절대 없습니다. 언제든 구독 취소 가능합니다.</p>
+  </div>
+</section>
+
+
+<!-- ═══════ HOW IT WORKS ═══════ -->
+<section class="max-w-[1360px] mx-auto px-6 lg:px-8 py-20">
+  <div class="rv text-center mb-12">
+    <p class="text-[.7rem] font-black tracking-[.12em] uppercase text-accent mb-3">How it works</p>
+    <h2 class="text-[clamp(1.8rem,3.5vw,2.5rem)] font-black tracking-[-0.04em]">어떻게 운영되나요?</h2>
+  </div>
+  <div class="grid sm:grid-cols-3 gap-5">
+    <div class="rv g-border rounded-2xl p-7 border border-white/[.07] relative overflow-hidden" style="background:#0e0e1f;transition-delay:.05s">
+      <div class="absolute top-0 right-0 w-40 h-40 rounded-full blur-[50px] pointer-events-none" style="background:radial-gradient(circle,rgba(124,106,245,.12),transparent)"></div>
+      <div class="w-11 h-11 rounded-xl flex items-center justify-center text-xl mb-5 border border-white/[.07]" style="background:#161628">🎨</div>
+      <div class="text-[.62rem] font-black tracking-widest uppercase text-accent mb-2">Step 01</div>
+      <h3 class="text-[1rem] font-bold mb-2.5">작품 제출</h3>
+      <p class="text-[.83rem] text-[#6b6b8a] leading-relaxed">직접 만든 랜딩페이지 URL과 스크린샷을 제출합니다. 폼 작성만으로 간편하게 신청하세요.</p>
+    </div>
+    <div class="rv g-border rounded-2xl p-7 border border-white/[.07] relative overflow-hidden" style="background:#0e0e1f;transition-delay:.1s">
+      <div class="absolute top-0 right-0 w-40 h-40 rounded-full blur-[50px] pointer-events-none" style="background:radial-gradient(circle,rgba(34,211,238,.1),transparent)"></div>
+      <div class="w-11 h-11 rounded-xl flex items-center justify-center text-xl mb-5 border border-white/[.07]" style="background:#161628">🔍</div>
+      <div class="text-[.62rem] font-black tracking-widest uppercase text-cyan mb-2">Step 02</div>
+      <h3 class="text-[1rem] font-bold mb-2.5">큐레이션 검토</h3>
+      <p class="text-[.83rem] text-[#6b6b8a] leading-relaxed">디자인 품질, 인터랙션, 완성도를 기준으로 심사합니다. 보통 3–5일 내 결과를 알려드립니다.</p>
+    </div>
+    <div class="rv g-border rounded-2xl p-7 border border-white/[.07] relative overflow-hidden" style="background:#0e0e1f;transition-delay:.15s">
+      <div class="absolute top-0 right-0 w-40 h-40 rounded-full blur-[50px] pointer-events-none" style="background:radial-gradient(circle,rgba(244,114,182,.1),transparent)"></div>
+      <div class="w-11 h-11 rounded-xl flex items-center justify-center text-xl mb-5 border border-white/[.07]" style="background:#161628">🚀</div>
+      <div class="text-[.62rem] font-black tracking-widest uppercase text-pink mb-2">Step 03</div>
+      <h3 class="text-[1rem] font-bold mb-2.5">쇼케이스 등재</h3>
+      <p class="text-[.83rem] text-[#6b6b8a] leading-relaxed">심사 통과 시 LandingHub에 노출됩니다. 방문자들의 피드백과 조회수를 실시간으로 확인하세요.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════ BOTTOM AD ═══════ -->
+<div class="max-w-[1360px] mx-auto px-6 lg:px-8 mb-16">
+  <div class="rounded-2xl p-4 border border-yellow-400/[.1]" style="background:rgba(251,191,36,.03)">
+    <div class="h-[88px] rounded-xl flex items-center justify-center gap-3 text-yellow-700 text-[.8rem] font-bold border border-dashed border-yellow-400/[.18]"
+         style="background:repeating-linear-gradient(45deg,rgba(251,191,36,.03) 0,rgba(251,191,36,.03) 1px,transparent 1px,transparent 10px)">
+      <span class="px-2 py-0.5 rounded text-[.6rem] font-black tracking-widest text-yellow-800 border border-yellow-400/20" style="background:rgba(251,191,36,.1)">AD</span>
+      하단 광고 영역 — 728 × 90
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════ FOOTER ═══════ -->
+<footer class="border-t border-white/[.06] px-6 lg:px-8 pt-12 pb-8" style="background:#0e0e1f">
+  <div class="max-w-[1360px] mx-auto">
+    <div class="grid sm:grid-cols-3 gap-10 mb-10">
+      <div>
+        <div class="flex items-center gap-2.5 mb-4">
+          <div class="w-[28px] h-[28px] rounded-[8px] flex items-center justify-center flex-shrink-0" style="background:linear-gradient(145deg,#6156f0,#22d3ee);box-shadow:0 0 0 1px rgba(255,255,255,.08) inset,0 4px 16px rgba(124,106,245,.45)">
+            <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
+              <rect x="0" y="0" width="8" height="8" rx="2" fill="white"/>
+              <rect x="10" y="0" width="8" height="8" rx="2" fill="rgba(255,255,255,.5)"/>
+              <rect x="0" y="10" width="8" height="8" rx="2" fill="rgba(255,255,255,.5)"/>
+              <rect x="10" y="10" width="8" height="8" rx="2" fill="rgba(255,255,255,.25)"/>
+            </svg>
+          </div>
+          <span class="font-extrabold tracking-[-0.03em]">LandingHub</span>
+        </div>
+        <p class="text-[.82rem] text-[#4a4a6a] leading-relaxed max-w-[200px]">국내 프론트엔드 개발자들의 랜딩페이지 쇼케이스 플랫폼</p>
+      </div>
+      <div>
+        <p class="text-[.7rem] font-bold uppercase tracking-widest text-[#4a4a6a] mb-3.5">링크</p>
+        <div class="flex flex-col gap-2">
+          <a href="#" class="text-[.83rem] text-[#6b6b8a] hover:text-[#ede9ff] transition-colors no-underline">쇼케이스</a>
+          <a href="#" class="text-[.83rem] text-[#6b6b8a] hover:text-[#ede9ff] transition-colors no-underline">작품 제출</a>
+          <a href="#notify" class="text-[.83rem] text-[#6b6b8a] hover:text-[#ede9ff] transition-colors no-underline">알림 받기</a>
+        </div>
+      </div>
+      <div>
+        <p class="text-[.7rem] font-bold uppercase tracking-widest text-[#4a4a6a] mb-3.5">문의</p>
+        <div class="flex flex-col gap-2">
+          <a href="#" class="text-[.83rem] text-[#6b6b8a] hover:text-[#ede9ff] transition-colors no-underline">광고 문의</a>
+          <a href="#" class="text-[.83rem] text-[#6b6b8a] hover:text-[#ede9ff] transition-colors no-underline">이용약관</a>
+          <a href="#" class="text-[.83rem] text-[#6b6b8a] hover:text-[#ede9ff] transition-colors no-underline">개인정보처리방침</a>
+        </div>
+      </div>
+    </div>
+    <div class="border-t border-white/[.06] pt-6 flex flex-wrap items-center justify-between gap-4">
+      <p class="text-[.78rem] text-[#3a3a55]">© 2025 LandingHub. All rights reserved.</p>
+      <p class="text-[.78rem] text-[#3a3a55]">Made with ♥ by 프론트엔드 개발자</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+.cloud-tag{padding:5px 11px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:8px;font-size:.75rem;font-weight:500;color:#8b8aaa;cursor:pointer;transition:all .2s;display:inline-block}
+.cloud-tag:hover{background:rgba(124,106,245,.1);border-color:rgba(124,106,245,.22);color:#a78bfa}
+</style>
+
+<script>
+/* ───────────────────────────────
+   MARQUEE 복제
+─────────────────────────────── */
+const tpl = document.getElementById('marqueeTpl');
+const row = tpl.parentElement;
+const clone = tpl.content.cloneNode(true);
+const clone2 = tpl.content.cloneNode(true);
+row.appendChild(clone);
+row.appendChild(clone2);
+tpl.remove();
+
+/* ───────────────────────────────
+   MOBILE NAV
+─────────────────────────────── */
+const mobNavEl = document.getElementById('mobNav');
+const mobNavBtn = document.getElementById('mobNavBtn');
+const mobNavIcon = document.getElementById('mobNavIcon');
+
+function openMobNav() {
+  mobNavEl.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  mobNavIcon.innerHTML = '<path d="M18 6 6 18M6 6l12 12"/>';
+}
+function closeMobNav() {
+  mobNavEl.style.display = 'none';
+  document.body.style.overflow = '';
+  mobNavIcon.innerHTML = '<line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>';
+}
+mobNavBtn.addEventListener('click', () => {
+  mobNavEl.style.display === 'flex' ? closeMobNav() : openMobNav();
+});
+function handleMobNavBgClick(e) {
+  if (e.target === mobNavEl) closeMobNav();
+}
+
+/* ───────────────────────────────
+   DATA
+   카드 추가: CARDS 배열에 아래 형식으로 객체 추가
+   { id, title, author, tag, tags:[], url, thumb, date, views, likes }
+─────────────────────────────── */
+const CARDS = [];
+
+/* ───────────────────────────────
+   STATE
+─────────────────────────────── */
+let filter = 'all', query = '', listView = false;
+const CATS = ['all','SaaS','포트폴리오','커머스','스타트업','앱'];
+
+const $grid  = document.getElementById('cardGrid');
+const $empty = document.getElementById('emptyState');
+const $skel  = document.getElementById('skelWrap');
+const $vis   = document.getElementById('visCnt');
+const $tot   = document.getElementById('totalCount');
+const $search= document.getElementById('searchInput');
+
+/* ───────────────────────────────
+   RENDER
+─────────────────────────────── */
+function filtered(){
+  return CARDS.filter(c=>{
+    const mt = filter==='all'||c.tag===filter;
+    const ms = !query||[c.title,c.author,...c.tags].some(s=>s.toLowerCase().includes(query));
+    return mt&&ms;
+  });
+}
+
+function render(){
+  $grid.querySelectorAll('.lp-card').forEach(e=>e.remove());
+  const list=filtered(), empty=list.length===0;
+  $tot.textContent=CARDS.length; $vis.textContent=list.length;
+  if($empty) $empty.style.display=empty?'flex':'none';
+  $skel.style.display=empty?'grid':'none';
+  $grid.style.gridTemplateColumns=listView?'1fr':'repeat(auto-fill,minmax(300px,1fr))';
+
+  list.forEach((c,i)=>{
+    const el=document.createElement('div');
+    el.className='lp-card rv g-border';
+    el.dataset.tag=c.tag;
+    el.style.cssText=`display:block;transition-delay:${i*.04}s`;
+    el.innerHTML=`
+      <div class="thumb">
+        <img src="${c.thumb}" alt="${c.title}" loading="lazy"/>
+        <div class="thumb-ov"><a href="${c.url}" class="ov-btn" target="_blank" rel="noopener">사이트 방문 →</a></div>
+        <span class="cat-badge">${c.tag}</span>
+      </div>
+      <div style="padding:18px 20px 20px">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:6px">
+          <p style="font-size:.96rem;font-weight:700;color:#ede9ff;letter-spacing:-.02em;line-height:1.3">${c.title}</p>
+          <button class="like-btn" data-id="${c.id}">♡</button>
+        </div>
+        <p style="font-size:.76rem;color:#4a4a6a;margin-bottom:11px;display:flex;align-items:center;gap:5px">
+          <span style="width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,#7c6af5,#22d3ee);flex-shrink:0;display:inline-block"></span>${c.author}
+        </p>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:13px">${c.tags.map(t=>`<span class="ctag">${t}</span>`).join('')}</div>
+        <div style="height:1px;background:rgba(255,255,255,.07);margin-bottom:12px"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;font-size:.74rem;color:#4a4a6a">
+          <span>📅 ${c.date}</span><span>👁 ${c.views.toLocaleString()} views</span>
+        </div>
+      </div>`;
+    $grid.insertBefore(el,$empty);
+    requestAnimationFrame(()=>el.classList.add('show'));
+  });
+
+  CATS.forEach(cat=>{
+    const n=cat==='all'?CARDS.length:CARDS.filter(c=>c.tag===cat).length;
+    ['cnt-','sb-'].forEach(p=>{const e=document.getElementById(p+cat);if(e)e.textContent=n});
+  });
+}
+
+/* ───────────────────────────────
+   EVENTS
+─────────────────────────────── */
+function setFilter(f){
+  filter=f;
+  document.querySelectorAll('.fpill').forEach(b=>b.classList.toggle('on',b.dataset.f===f));
+  document.querySelectorAll('.crow').forEach(b=>b.classList.toggle('on',b.dataset.f===f));
+  render();
+}
+
+document.querySelectorAll('.fpill').forEach(b=>b.addEventListener('click',()=>setFilter(b.dataset.f)));
+document.getElementById('catList').addEventListener('click',e=>{const r=e.target.closest('.crow');if(r)setFilter(r.dataset.f)});
+$search.addEventListener('input',e=>{query=e.target.value.toLowerCase().trim();render()});
+
+document.getElementById('gvBtn').addEventListener('click',()=>{listView=false;document.getElementById('gvBtn').classList.add('bg-white/[.08]','text-[#ede9ff]');document.getElementById('lvBtn').classList.remove('bg-white/[.08]','text-[#ede9ff]');render()});
+document.getElementById('lvBtn').addEventListener('click',()=>{listView=true;document.getElementById('lvBtn').classList.add('bg-white/[.08]','text-[#ede9ff]');document.getElementById('gvBtn').classList.remove('bg-white/[.08]','text-[#ede9ff]');render()});
+
+$grid.addEventListener('click',e=>{const b=e.target.closest('.like-btn');if(!b)return;b.classList.toggle('on');b.textContent=b.classList.contains('on')?'♥':'♡'});
+
+/* ───────────────────────────────
+   SCROLL REVEAL
+─────────────────────────────── */
+const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('show');obs.unobserve(e.target)}}),{threshold:.07});
+document.querySelectorAll('.rv').forEach(el=>obs.observe(el));
+
+/* glow btn mouse effect */
+document.querySelectorAll('.glow-btn').forEach(btn=>{
+  btn.addEventListener('mousemove',e=>{const r=btn.getBoundingClientRect();btn.style.setProperty('--x',((e.clientX-r.left)/r.width*100)+'%');btn.style.setProperty('--y',((e.clientY-r.top)/r.height*100)+'%')});
+});
+
+document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();$search.focus()}});
+
+render();
+
+/* ───────────────────────────────
+   NOTIFY 구독 폼
+─────────────────────────────── */
+const WORKER_URL = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+  ? 'http://localhost:8787'
+  : '';
+
+const $notifyEmail = document.getElementById('notifyEmail');
+const $notifyBtn   = document.getElementById('notifyBtn');
+const $notifyMsg   = document.getElementById('notifyMsg');
+
+function showNotifyMsg(type, text) {
+  $notifyMsg.textContent = text;
+  $notifyMsg.className = type;
+  $notifyMsg.style.display = 'block';
+  setTimeout(() => { $notifyMsg.style.display = 'none'; }, 5000);
+}
+
+$notifyBtn.addEventListener('click', async () => {
+  const email = $notifyEmail.value.trim();
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showNotifyMsg('error', '올바른 이메일 주소를 입력해주세요.');
+    return;
+  }
+  $notifyBtn.disabled = true;
+  $notifyBtn.textContent = '처리 중...';
+  try {
+    const res  = await fetch(`${WORKER_URL}/api/subscribe`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    if (res.ok || res.status === 200) {
+      showNotifyMsg('success', data.message || '구독이 완료되었습니다!');
+      $notifyEmail.value = '';
+    } else {
+      showNotifyMsg('error', data.error || '오류가 발생했습니다. 다시 시도해주세요.');
+    }
+  } catch {
+    showNotifyMsg('error', '서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.');
+  } finally {
+    $notifyBtn.disabled = false;
+    $notifyBtn.textContent = '알림 받기';
+  }
+});
+
+$notifyEmail.addEventListener('keydown', e => { if (e.key === 'Enter') $notifyBtn.click(); });
+</script>
+</body>
+</html>

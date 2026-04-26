@@ -1,0 +1,205 @@
+# Work History Policy
+
+**Version:** 1.4  
+**Last updated:** 2026-04-26
+
+이 문서는 작업 이력의 저장 위치, 기록 시점, 책임 주체를 정의한다.
+
+## 목적
+
+- 모든 작업의 시작, 진행, 종료를 추적할 수 있게 한다.
+- 세션 단위 요약과 작업 단위 원장을 분리한다.
+- 사용자에게 보여준 설명과 기록을 최대한 같은 흐름으로 유지한다.
+
+## 저장 위치
+
+```text
+logs/
+  tasks/
+    TASK-YYYYMMDD-NNN.jsonl
+  sessions/
+    SESSION-YYYYMMDD-NNN.md
+  insights.jsonl
+
+reports/
+  TASK-YYYYMMDD-NNN.md
+
+CURRENT_STATE.md
+```
+
+| 위치 | 용도 | 형식 | 작성 주체 |
+|---|---|---|---|
+| `logs/tasks/TASK-{ID}.jsonl` | 작업 원장, 이벤트 append-only | JSON Lines | Analyst |
+| `logs/sessions/SESSION-{YYYYMMDD}-{NNN}.md` | 세션 요약, 진행 중 갱신 | Markdown | Analyst |
+| `logs/insights.jsonl` | 장기 인사이트 누적 | JSON Lines | Analyst |
+| `reports/TASK-{ID}.md` | 최종 보고서 | Markdown | Analyst |
+| `CURRENT_STATE.md` | 현재 세션의 기준 상태 | Markdown | Analyst |
+
+## 핵심 규칙
+
+1. 새 요청이 들어오면 가장 먼저 `TASK-{ID}.jsonl`을 만든다.
+2. `TASK_CREATED` 이벤트를 작업 시작 전에 기록한다.
+3. 작업 중 발생한 중요한 상태 변화는 같은 `TASK` 원장에 append 한다.
+4. `TASK_COMPLETED` 이후에는 신규 작업 이벤트를 추가하지 않는다. 단, 기록 오류 정정이나 감사 메모는 `CORRECTION` 또는 `AUDIT_NOTE` 성격으로만 append 할 수 있다.
+5. 기존 이벤트는 수정하지 않고 append-only로 유지한다.
+6. 민감 정보는 원장이나 세션 로그에 남기지 않는다.
+
+## 세션 로그 생성 시점
+
+세션 로그는 작업이 끝난 뒤에만 만드는 파일이 아니다.
+
+- 작업을 수행하는 세션에는 `logs/sessions/SESSION-YYYYMMDD-NNN.md`를 하나 생성하거나, 이미 열린 세션 로그를 재사용한다.
+- 새 Task를 시작할 때 현재 세션 로그가 없으면 Phase 0에서 생성한다.
+- 동일 세션의 여러 Task는 같은 세션 로그에 누적할 수 있다.
+- 세션이 진행되는 동안 중요한 결정, 실패, 재시도, 배포 결과를 계속 추가한다.
+- 세션이 끝나면 최종 요약과 다음 행동을 정리한다.
+
+즉, 세션 로그는 다음처럼 동작한다.
+
+- 시작 시 생성
+- 진행 중인 로그가 있으면 재사용
+- 진행 중 누적 갱신
+- 종료 시 마무리 정리
+
+생략 가능 예외:
+
+```text
+단일 명령 출력 확인처럼 사용자 업데이트가 거의 없고 파일 변경이 없는 초소형 Task
+```
+
+이 경우에도 `TASK_COMPLETED.details.session_log_skipped_reason`에 생략 사유를 남긴다.
+
+## 세션 로그 우선순위
+
+세션 로그는 `작업 요약`보다 `인라인 보고 원문`을 우선한다.
+
+- 세션 중 사용자에게 보낸 인라인 보고를 누락 없이 원문 그대로 옮긴다.
+- 요약, 문장 재작성, 세부 내용 삭제로 원문 보고를 대체하지 않는다.
+- 세션 종료 시에는 그 보고를 짧게 정리해서 `결정 사항`에 반영한다.
+- 기본 템플릿에서는 별도의 `작업 요약` 섹션을 두지 않는다.
+
+### 인라인 보고 원문 보존 규칙
+
+Analyst가 사용자에게 보낸 중간 보고는 운영 기록의 일부다.
+
+필수:
+
+```
+[ ] 사용자에게 보낸 모든 commentary/inline update를 세션 로그에 원문 그대로 기록
+[ ] 시간 순서를 유지
+[ ] 최종 요약과 별개로 보존
+[ ] 민감 정보가 있으면 값만 마스킹하고 문맥은 보존
+```
+
+금지:
+
+```
+[ ] "검토 진행함"처럼 축약해서 대체
+[ ] 사용자의 판단에 영향을 준 세부 설명 삭제
+[ ] 최종 보고만 남기고 중간 보고 누락
+```
+
+## 세션 종료 요약 규칙
+
+세션이 끝날 때 작성하는 최종 요약은, 사용자에게 전달한 최종 설명과 같은 흐름이어야 한다.
+
+권장 방식:
+
+- 작업 중에는 짧고 정확한 인라인 업데이트를 남긴다.
+- 세션 종료 시에는 그 내용을 정리해서 세션 로그에 반영한다.
+- 사용자에게 보낸 최종 요약과 세션 로그의 결론은 의미가 일치해야 한다.
+- 인라인 보고 원문 섹션은 결론 일치 여부와 별개로 원문 보존을 우선한다.
+
+이 규칙의 목적은 말한 내용과 기록된 내용이 따로 놀지 않게 하는 것이다.
+
+## `TASK` 원장에 기록하는 시점
+
+아래 이벤트는 원칙적으로 `logs/tasks/TASK-{ID}.jsonl`에 기록한다.
+
+| 시점 | 이벤트 |
+|---|---|
+| 작업 시작 | `TASK_CREATED` |
+| 지시 전달 | `INSTRUCTION_SENT` |
+| 중간 결과 수신 | `AGENT_RESULT_RECEIVED` |
+| 생성 완료 | `GENERATION_COMPLETED` |
+| 검증 결과 | `VALIDATION_RESULT` |
+| 도구/할당/쿼터 문제 | `RESOURCE_FAILURE` |
+| 반박 제출 | `REBUTTAL_SUBMITTED` |
+| 판단 완료 | `ADJUDICATION_COMPLETED` |
+| 알림 발송 | `NOTIFICATION_SENT` |
+| 배포/병합 완료 | `MERGE_COMPLETED` |
+| 보고서 작성 | `REPORT_WRITTEN` |
+| 가이드 갱신 | `GUIDE_UPDATED` |
+| 기록 정정 | `CORRECTION` |
+| 감사 메모 | `AUDIT_NOTE` |
+| 작업 종료 | `TASK_COMPLETED` |
+
+## 세션 로그에 기록하는 내용
+
+세션 로그는 작업의 흐름을 사람이 빠르게 이해할 수 있도록 적는다.
+
+- 세션 시작 시간
+- 주요 TASK 목록
+- 중요한 결정 사항
+- 검증 또는 배포 결과
+- 사용자에게 보낸 최종 요약과 같은 결론
+- 다음 세션에서 이어갈 일
+
+## 책임 분리
+
+| 주체 | 책임 |
+|---|---|
+| Analyst | TASK 원장 생성, 세션 로그 갱신, 최종 보고서 작성 |
+| Researcher | 조사 결과를 Analyst에게 전달 |
+| Generator | 코드/문서 변경 결과를 Analyst에게 보고 |
+| Validator-A/B | 검증 결과를 Analyst에게 보고 |
+
+## 완료 조건
+
+작업을 완료로 처리하려면 아래가 충족되어야 한다.
+
+- `logs/tasks/TASK-{ID}.jsonl`에 `TASK_COMPLETED`가 존재해야 한다.
+- 보고서 게이트에 따라 `reports/TASK-{ID}.md`가 작성되어야 한다.
+- 품질 점수 게이트에 따라 `logs/quality-scores.jsonl`에 점수가 기록되어야 한다.
+- 세션이 존재하면 `logs/sessions/SESSION-{YYYYMMDD}-{NNN}.md`에 요약이 반영되어야 한다.
+
+### 보고서 게이트
+
+| 상황 | 보고서 처리 |
+|---|---|
+| Tier 1 일반 작업 | 파일 보고서 선택. 인라인 보고와 원장으로 완료 가능 |
+| Tier 1 운영 규칙/가이드 변경 | 보고서 권장. 변경 근거가 남아야 하는 경우 작성 |
+| Tier 1 사용자 요청 | 사용자가 보고서를 요청하면 필수 |
+| Tier 2 | `reports/TASK-{ID}.md` 필수 |
+| Tier 3 | `reports/TASK-{ID}.md` 필수 |
+| HOLD / Resource Failure / FAILED | 상태·원인·영향·다음 조치 보고서 필수 |
+| Adjudication | 판정 근거와 채택/기각 사유 보고서 필수 |
+
+보고서가 필수인 상황에서 보고서를 작성하지 못하면 `TASK_COMPLETED`를 기록하지 않는다.
+
+### 품질 점수 게이트
+
+| 상황 | 품질 점수 처리 |
+|---|---|
+| Tier 1 일반 작업 | 선택 |
+| Tier 1 운영 규칙/가이드 변경 | 필수 |
+| Tier 2 | 필수 |
+| Tier 3 | 필수 |
+| HOLD / Resource Failure | 완료 전까지 보류. Resource Failure 자체는 품질 실패로 채점하지 않음 |
+| FAILED | 필수. 실패 원인과 프로세스 점수를 반영 |
+
+품질 점수를 생략하는 경우:
+
+```json
+{
+  "quality_score_skipped_reason": "Tier 1 trivial local-only task; no report requested"
+}
+```
+
+위 사유를 `TASK_COMPLETED.details`에 기록한다.
+
+## 보존 원칙
+
+- `logs/tasks/*.jsonl`은 append-only로 유지한다.
+- `logs/sessions/*.md`는 세션별 기록으로 보존한다.
+- 민감 정보가 들어가면 즉시 마스킹하고, 마스킹 사실을 메타데이터에 남긴다.
