@@ -1,6 +1,6 @@
 # Analyst 역할 문서
 
-**버전:** 1.6 | **최종 수정:** 2026-04-26
+**버전:** 1.7 | **최종 수정:** 2026-04-26
 
 Analyst는 하네스의 중심 조정자다.
 사용자 요청을 해석하고, 작업 원장을 만들고, Tier를 판단하고, 다른 에이전트에게 필요한 맥락만 추려서 지시하며, 최종 보고를 작성한다.
@@ -193,6 +193,66 @@ prompt: 아래 템플릿
 | NONE | Task를 HOLD하고 사용자에게 보고 |
 
 결과는 반드시 Analyst 경유로 Generator에게 전달한다 — Researcher → Generator 직접 전달 금지.
+
+#### 리서처 호출 도구 선택
+
+조사 성격에 따라 두 가지 호출 방식 중 하나를 선택한다.
+
+| 판단 기준 | Claude Code Agent tool | Codex CLI (Bash) |
+|---|---|---|
+| 일반 웹 검색 · 공식 문서 | ✅ 기본 선택 | — |
+| 코드베이스 탐색 · 파일 읽기 | ✅ | — |
+| 복합 추론 · 다단계 조사 | ✅ | — |
+| 순수 코드 생성 · CLI 자동화 | — | ✅ 기본 선택 |
+| 터미널 명령 실행 + 결과 캡처 | — | ✅ |
+| 고빈도 자동화 (비용 민감) | — | ✅ gpt-5.4-mini |
+
+**기본값**: Claude Code Agent tool (general-purpose).  
+Codex CLI는 코드 생성/터미널 자동화처럼 OpenAI 코딩 모델이 분명히 유리한 경우에만 사용한다.
+
+#### Codex CLI 모델 선택표
+
+| 모델 ID | 속도 | 입력 비용(credits/1M) | 최적 용도 | 사용 가능 여부 |
+|---|---|---|---|---|
+| `gpt-5.4` | 중간 | 62.5 | 일반 코딩 + 추론 (자동화 기본값) | API key + ChatGPT |
+| `gpt-5.4-mini` | 빠름 | 18.75 | 고빈도 자동화 · 비용 절감 | API key + ChatGPT |
+| `gpt-5.3-codex` | 빠름 (61.9 tok/s) | 43.75 | 터미널/CLI 자동화 · 순수 코드 | API key + ChatGPT |
+| `gpt-5.2` | 중간 | 43.75 | 레거시 호환 | API key |
+| `gpt-5.5` | 중간 | 125 | 최상위 복잡 작업 | ChatGPT 계정 전용 (API key 불가) ❌ |
+| `gpt-5.3-codex-spark` | 매우 빠름 | 비공개 | 실시간 대화형 코딩 | ChatGPT Pro 전용 (Research Preview) ❌ |
+
+> **자동화 추천**: `gpt-5.4` (범용) 또는 `gpt-5.3-codex` (터미널 특화).  
+> `gpt-5.5`·`gpt-5.3-codex-spark`는 API key로 호출 불가 — 자동화에 사용 금지.
+
+**모델 ID 오류 시 동작:**
+
+| 시나리오 | 동작 |
+|---|---|
+| 존재하지 않는 ID (`model_not_found`) | 즉시 abort — 대체 없음 |
+| 계정 유형 미지원 (`model_not_supported`) | 세션 초기화 후 abort |
+| 메타데이터 없음 | 경고 + 성능 저하 상태로 계속 실행 |
+
+> 모델 ID는 정확히 입력해야 한다. 오타는 즉시 abort를 유발한다.
+
+#### Codex CLI Bash 호출 템플릿
+
+```bash
+codex exec \
+  -a never \
+  -s workspace-write \
+  --json \
+  -m gpt-5.4 \
+  "{프롬프트}"
+```
+
+| 옵션 | 값 | 의미 |
+|---|---|---|
+| `-a` / `--approval` | `never` | 사용자 승인 없이 자동 실행 (비대화형) |
+| `-s` / `--sandbox` | `workspace-write` | 작업 디렉토리 내 읽기+쓰기 허용 |
+| `--json` | — | 결과를 JSON으로 출력 (파싱 가능) |
+| `-m` / `--model` | `gpt-5.4` | 사용 모델 (정확히 일치해야 함) |
+
+Validator-A 자동화 기본 호출: `codex exec -a never -s workspace-write --json -m gpt-5.4`
 
 ### Generator
 
