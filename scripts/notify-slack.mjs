@@ -31,9 +31,10 @@ if (!webhookUrl) {
 }
 
 const event = {
+  type: "NOTIFICATION_EVENT",
   task_id: args["task-id"] || "TASK-UNKNOWN",
   severity: args.severity || "INFO",
-  status: args.status || "RUNNING",
+  notification_status: args["notification-status"] || args.status || "RUNNING",
   title: args.title || "Harness notification",
   summary: args.summary || "",
   report_path: args["report-path"] || "",
@@ -53,7 +54,7 @@ const payload = {
     {
       type: "section",
       fields: [
-        { type: "mrkdwn", text: `*상태*\n${statusLabel(event.status)}` },
+        { type: "mrkdwn", text: `*상태*\n${statusLabel(event.notification_status)}` },
         { type: "mrkdwn", text: `*심각도*\n${severityLabel(event.severity)}` },
       ],
     },

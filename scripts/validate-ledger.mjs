@@ -5,6 +5,7 @@ const root = process.cwd();
 const taskDir = path.join(root, 'logs', 'tasks');
 const strictCutoff = 38;
 const validTaskStatuses = new Set(['ACTIVE', 'HOLD', 'PENDING_VALIDATION', 'RETRYING', 'COMPLETE', 'PARTIAL', 'FAILED']);
+const validTiers = new Set(['Tier1', 'Tier2', 'Tier3']);
 
 let errors = 0;
 let warnings = 0;
@@ -22,6 +23,69 @@ function reportError(message) {
 function reportWarning(message) {
   warnings += 1;
   console.warn(`[WARN] ${message}`);
+}
+
+function eventType(event) {
+  return event.event_type ?? event.event;
+}
+
+function correctionEvents(events) {
+  return events.filter((event) => eventType(event) === 'CORRECTION');
+}
+
+function hasCorrection(events, predicate) {
+  return correctionEvents(events).some((event) => predicate(event.details ?? {}, event));
+}
+
+function normalizedTier(value) {
+  if (!value) return null;
+  const text = String(value).trim();
+  if (validTiers.has(text)) return text;
+  if (/^tier\s*1$/i.test(text) || text === '1') return 'Tier1';
+  if (/^tier\s*2$/i.test(text) || text === '2') return 'Tier2';
+  if (/^tier\s*3$/i.test(text) || text === '3') return 'Tier3';
+  return null;
+}
+
+function taskTier(events, finalEvent) {
+  const candidates = [
+    finalEvent.task_tier,
+    finalEvent.details?.task_tier,
+    finalEvent.details?.tier,
+    ...events.map((event) => event.task_tier),
+    ...events.map((event) => event.details?.task_tier),
+    ...events.map((event) => event.details?.tier),
+  ];
+
+  for (const candidate of candidates) {
+    const tier = normalizedTier(candidate);
+    if (tier) return tier;
+  }
+
+  return null;
+}
+
+function effectiveRefs(finalEvent, events) {
+  const refs = [...(finalEvent.artifact_refs ?? [])];
+
+  for (const event of correctionEvents(events)) {
+    for (const ref of event.artifact_refs ?? []) {
+      refs.push(ref);
+    }
+  }
+
+  return refs;
+}
+
+function effectiveDetails(finalEvent, events) {
+  const created = events.find((event) => eventType(event) === 'TASK_CREATED');
+  const merged = { ...(created?.details ?? {}), ...(finalEvent.details ?? {}) };
+
+  for (const event of correctionEvents(events)) {
+    Object.assign(merged, event.details ?? {});
+  }
+
+  return merged;
 }
 
 if (!fs.existsSync(taskDir)) {
@@ -52,8 +116,8 @@ for (const file of files) {
   }
 
   const taskId = file.replace(/\.jsonl$/, '');
-  const hasCreated = events.some((event) => event.event_type === 'TASK_CREATED' || event.event === 'TASK_CREATED');
-  const completed = events.filter((event) => event.event_type === 'TASK_COMPLETED' || event.event === 'TASK_COMPLETED');
+  const hasCreated = events.some((event) => eventType(event) === 'TASK_CREATED');
+  const completed = events.filter((event) => eventType(event) === 'TASK_COMPLETED');
 
   if (!hasCreated) {
     reportError(`${file}: missing TASK_CREATED`);
@@ -65,20 +129,42 @@ for (const file of files) {
     }
 
     if (event.status && !validTaskStatuses.has(event.status)) {
-      reportError(`${file}: invalid task status ${event.status}`);
+      const corrected = hasCorrection(events, (details) =>
+        details.corrected_event_index === events.indexOf(event) + 1
+        && details.corrected_status === 'COMPLETE'
+      );
+
+      const suppressed = hasCorrection(events, (details) =>
+        details.corrected_event_index === events.indexOf(event) + 1
+        && details.legacy_status_warning_suppressed === true
+      );
+
+      if (corrected && !suppressed) {
+        reportWarning(`${file}: legacy invalid task status ${event.status} is superseded by CORRECTION`);
+      } else if (corrected) {
+        // Legacy value is intentionally preserved and documented by CORRECTION.
+      } else {
+        reportError(`${file}: invalid task status ${event.status}`);
+      }
     }
   }
 
   if (completed.length > 1) {
-    reportWarning(`${file}: multiple TASK_COMPLETED events; verify this is a correction history, not new work on a closed task`);
+    const suppressed = hasCorrection(events, (details) =>
+      details.multiple_completion_warning_suppressed === true
+    );
+
+    if (!suppressed) {
+      reportWarning(`${file}: multiple TASK_COMPLETED events; verify this is a correction history, not new work on a closed task`);
+    }
   }
 
   const strict = taskNumber(taskId) >= strictCutoff;
   if (strict && completed.length > 0) {
     const finalEvent = completed.at(-1);
-    const tier = finalEvent.task_tier ?? events.find((event) => event.task_tier)?.task_tier;
-    const details = finalEvent.details ?? {};
-    const refs = finalEvent.artifact_refs ?? [];
+    const tier = taskTier(events, finalEvent);
+    const details = effectiveDetails(finalEvent, events);
+    const refs = effectiveRefs(finalEvent, events);
     const reportPath = refs.find((ref) => ref.type === 'report')?.path ?? details.report_path;
     const hasQuality = Boolean(details.quality_score)
       || refs.some((ref) => ref.type === 'quality_score')

@@ -1,6 +1,6 @@
 # Eval Harness — 평가 및 개선 루프
 
-**버전:** 1.5 | **최종 수정:** 2026-04-26  
+**버전:** 1.6 | **최종 수정:** 2026-04-26  
 **원칙:** "측정해야 평가하고, 평가해야 개선한다. 느낌으로 개선하지 말라."
 
 ---
@@ -197,6 +197,6 @@ def run_generator_agent(task_spec):
 |---|---|---|
 | `node scripts/check-doc-headers.mjs` | `CURRENT_STATE.md` 권위 문서 표와 실제 파일 헤더의 버전·날짜 일치 | 세션 재진입, 가이드 변경 후 |
 | `node scripts/validate-ledger.mjs` | `logs/tasks/*.jsonl` JSON 파싱, `TASK_CREATED` 존재, 상태 enum, strict-era 완료 게이트 일부 | Task 완료 전 |
-| `node scripts/check-completion-gates.mjs` | Tier 2/3 보고서·품질 점수 존재, 완료 보고서의 stale 예정 문구 잔류 여부 | 보고서 작성 후, 완료 전 |
+| `node scripts/check-completion-gates.mjs` | Tier 2/3 보고서·품질 점수·검증/머지 증거 또는 명시적 생략 사유, 완료 보고서의 stale 예정 문구, 완료 시 dirty worktree 예외 사유 | 보고서 작성 후, 완료 전 |
 
 운영 규칙 변경 Task는 위 세 스크립트를 모두 실행하고 결과를 Task 원장과 보고서에 기록한다.

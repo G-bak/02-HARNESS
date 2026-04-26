@@ -1,6 +1,6 @@
 # Notification Policy — 장기 작업 알림 정책
 
-**버전:** 1.5 | **최종 수정:** 2026-04-26  
+**버전:** 1.6 | **최종 수정:** 2026-04-26  
 **원칙:** 사용자가 자리를 비워도 Task 상태 전환과 사용자 판단 필요 상황을 놓치지 않게 한다.
 
 ---
@@ -104,10 +104,11 @@ Slack 메시지는 짧고 행동 가능해야 한다.
 ## 전송 방식
 
 ```bash
-node scripts/notify-slack.mjs --title "TASK 완료" --summary "검증과 머지가 완료되었습니다." --task-id "TASK-20260425-001" --status "COMPLETE" --severity "INFO"
+node scripts/notify-slack.mjs --title "TASK 완료" --summary "검증과 머지가 완료되었습니다." --task-id "TASK-20260425-001" --notification-status "COMPLETE" --severity "INFO"
 ```
 
-CLI 인자명이 `--status`인 경우에도 의미는 `notification_status`다.
+CLI는 기존 호환성을 위해 `--status`도 받지만, 새 지시서와 예시는 `--notification-status`를 사용한다.  
+내부 이벤트 필드명은 항상 `notification_status`다.
 
 환경변수 `SLACK_WEBHOOK_URL`이 없으면 전송하지 않고 실패 처리한다.
 

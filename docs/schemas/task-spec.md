@@ -1,6 +1,6 @@
 # Task Spec — 스키마 정의
 
-**버전:** 1.2 | **최종 수정:** 2026-04-26  
+**버전:** 1.3 | **최종 수정:** 2026-04-26  
 **작성자:** Analyst | **소비자:** Generator, Validator (일부 필드는 Researcher)
 
 ---
@@ -13,7 +13,7 @@
   "created_at": "ISO8601",
   "complexity_tier": "Tier1 | Tier2 | Tier3",
   "tier_rationale": "Tier 분류 근거 (예: 인증 로직 포함 → Tier 3)",
-  "status": "ACTIVE | HOLD | PENDING_VALIDATION | RETRYING | COMPLETE | FAILED",
+  "status": "ACTIVE | HOLD | PENDING_VALIDATION | RETRYING | COMPLETE | PARTIAL | FAILED",
   "depends_on": ["선행 Task의 task_id 목록. 없으면 빈 배열 []"],
   "request_summary": "사용자 요청 한 줄 요약",
   "goal": "달성해야 할 최종 목표",
@@ -43,7 +43,7 @@
 
 ## 저장 위치
 
-Task Spec 원본은 아래 둘 중 하나에 저장한다.
+Task Spec 원본은 아래 둘 중 하나에 반드시 저장한다.
 
 권장 SSOT:
 
@@ -62,6 +62,7 @@ logs/tasks/TASK-{YYYYMMDD}-{NNN}.jsonl 의 TASK_CREATED 이벤트 details.spec
 - Validator에게 전달되는 success_criteria는 이 저장본과 의미가 같아야 한다.
 - 재분류, 성공 기준 변경, constraints 변경이 있으면 새 이벤트에 변경 전/후를 기록한다.
 - 단순 요약만 원장에 남기고 Task Spec 원본을 보존하지 않는 것은 금지한다.
+- 초소형 Tier 1이라도 `TASK_CREATED.details.spec`에 목표와 성공 기준을 보존한다.
 - `tasks/specs/` 디렉터리가 없으면 Analyst가 생성한다.
 
 ---

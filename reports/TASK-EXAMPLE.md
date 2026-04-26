@@ -1,6 +1,6 @@
 # TASK-EXAMPLE.md — 보고서 예시 파일
 
-**버전:** 1.5 | **최종 수정:** 2026-04-26
+**버전:** 1.6 | **최종 수정:** 2026-04-26
 
 > 실제 운영 시 이 구조를 따른다. Tier 1은 인라인 보고만 사용하고, Tier 2/3부터 `reports/TASK-{ID}.md` 상세 보고서를 작성한다.  
 > 보고서는 대표·관리자·기술 리드가 함께 보는 문서로 작성한다. 기술 상세보다 먼저 의사결정에 필요한 결론, 영향도, 리스크, 조치 필요 여부를 제시한다.
@@ -112,7 +112,7 @@ TASK-20260426-001 완료 [Tier 1]
 **Slack COMPLETE 알림 예시:**
 
 ```powershell
-node scripts/notify-slack.mjs --task-id TASK-20260426-001 --status COMPLETE --severity INFO --title "헤더 문구 수정 완료" --summary "Home.jsx 오타 수정 완료"
+node scripts/notify-slack.mjs --task-id TASK-20260426-001 --notification-status COMPLETE --severity INFO --title "헤더 문구 수정 완료" --summary "Home.jsx 오타 수정 완료"
 ```
 
 ---
@@ -205,7 +205,7 @@ node scripts/notify-slack.mjs --task-id TASK-20260426-001 --status COMPLETE --se
   "task_id": "TASK-20260426-002",
   "provider": "slack",
   "severity": "INFO",
-  "status": "COMPLETE",
+  "notification_status": "COMPLETE",
   "title": "닉네임 글자 수 제한 완료",
   "summary": "ProfileForm에 20자 제한과 카운터를 추가했습니다.",
   "report_path": "reports/TASK-20260426-002.md",
@@ -353,7 +353,7 @@ node scripts/notify-slack.mjs --task-id TASK-20260426-001 --status COMPLETE --se
   "task_id": "TASK-20260426-003",
   "provider": "slack",
   "severity": "ACTION_REQUIRED",
-  "status": "ACTION_REQUIRED",
+  "notification_status": "ACTION_REQUIRED",
   "title": "Tier 3 승인 필요",
   "summary": "Validator-A/B 모두 PASS. Analyst 최종 승인 후 머지 가능.",
   "report_path": "reports/TASK-20260426-003.md",
@@ -369,7 +369,7 @@ node scripts/notify-slack.mjs --task-id TASK-20260426-001 --status COMPLETE --se
   "task_id": "TASK-20260426-003",
   "provider": "slack",
   "severity": "INFO",
-  "status": "COMPLETE",
+  "notification_status": "COMPLETE",
   "title": "세션 토큰 저장 방식 변경 완료",
   "summary": "HttpOnly 쿠키 기반 세션 처리로 전환하고 Tier 3 검증을 통과했습니다.",
   "report_path": "reports/TASK-20260426-003.md",
@@ -493,7 +493,7 @@ node scripts/notify-slack.mjs --task-id TASK-20260426-001 --status COMPLETE --se
   "task_id": "TASK-20260426-004",
   "provider": "slack",
   "severity": "ACTION_REQUIRED",
-  "status": "HOLD",
+  "notification_status": "HOLD",
   "title": "Resource Failure 발생",
   "summary": "Validator-A rate limit으로 검증이 보류되었습니다. main 머지는 금지됩니다.",
   "report_path": "reports/TASK-20260426-004.md",
@@ -634,7 +634,7 @@ Generator는 해당 FAIL이 재현 절차 오류라고 판단해 Rebuttal을 제
   "task_id": "TASK-20260426-005",
   "provider": "slack",
   "severity": "ACTION_REQUIRED",
-  "status": "ACTION_REQUIRED",
+  "notification_status": "ACTION_REQUIRED",
   "title": "Validator 판정 충돌",
   "summary": "Generator Rebuttal 제출로 Analyst Adjudication에 진입했습니다.",
   "report_path": "reports/TASK-20260426-005.md",
@@ -650,7 +650,7 @@ Generator는 해당 FAIL이 재현 절차 오류라고 판단해 Rebuttal을 제
   "task_id": "TASK-20260426-005",
   "provider": "slack",
   "severity": "INFO",
-  "status": "COMPLETE",
+  "notification_status": "COMPLETE",
   "title": "검색 정렬 기준 변경 완료",
   "summary": "Adjudication 후 재검증 PASS 및 머지 완료.",
   "report_path": "reports/TASK-20260426-005.md",

@@ -1,6 +1,6 @@
 # Work History Policy
 
-**Version:** 1.4  
+**Version:** 1.6  
 **Last updated:** 2026-04-26
 
 이 문서는 작업 이력의 저장 위치, 기록 시점, 책임 주체를 정의한다.
@@ -112,6 +112,29 @@ Analyst가 사용자에게 보낸 중간 보고는 운영 기록의 일부다.
 
 이 규칙의 목적은 말한 내용과 기록된 내용이 따로 놀지 않게 하는 것이다.
 
+### 다음 단계 정합성 규칙
+
+세션 로그의 `## 다음 단계`는 현재 남은 작업만 적는다.
+
+필수:
+
+```
+[ ] Task 완료 전, 세션 로그의 `## 다음 단계`를 현재 상태와 대조한다
+[ ] 이미 완료한 항목은 삭제하거나 완료 사실로 갱신한다
+[ ] 남은 작업이 없으면 `- 없음`으로 명시한다
+[ ] `CURRENT_STATE.md`에 활성 Task 없음으로 기록할 경우, 최신 세션 로그의 다음 단계도 남은 작업 없음과 일치해야 한다
+```
+
+금지:
+
+```
+[ ] 이미 완료한 작업을 다음 단계로 남겨두기
+[ ] 예전 평가 결과의 다음 단계 목록을 그대로 방치하기
+[ ] 최종 보고와 세션 로그의 다음 단계가 서로 다른 상태를 가리키게 하기
+```
+
+완료 직전 자동 감사에서 최신 세션 로그의 `## 다음 단계`가 stale 상태이면 `TASK_COMPLETED`를 기록하지 않는다.
+
 ## `TASK` 원장에 기록하는 시점
 
 아래 이벤트는 원칙적으로 `logs/tasks/TASK-{ID}.jsonl`에 기록한다.
@@ -162,6 +185,12 @@ Analyst가 사용자에게 보낸 중간 보고는 운영 기록의 일부다.
 - 보고서 게이트에 따라 `reports/TASK-{ID}.md`가 작성되어야 한다.
 - 품질 점수 게이트에 따라 `logs/quality-scores.jsonl`에 점수가 기록되어야 한다.
 - 세션이 존재하면 `logs/sessions/SESSION-{YYYYMMDD}-{NNN}.md`에 요약이 반영되어야 한다.
+
+Tier 2/3 추가 완료 조건:
+
+- `VALIDATION_RESULT`가 존재해야 한다. 가이드 유지보수나 legacy 보정처럼 Validator를 생략한 경우 `TASK_COMPLETED.details.validation_omission_reason`에 사유를 남긴다.
+- git 저장소 모드에서 완료하는 경우 `MERGE_COMPLETED`가 존재해야 한다. 머지를 수행하지 않은 로컬/가이드 보정 작업은 `TASK_COMPLETED.details.merge_omission_reason`에 사유를 남긴다.
+- 완료 시점에 작업공간이 dirty라면 `TASK_COMPLETED.details.git_dirty_allowed_reason`에 사유를 남긴다. 이 사유는 임시 허용이며, 제품 코드 작업에서는 사용할 수 없다.
 
 ### 보고서 게이트
 

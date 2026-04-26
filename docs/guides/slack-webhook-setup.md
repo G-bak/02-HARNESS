@@ -1,6 +1,6 @@
 # Slack Webhook 설정 가이드
 
-**버전:** 1.0 | **최종 수정:** 2026-04-26  
+**버전:** 1.1 | **최종 수정:** 2026-04-26  
 **목적:** 하네스 알림 채널(Slack Incoming Webhook) 최초 설정 및 장애 복구  
 **대상:** 저장소 관리자 (에이전트 아님)
 
@@ -59,7 +59,7 @@ $env:SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/..."
 ## 4. 연결 테스트
 
 ```bash
-node scripts/notify-slack.mjs --title "테스트" --summary "연결 확인" --task-id "TEST-001" --status "COMPLETE" --severity "INFO"
+node scripts/notify-slack.mjs --title "테스트" --summary "연결 확인" --task-id "TEST-001" --notification-status "COMPLETE" --severity "INFO"
 ```
 
 Slack 채널에 메시지가 도착하면 정상이다.
