@@ -21,20 +21,20 @@
 | 전체 에이전트 구조·절대규칙 | `AGENTS.md` | v1.7 | 2026-04-26 |
 | 시스템 아키텍처 | `ARCHITECTURE.md` | v1.2 | 2026-04-26 |
 | 보안 규칙 | `SECURITY.md` | v1.3 | 2026-04-26 |
-| Analyst 역할·보고·리셋 | `docs/agents/analyst.md` | v2.4 | 2026-04-27 |
+| Analyst 역할·보고·리셋 | `docs/agents/analyst.md` | v2.5 | 2026-04-27 |
 | Validator 역할·검증 절차 | `docs/agents/validator.md` | v1.4 | 2026-04-26 |
 | Generator 역할 | `docs/agents/generator.md` | v1.4 | 2026-04-26 |
 | Researcher 역할 | `docs/agents/researcher.md` | v1.2 | 2026-04-26 |
 | 머지 조건·승인 주체 (권위) | `docs/operations/git-branch-policy.md` | v1.6 | 2026-04-26 |
 | 도구 권한 | `docs/operations/tool-permissions.md` | v1.7 | 2026-04-26 |
 | 외부 알림 정책 | `docs/operations/notification-policy.md` | v1.6 | 2026-04-26 |
-| 작업 이력 저장 정책 | `docs/operations/work-history-policy.md` | v1.9 | 2026-04-27 |
+| 작업 이력 저장 정책 | `docs/operations/work-history-policy.md` | v1.10 | 2026-04-27 |
 | Tier 분류 기준 | `docs/workflows/tier-classification.md` | v1.3 | 2026-04-26 |
 | Task 수명 주기 | `docs/workflows/task-lifecycle.md` | v1.16 | 2026-04-26 |
 | 실패 처리 | `docs/workflows/failure-handling.md` | v1.3 | 2026-04-25 |
 | 컨텍스트 관리 | `docs/workflows/context-management.md` | v1.0 | 2026-04-24 |
 | Task Spec 스키마 | `docs/schemas/task-spec.md` | v1.4 | 2026-04-26 |
-| 에이전트 출력 형식 | `docs/schemas/output-formats.md` | v1.15 | 2026-04-27 |
+| 에이전트 출력 형식 | `docs/schemas/output-formats.md` | v1.16 | 2026-04-27 |
 | 품질 루브릭 | `QUALITY_SCORE.md` | v1.3 | 2026-04-26 |
 | 실행 비용·리소스 관측 | `docs/operations/eval-harness.md` | v1.7 | 2026-04-26 |
 | 보고서 예시 | `reports/TASK-EXAMPLE.md` | v1.6 | 2026-04-26 |
