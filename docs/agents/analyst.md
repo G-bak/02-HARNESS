@@ -1,6 +1,6 @@
 # Analyst 역할 문서
 
-**버전:** 2.1 | **최종 수정:** 2026-04-26
+**버전:** 2.2 | **최종 수정:** 2026-04-26
 
 Analyst는 하네스의 중심 조정자다.
 사용자 요청을 해석하고, 작업 원장을 만들고, Tier를 판단하고, 다른 에이전트에게 필요한 맥락만 추려서 지시하며, 최종 보고를 작성한다.
@@ -239,12 +239,13 @@ codex exec \
   "{프롬프트}"
 ```
 
-| 옵션 | 값 | 의미 |
-|---|---|---|
-| `-a` / `--approval` | `never` | 사용자 승인 없이 자동 실행 (비대화형) |
-| `-s` / `--sandbox` | `workspace-write` | 작업 디렉토리 내 읽기+쓰기 허용 |
-| `--json` | — | 결과를 JSON으로 출력 (파싱 가능) |
-| `-m` / `--model` | `gpt-5.4` | 사용 모델 (정확히 일치해야 함) |
+| 옵션 | 기본값 (하네스) | 가능한 값 | 의미 |
+|---|---|---|---|
+| `-a` / `--approval` | `never` | `never` · `on-failure` · `always` | 실행 중 사용자 승인 요청 시점. `never` = 전혀 묻지 않음 (자동화 필수) |
+| `-s` / `--sandbox` | `workspace-write` | `none` · `workspace-read` · `workspace-write` · `full` | 파일 접근 범위. `workspace-write` = 작업 디렉토리 읽기+쓰기, 외부 접근 차단 |
+| `--json` | (항상 사용) | flag (값 없음) | 결과를 JSON으로 출력. 없으면 plain text — 파싱 불가 |
+| `-m` / `--model` | `gpt-5.4` | 모델 ID 문자열 | 사용할 모델. 오타 시 즉시 abort (위 모델 선택표 참고) |
+| `-q` / `--quiet` | (선택) | flag (값 없음) | 진행 로그 숨김. `--json`과 함께 쓰면 출력이 JSON만 남음 |
 
 Validator-A 자동화 기본 호출: `codex exec -a never -s workspace-write --json -m gpt-5.4`
 
