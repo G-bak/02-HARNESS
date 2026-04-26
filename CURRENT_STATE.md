@@ -76,8 +76,7 @@
 - **Task Spec SSOT 감사**: 신규 strict Task는 `tasks/specs/TASK-{ID}.json`, `TASK_CREATED.details.spec`, `TASK_CREATED.details.spec_path` 중 하나가 필수이며 legacy 누락은 `CORRECTION.details.legacy_spec_omission_reason`으로만 보정.
 - **품질 점수 최근값 기준**: 최근 5건 평균은 append 순서가 아니라 `recorded_at` 및 `task_id` 기준으로 산정.
 - **문서 클래스 구분**: Authority / Operational guide / Product/runtime doc / Plan/archive를 구분하고, 권위 규칙은 Authority 문서에만 둠.
-- **Tier 1 commit + push 기본**: Tier 1 작업은 파일 변경이 있으면 완료 시 main에 직접 commit + push가 기본. 사용자가 명시적으로 로컬만 요청한 경우에만 생략 가능 (`local_only_reason` 원장 기록 필수).
-- **Push 포함 완료 조건**: 사용자가 push까지 요청했거나 Task Spec에 push가 포함되면 `git push origin main`과 push 후 상태 확인을 완료 조건에 포함.
+- **commit/merge/push 세트 규칙**: 모든 Tier에서 commit/merge(Tier 2/3)/push는 항상 세트. 요청 여부와 무관하게 push까지 완료해야 작업 완료. push 없이 `TASK_COMPLETED` 기록 금지. (Non-git 작업공간 모드 제외)
 - **대표 보고용 품질 점수 표시**: 보고서에는 JSON 원문보다 `95점 / 100점 (S등급)` 형식의 요약, 구분 표, 좋았던 점, 감점/주의를 먼저 표시. JSON은 내부 원장 또는 부록용.
 
 ---

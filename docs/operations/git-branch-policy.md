@@ -164,15 +164,7 @@ Squash merge 시 아래 순서를 따른다.
 
 ### Push / Origin 인수인계
 
-main squash merge 후 push까지 요청받지 않았다면 push하지 않는다. 대신 최종 보고와 `CURRENT_STATE.md`에 아래를 명확히 남긴다.
-
-```text
-로컬 main은 origin/main보다 N커밋 앞서 있음
-```
-
-다음 세션의 첫 에이전트는 재진입 체크 중 `git status --short --branch`를 실행해 이 상태를 보고해야 한다.
-
-사용자가 push까지 요청했거나 Task Spec의 success_criteria에 push가 포함되어 있으면 아래 순서까지 완료해야 한다.
+commit/merge/push는 항상 세트다. 작업 완료 = push까지 완료. 요청 여부와 무관하다.
 
 ```powershell
 git status --short --branch
@@ -186,7 +178,6 @@ push 완료 후 필수 기록:
 [ ] `MERGE_COMPLETED.details.push_status`를 `PUSHED`로 기록
 [ ] push 대상 remote/branch 기록 (`origin/main`)
 [ ] push 전후 `git status --short --branch` 결과를 원장 또는 보고서에 요약
-[ ] `CURRENT_STATE.md`의 origin ahead 인수인계를 제거하거나 "동기화 완료"로 갱신
 ```
 
 금지:
@@ -194,7 +185,7 @@ push 완료 후 필수 기록:
 ```text
 [ ] push하지 않았는데 원격 반영 완료로 보고
 [ ] push 실패를 Task COMPLETE로 숨기기
-[ ] push 요청이 없는데 임의로 push
+[ ] push 없이 작업 완료로 처리
 ```
 
 ### Squash 머지 커밋 메시지 형식
@@ -236,7 +227,6 @@ Tier 1은 단일 파일 이하, 즉시 되돌릴 수 있는 작업으로 Validat
 | 상황 | 처리 방법 |
 |---|---|
 | 기본 (파일 변경 있음) | Analyst 자체 검토 후 main에 직접 commit + push — 브랜치 생성 없음 |
-| 사용자가 로컬만 요청 | 로컬 완료로 처리 — commit/push 생략, 원장에 `local_only_reason` 기록 |
 | Generator 파일 수정 필요 | 원칙적으로 `task/{TASK-ID}` 브랜치 사용. 단, 저장소가 아니거나 사용자가 로컬 반영만 요청한 경우 Non-git 작업공간 운영 모드로 전환하고 원장에 사유를 기록 |
 
 Tier 1 기본 commit + push 순서:
