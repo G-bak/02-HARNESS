@@ -1,0 +1,2 @@
+{"timestamp": "2026-04-26T17:38:00+09:00", "event": "TASK_CREATED", "task_id": "TASK-20260426-044", "details": {"description": "logo.svg 텍스트 및 디자인 서비스명에 맞게 변경", "tier": "1"}}
+{"timestamp": "2026-04-26T17:40:00+09:00", "event": "TASK_COMPLETED", "task_id": "TASK-20260426-044", "status": "SUCCESS", "details": {"summary": "logo.svg 텍스트를 LandingHub 및 SHOWCASE PLATFORM으로 변경"}}
