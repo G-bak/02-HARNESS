@@ -235,9 +235,17 @@ Tier 1은 단일 파일 이하, 즉시 되돌릴 수 있는 작업으로 Validat
 
 | 상황 | 처리 방법 |
 |---|---|
-| GitHub 반영 불필요 | Analyst 자체 검토 후 로컬 완료로 처리 — 브랜치 생성 없음 |
-| GitHub 반영 필요 | Analyst 검토 완료 후 사용자(사람)가 직접 머지 — 에이전트 머지 없음 |
+| 기본 (파일 변경 있음) | Analyst 자체 검토 후 main에 직접 commit + push — 브랜치 생성 없음 |
+| 사용자가 로컬만 요청 | 로컬 완료로 처리 — commit/push 생략, 원장에 `local_only_reason` 기록 |
 | Generator 파일 수정 필요 | 원칙적으로 `task/{TASK-ID}` 브랜치 사용. 단, 저장소가 아니거나 사용자가 로컬 반영만 요청한 경우 Non-git 작업공간 운영 모드로 전환하고 원장에 사유를 기록 |
+
+Tier 1 기본 commit + push 순서:
+
+```powershell
+git add {변경된 파일들}
+git commit -m "[{TASK-ID}] {변경 내용 요약}"
+git push origin main
+```
 
 Tier 1 예외는 "브랜치가 없어도 된다"는 뜻이지 "기록 없이 수정해도 된다"는 뜻이 아니다.
 브랜치 생략 시에도 `TASK_CREATED`, 변경 요약, 자체 검토, `TASK_COMPLETED`는 반드시 기록한다.

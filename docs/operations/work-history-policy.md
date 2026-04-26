@@ -1,7 +1,6 @@
 # Work History Policy
 
-**Version:** 1.8  
-**Last updated:** 2026-04-26
+**버전:** 1.8 | **최종 수정:** 2026-04-26
 
 이 문서는 작업 이력의 저장 위치, 기록 시점, 책임 주체를 정의한다.
 
@@ -80,6 +79,12 @@ CURRENT_STATE.md
 ```
 
 이 경우에도 `TASK_COMPLETED.details.session_log_skipped_reason`에 생략 사유를 남긴다.
+
+생략 절대 금지:
+
+```text
+파일 변경이 1건이라도 있으면 session_log_skipped_reason 사용 불가 — 세션 로그 필수
+```
 
 ## 세션 로그 우선순위
 
