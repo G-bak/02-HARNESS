@@ -57,6 +57,7 @@ INPUT                        CORE                          EXECUTION
 | Tier | 핵심 판단 기준 | 투입 에이전트 | 검증 방식 |
 |---|---|---|---|
 | **Tier 1** | 영향 범위 1파일 이하, 즉시 되돌리기 가능 | Analyst + Generator | Analyst 자체 검토 |
+| **Tier 1 예외** | 파일 변경 없음 + Generator 미투입인 조사 전용 작업 | Analyst + Researcher | Analyst 자체 검토 (상세: tier-classification.md) |
 | **Tier 2** | 복수 파일, 실패 시 수정 사이클로 해결 가능 | 전체 에이전트 풀 | Validator-A (Codex) 단독 |
 | **Tier 3** | 아래 조건 중 하나라도 해당 | 전체 + 복수 Validator | Validator-A + Validator-B 둘 다 PASS |
 
