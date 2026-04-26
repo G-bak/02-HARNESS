@@ -21,7 +21,7 @@
 | 전체 에이전트 구조·절대규칙 | `AGENTS.md` | v1.7 | 2026-04-26 |
 | 시스템 아키텍처 | `ARCHITECTURE.md` | v1.2 | 2026-04-26 |
 | 보안 규칙 | `SECURITY.md` | v1.3 | 2026-04-26 |
-| Analyst 역할·보고·리셋 | `docs/agents/analyst.md` | v1.6 | 2026-04-26 |
+| Analyst 역할·보고·리셋 | `docs/agents/analyst.md` | v2.3 | 2026-04-26 |
 | Validator 역할·검증 절차 | `docs/agents/validator.md` | v1.4 | 2026-04-26 |
 | Generator 역할 | `docs/agents/generator.md` | v1.4 | 2026-04-26 |
 | Researcher 역할 | `docs/agents/researcher.md` | v1.2 | 2026-04-26 |

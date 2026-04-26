@@ -199,12 +199,12 @@ prompt: 아래 템플릿
 Researcher는 외부 기술 조사 전용이다. 항상 Codex CLI + `gpt-5.4`를 사용한다.
 
 ```bash
-codex exec -a never -s workspace-write --json -m gpt-5.4 "{프롬프트}"
+codex exec --full-auto never -s workspace-write --json -m gpt-5.4 "{프롬프트}"
 ```
 
 | 옵션 | 기본값 (하네스) | 가능한 값 | 의미 |
 |---|---|---|---|
-| `-a` / `--approval` | `never` | `never` · `on-failure` · `always` | 실행 중 사용자 승인 요청 시점. `never` = 전혀 묻지 않음 (자동화 필수) |
+| `--full-auto` | `--full-auto` | `--full-auto` | 실행 중 사용자 승인 요청 시점. `--full-auto` = 전혀 묻지 않음 (자동화 필수) |
 | `-s` / `--sandbox` | `workspace-write` | `none` · `workspace-read` · `workspace-write` · `full` | 파일 접근 범위. `workspace-write` = 작업 디렉토리 읽기+쓰기, 외부 접근 차단 |
 | `--json` | (항상 사용) | flag (값 없음) | 결과를 JSON으로 출력. 없으면 plain text — 파싱 불가 |
 | `-m` / `--model` | `gpt-5.4` | 모델 ID 문자열 | 사용할 모델. 오타 시 즉시 abort |
