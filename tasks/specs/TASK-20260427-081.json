@@ -1,0 +1,31 @@
+{
+  "task_id": "TASK-20260427-081",
+  "created_at": "2026-04-27T00:10:00+09:00",
+  "complexity_tier": "Tier1",
+  "tier_rationale": "Documentation-only update to require Korean session logs in the harness guides.",
+  "status": "ACTIVE",
+  "depends_on": ["TASK-20260426-080"],
+  "request_summary": "Add an explicit rule that session logs must be written in Korean and not English.",
+  "goal": "Prevent future session logs from switching to English by encoding the rule in the guide documents.",
+  "constraints": {
+    "positive": [
+      "Update the guide documents that govern session logs.",
+      "Keep the rule explicit and easy to find.",
+      "Update authority versions if document headers change."
+    ],
+    "negative": [
+      "Do not touch secrets or runtime configuration.",
+      "Do not revert unrelated user edits."
+    ]
+  },
+  "success_criteria": [
+    "The guide documents state that session logs must be written in Korean.",
+    "Authority versions in CURRENT_STATE.md match the updated document headers.",
+    "Task history records the change."
+  ],
+  "assigned_agents": ["Analyst"],
+  "context": {
+    "initial_branch": "main",
+    "initial_status_summary": "Clean worktree on main after TASK-20260426-080 push completion."
+  }
+}
