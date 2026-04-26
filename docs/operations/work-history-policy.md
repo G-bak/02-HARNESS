@@ -1,6 +1,6 @@
 # Work History Policy
 
-**Version:** 1.6  
+**Version:** 1.7  
 **Last updated:** 2026-04-26
 
 이 문서는 작업 이력의 저장 위치, 기록 시점, 책임 주체를 정의한다.
@@ -134,6 +134,31 @@ Analyst가 사용자에게 보낸 중간 보고는 운영 기록의 일부다.
 ```
 
 완료 직전 자동 감사에서 최신 세션 로그의 `## 다음 단계`가 stale 상태이면 `TASK_COMPLETED`를 기록하지 않는다.
+
+## Git 상태 인수인계 규칙
+
+Git 저장소 모드에서 작업한 경우 세션 로그와 최종 보고는 아래 상태를 반드시 남긴다.
+
+필수:
+
+```
+[ ] 현재 브랜치
+[ ] 워킹트리 clean/dirty 여부
+[ ] main과 origin/main의 ahead/behind 상태
+[ ] task 브랜치 커밋 여부
+[ ] main squash merge 여부
+[ ] push 수행 여부 또는 미수행 사유
+```
+
+금지:
+
+```
+[ ] main에 반영하지 않았는데 완료로 표현
+[ ] push하지 않았는데 원격 반영 완료로 표현
+[ ] dirty worktree를 정상 완료처럼 숨기기
+```
+
+push가 요청되지 않아 생략된 경우에는 `push_omission_reason` 또는 최종 보고에 “로컬 main만 ahead”라고 명시한다.
 
 ## `TASK` 원장에 기록하는 시점
 

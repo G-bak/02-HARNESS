@@ -3,7 +3,7 @@
 > Analyst가 유지·갱신하는 파일입니다. 새 세션 시작 시 이 파일을 먼저 읽으세요.  
 > 새 세션 시작 방법: `/clear` 후 → "CURRENT_STATE.md를 읽고 이어서 진행해줘."
 
-**마지막 갱신:** 2026-04-26 (TASK-20260426-057 완료 — 세션 다음 단계 정합성 및 main squash merge)
+**마지막 갱신:** 2026-04-26 (TASK-20260426-058 완료 — Git 작업 인수인계 및 main squash merge)
 
 ---
 
@@ -25,12 +25,12 @@
 | Validator 역할·검증 절차 | `docs/agents/validator.md` | v1.4 | 2026-04-26 |
 | Generator 역할 | `docs/agents/generator.md` | v1.4 | 2026-04-26 |
 | Researcher 역할 | `docs/agents/researcher.md` | v1.2 | 2026-04-26 |
-| 머지 조건·승인 주체 (권위) | `docs/operations/git-branch-policy.md` | v1.4 | 2026-04-26 |
+| 머지 조건·승인 주체 (권위) | `docs/operations/git-branch-policy.md` | v1.5 | 2026-04-26 |
 | 도구 권한 | `docs/operations/tool-permissions.md` | v1.6 | 2026-04-26 |
 | 외부 알림 정책 | `docs/operations/notification-policy.md` | v1.6 | 2026-04-26 |
-| 작업 이력 저장 정책 | `docs/operations/work-history-policy.md` | v1.6 | 2026-04-26 |
+| 작업 이력 저장 정책 | `docs/operations/work-history-policy.md` | v1.7 | 2026-04-26 |
 | Tier 분류 기준 | `docs/workflows/tier-classification.md` | v1.3 | 2026-04-26 |
-| Task 수명 주기 | `docs/workflows/task-lifecycle.md` | v1.14 | 2026-04-26 |
+| Task 수명 주기 | `docs/workflows/task-lifecycle.md` | v1.15 | 2026-04-26 |
 | 실패 처리 | `docs/workflows/failure-handling.md` | v1.3 | 2026-04-25 |
 | 컨텍스트 관리 | `docs/workflows/context-management.md` | v1.0 | 2026-04-24 |
 | Task Spec 스키마 | `docs/schemas/task-spec.md` | v1.3 | 2026-04-26 |
@@ -78,14 +78,15 @@
 ## 활성 Task
 
 현재 진행 중인 Task 없음.  
-마지막 완료 Task: TASK-20260426-057 세션 다음 단계 정합성 및 main squash merge (2026-04-26)
+마지막 완료 Task: TASK-20260426-058 Git 작업 인수인계 및 main squash merge (2026-04-26)
 
 ---
 
 ## 남은 작업
 
 현재 미완료 작업 없음. 문서 체계 1차 완성 상태.  
-다음 재개 시 예상 시작점: 실제 에이전트 운영 첫 Task 실행 또는 추가 피드백 반영.
+Git 인수인계: 로컬 `main`은 `origin/main`보다 앞서 있으며, 원격 push는 아직 수행하지 않았다. 다음 세션은 `git status --short --branch`로 ahead 수를 확인해 먼저 보고한다.  
+다음 재개 시 예상 시작점: 실제 에이전트 운영 첫 Task 실행, push 요청 처리, 또는 추가 피드백 반영.
 
 ---
 

@@ -1,6 +1,6 @@
 # Git Branch Policy — 브랜치 격리 정책
 
-**버전:** 1.4 | **최종 수정:** 2026-04-26  
+**버전:** 1.5 | **최종 수정:** 2026-04-26  
 **원칙:** 모든 생성 작업은 전용 브랜치에서 수행한다. Generator는 main에 직접 접근하지 않는다.  
 **권위 문서:** 머지 조건·승인 주체에 관한 규칙은 이 문서가 단일 기준(Single Source of Truth)이다. SECURITY.md와 각 에이전트 문서는 이 문서를 참조하며 독자적인 규칙을 정의하지 않는다.
 
@@ -116,6 +116,61 @@ task/{TASK-ID}
 
 **기본: Squash Merge**  
 task/* 브랜치의 WIP 커밋을 하나로 압축하여 main에 반영한다. Task 단위 이력 관리가 쉽고 main 로그가 깔끔하게 유지된다.
+
+### Windows PowerShell Git 명령 주의
+
+Windows PowerShell에서는 shell 연산자 호환성이 환경마다 다를 수 있다. Git 작업은 실패 지점을 명확히 하기 위해 한 명령씩 실행한다.
+
+권장:
+
+```powershell
+git add CURRENT_STATE.md docs logs reports scripts
+git commit -m "[TASK-20260426-001] Update harness guides"
+git switch main
+git merge --squash task/TASK-20260426-001
+git commit -m "[TASK-20260426-001] Update harness guides`n`nValidator: Validator-A PASS (Codex CLI)`nTier: Tier2"
+```
+
+금지:
+
+```powershell
+git add . && git commit -m "..."
+```
+
+이유:
+
+- `&&`가 PowerShell 버전에 따라 실패할 수 있다.
+- 실패한 첫 명령 이후의 작업이 실행됐는지 헷갈리기 쉽다.
+- 원장과 세션 로그에 어느 단계까지 완료됐는지 기록하기 어렵다.
+
+### Squash Merge 운영 순서
+
+Squash merge 시 아래 순서를 따른다.
+
+1. `task/{TASK-ID}` 브랜치에서 모든 변경을 커밋한다.
+2. `main`으로 전환한다.
+3. `git merge --squash task/{TASK-ID}`를 실행한다.
+4. squash 결과가 staged 상태가 되면 `MERGE_COMPLETED`, `TASK_COMPLETED`, `CURRENT_STATE.md`, 최신 세션 로그의 `## 다음 단계`를 최종 상태로 갱신한다.
+5. 갱신한 기록 파일을 다시 `git add` 한다.
+6. Validator 결과와 Tier가 포함된 squash commit을 생성한다.
+7. 최종 감사 스크립트 3종을 실행한다.
+8. `git status --short --branch`로 `main` 상태와 `origin/main` ahead 여부를 확인해 사용자에게 보고한다.
+
+커밋 해시 기록 주의:
+
+- merge 커밋 안에 자기 자신의 최종 해시를 고정 문자열로 넣으려고 amend를 반복하지 않는다.
+- 같은 squash commit 안의 원장에는 `SELF_REFERENTIAL_MAIN_SQUASH_COMMIT`처럼 self-reference 표기를 사용할 수 있다.
+- 실제 최종 HEAD 해시는 커밋 후 사용자 보고와 필요 시 후속 `CORRECTION` 이벤트에 기록한다.
+
+### Push / Origin 인수인계
+
+main squash merge 후 push까지 요청받지 않았다면 push하지 않는다. 대신 최종 보고와 `CURRENT_STATE.md`에 아래를 명확히 남긴다.
+
+```text
+로컬 main은 origin/main보다 N커밋 앞서 있음
+```
+
+다음 세션의 첫 에이전트는 재진입 체크 중 `git status --short --branch`를 실행해 이 상태를 보고해야 한다.
 
 ### Squash 머지 커밋 메시지 형식
 

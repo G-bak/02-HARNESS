@@ -208,6 +208,7 @@ for (const file of taskFiles) {
   if (
     taskId === latestCompletedTaskId
     && taskNumber(taskId) >= strictCutoff
+    && currentStateHasNoActiveTask()
     && dirtyFiles
     && dirtyFiles.length > 0
     && details.branch_required !== false
