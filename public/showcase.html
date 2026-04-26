@@ -751,7 +751,7 @@ function render(){
         <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:13px">${c.tags.map(t=>`<span class="ctag">${t}</span>`).join('')}</div>
         <div style="height:1px;background:rgba(255,255,255,.07);margin-bottom:12px"></div>
         <div style="display:flex;align-items:center;justify-content:space-between;font-size:.74rem;color:#4a4a6a">
-          <span>📅 ${c.date}</span><span>👁 ${c.views.toLocaleString()} views</span>
+          <span style="display:flex;align-items:center;gap:5px"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="3" width="14" height="12" rx="2" stroke="#4a4a6a" stroke-width="1.5"/><path d="M1 7h14" stroke="#4a4a6a" stroke-width="1.5"/><path d="M5 1v4M11 1v4" stroke="#4a4a6a" stroke-width="1.5" stroke-linecap="round"/></svg>${c.date}</span><span style="display:flex;align-items:center;gap:5px"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="8" cy="8" rx="7" ry="5" stroke="#4a4a6a" stroke-width="1.5"/><circle cx="8" cy="8" r="2" fill="#4a4a6a"/></svg>${c.views.toLocaleString()} views</span>
         </div>
       </div>`;
     $grid.insertBefore(el,$empty);
