@@ -70,7 +70,7 @@ Tier 2/3 보고서는 아래 순서를 기본으로 한다.
 ```markdown
 # TASK-{ID} 보고서 — {작업명}
 
-## 0. Executive Summary
+## 0. 핵심 요약
 - 상태:
 - 결론:
 - 서비스 영향:
@@ -89,7 +89,7 @@ Tier 2/3 보고서는 아래 순서를 기본으로 한다.
 ## 9. 다음 권장 사항
 ```
 
-`Executive Summary`는 10줄 이내를 원칙으로 한다. 바쁜 의사결정자는 이 섹션만 읽어도 상태를 판단할 수 있어야 한다.
+`핵심 요약`는 10줄 이내를 원칙으로 한다. 바쁜 의사결정자는 이 섹션만 읽어도 상태를 판단할 수 있어야 한다.
 
 ---
 
@@ -119,7 +119,7 @@ node scripts/notify-slack.mjs --task-id TASK-20260426-001 --notification-status 
 
 # TASK-20260426-002 보고서 — Tier 2 성공 예시
 
-## 0. Executive Summary
+## 0. 핵심 요약
 
 - **상태:** COMPLETE
 - **결론:** 프로필 닉네임 입력에 20자 제한과 실시간 카운터를 추가했고 검증을 통과했다.
@@ -247,7 +247,7 @@ node scripts/notify-slack.mjs --task-id TASK-20260426-001 --notification-status 
 
 # TASK-20260426-003 보고서 — Tier 3 성공 예시
 
-## 0. Executive Summary
+## 0. 핵심 요약
 
 - **상태:** COMPLETE
 - **결론:** 세션 토큰 저장 방식을 HttpOnly 쿠키로 전환해 XSS로 인한 토큰 탈취 위험을 낮췄다.
@@ -412,7 +412,7 @@ node scripts/notify-slack.mjs --task-id TASK-20260426-001 --notification-status 
 
 # TASK-20260426-004 보고서 — Resource Failure / HOLD 예시
 
-## 0. Executive Summary
+## 0. 핵심 요약
 
 - **상태:** HOLD / PENDING_VALIDATION
 - **결론:** 구현은 완료됐지만 Validator-A rate limit으로 검증이 끝나지 않았다.
@@ -513,7 +513,7 @@ node scripts/notify-slack.mjs --task-id TASK-20260426-001 --notification-status 
 
 # TASK-20260426-005 보고서 — Rebuttal / Adjudication 예시
 
-## 0. Executive Summary
+## 0. 핵심 요약
 
 - **상태:** COMPLETE
 - **결론:** 검색 결과 기본 정렬을 최신순으로 변경했고, Validator 재현 절차 오류는 Adjudication으로 정정했다.
@@ -678,7 +678,7 @@ Generator는 해당 FAIL이 재현 절차 오류라고 판단해 Rebuttal을 제
 # 보고서 작성 체크리스트
 
 ```text
-[ ] Executive Summary가 10줄 이내이며 상태, 결론, 영향, 검증, 리스크, 조치 필요 여부를 포함하는가
+[ ] 핵심 요약가 10줄 이내이며 상태, 결론, 영향, 검증, 리스크, 조치 필요 여부를 포함하는가
 [ ] 대표/관리자가 첫 화면만 읽어도 의사결정 가능한가
 [ ] task_id가 TASK-YYYYMMDD-NNN 형식인가
 [ ] Tier 분류 근거가 실제 변경 범위 기준으로 적혀 있는가

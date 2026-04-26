@@ -1,16 +1,16 @@
-﻿# Work History Policy
+# Work History Policy
 
 **버전:** 1.9 | **최종 수정:** 2026-04-27
 
-??臾몄꽌???묒뾽 ?대젰??????꾩튂, 湲곕줉 ?쒖젏, 梨낆엫 二쇱껜瑜??뺤쓽?쒕떎.
+이 문서는 작업 이력의 저장 위치, 기록 시점, 책임 주체를 정의한다.
 
-## 紐⑹쟻
+## 목적
 
-- 紐⑤뱺 ?묒뾽???쒖옉, 吏꾪뻾, 醫낅즺瑜?異붿쟻?????덇쾶 ?쒕떎.
-- ?몄뀡 ?⑥쐞 ?붿빟怨??묒뾽 ?⑥쐞 ?먯옣??遺꾨━?쒕떎.
-- ?ъ슜?먯뿉寃?蹂댁뿬以 ?ㅻ챸怨?湲곕줉??理쒕???媛숈? ?먮쫫?쇰줈 ?좎??쒕떎.
+- 모든 작업의 시작, 진행, 종료를 추적할 수 있게 한다.
+- 세션 단위 요약과 작업 단위 원장을 분리한다.
+- 사용자에게 보여준 설명과 기록을 최대한 같은 흐름으로 유지한다.
 
-## ????꾩튂
+## 저장 위치
 
 ```text
 logs/
@@ -26,271 +26,271 @@ reports/
 CURRENT_STATE.md
 ```
 
-| ?꾩튂 | ?⑸룄 | ?뺤떇 | ?묒꽦 二쇱껜 |
+| 위치 | 용도 | 형식 | 작성 주체 |
 |---|---|---|---|
-| `logs/tasks/TASK-{ID}.jsonl` | ?묒뾽 ?먯옣, ?대깽??append-only | JSON Lines | Analyst |
-| `logs/sessions/SESSION-{YYYYMMDD}-{NNN}.md` | ?몄뀡 ?붿빟, 吏꾪뻾 以?媛깆떊 | Markdown | Analyst |
-| `logs/insights.jsonl` | ?κ린 ?몄궗?댄듃 ?꾩쟻 | JSON Lines | Analyst |
-| `reports/TASK-{ID}.md` | 理쒖쥌 蹂닿퀬??| Markdown | Analyst |
-| `CURRENT_STATE.md` | ?꾩옱 ?몄뀡??湲곗? ?곹깭 | Markdown | Analyst |
+| `logs/tasks/TASK-{ID}.jsonl` | 작업 원장, 이벤트 append-only | JSON Lines | Analyst |
+| `logs/sessions/SESSION-{YYYYMMDD}-{NNN}.md` | 세션 요약, 진행 중 갱신 | Markdown | Analyst |
+| `logs/insights.jsonl` | 장기 인사이트 누적 | JSON Lines | Analyst |
+| `reports/TASK-{ID}.md` | 최종 보고서 | Markdown | Analyst |
+| `CURRENT_STATE.md` | 현재 세션의 기준 상태 | Markdown | Analyst |
 
-## ?듭떖 洹쒖튃
+## 핵심 규칙
 
-1. ???붿껌???ㅼ뼱?ㅻ㈃ 媛??癒쇱? `TASK-{ID}.jsonl`??留뚮뱺??
-2. `TASK_CREATED` ?대깽?몃? ?묒뾽 ?쒖옉 ?꾩뿉 湲곕줉?쒕떎.
-3. ?묒뾽 以?諛쒖깮??以묒슂???곹깭 蹂?붾뒗 媛숈? `TASK` ?먯옣??append ?쒕떎.
-4. `TASK_COMPLETED` ?댄썑?먮뒗 ?좉퇋 ?묒뾽 ?대깽?몃? 異붽??섏? ?딅뒗?? ?? 湲곕줉 ?ㅻ쪟 ?뺤젙?대굹 媛먯궗 硫붾え??`CORRECTION` ?먮뒗 `AUDIT_NOTE` ?깃꺽?쇰줈留?append ?????덈떎.
-5. 湲곗〈 ?대깽?몃뒗 ?섏젙?섏? ?딄퀬 append-only濡??좎??쒕떎.
-6. 誘쇨컧 ?뺣낫???먯옣?대굹 ?몄뀡 濡쒓렇???④린吏 ?딅뒗??
-7. Tier 1 ?⑥닚 ?묒뾽(臾멸뎄 ?섏젙, ?ㅻ뜑 ?щ㎎ ?듭씪 ??? TASK ?먯옣 ?뚯씪 ?앸왂 媛??
-   ??寃쎌슦 ?몄뀡 濡쒓렇??`[TASK-{ID}] {蹂寃??붿빟} ??PASS` ?뺤떇 ?⑥씪 ?쇱씤 湲곕줉 ?꾩닔.
-   ?? ?좉퇋 ?뺤콉 寃곗젙쨌蹂댁븞 愿??蹂寃승룸났???뚯씪??嫄몄튇 ?뺤콉 蹂寃쎌? 寃쎈웾??遺덇? ???먯옣 ?꾩닔.
+1. 새 요청이 들어오면 가장 먼저 `TASK-{ID}.jsonl`을 만든다.
+2. `TASK_CREATED` 이벤트를 작업 시작 전에 기록한다.
+3. 작업 중 발생한 중요한 상태 변화는 같은 `TASK` 원장에 append 한다.
+4. `TASK_COMPLETED` 이후에는 신규 작업 이벤트를 추가하지 않는다. 단, 기록 오류 정정이나 감사 메모는 `CORRECTION` 또는 `AUDIT_NOTE` 성격으로만 append 할 수 있다.
+5. 기존 이벤트는 수정하지 않고 append-only로 유지한다.
+6. 민감 정보는 원장이나 세션 로그에 남기지 않는다.
+7. Tier 1 단순 작업(문구 수정, 헤더 포맷 통일 등)은 TASK 원장 파일 생략 가능.
+   이 경우 세션 로그에 `[TASK-{ID}] {변경 요약} → PASS` 형식 단일 라인 기록 필수.
+   단, 신규 정책 결정·보안 관련 변경·복수 파일에 걸친 정책 변경은 경량화 불가 — 원장 필수.
 
-## ?쒖꽦 Task? ?묒뾽怨듦컙 ?곹깭
+## 활성 Task와 작업공간 상태
 
-?묒뾽 以??앹꽦?섎뒗 ?먯옣, ?몄뀡 濡쒓렇, Task Spec ?뚯씪? ?뺤긽?곸씤 dirty worktree瑜?留뚮뱺??
-?곕씪???꾨즺 寃뚯씠?몃뒗 `CURRENT_STATE.md`留?蹂댁? ?딄퀬 `logs/tasks/*.jsonl`?먯꽌 ?꾩쭅 `TASK_COMPLETED`媛 ?녿뒗 ?쒖꽦 Task???④퍡 ?뺤씤?쒕떎.
+작업 중 생성되는 원장, 세션 로그, Task Spec 파일은 정상적인 dirty worktree를 만든다.
+따라서 완료 게이트는 `CURRENT_STATE.md`만 보지 않고 `logs/tasks/*.jsonl`에서 아직 `TASK_COMPLETED`가 없는 활성 Task도 함께 확인한다.
 
-洹쒖튃:
+규칙:
 
-- `TASK_CREATED`媛 ?덇퀬 `TASK_COMPLETED`媛 ?녿뒗 ?먯옣? ?쒖꽦 Task濡?蹂몃떎.
-- ?쒖꽦 Task媛 ?덉쑝硫??꾩옱 dirty worktree瑜?吏곸쟾 ?꾨즺 Task???꾨씫?쇰줈 ?ㅽ뙋?섏? ?딅뒗??
-- Task ?꾨즺 吏곸쟾?먮뒗 ?ъ쟾??clean/dirty ?곹깭瑜?蹂닿퀬?댁빞 ?섎ŉ, 誘몄빱諛??곹깭濡??꾨즺?섎젮硫?紐낆떆???ъ쑀媛 ?꾩슂?섎떎.
-- `CURRENT_STATE.md`???몄뀡 ?몄닔?멸퀎 湲곗??대?濡??κ린 ?묒뾽?먯꽌???쒖꽦 Task? ?ㅼ쓬 ?④퀎瑜?媛깆떊?쒕떎.
+- `TASK_CREATED`가 있고 `TASK_COMPLETED`가 없는 원장은 활성 Task로 본다.
+- 활성 Task가 있으면 현재 dirty worktree를 직전 완료 Task의 누락으로 오판하지 않는다.
+- Task 완료 직전에는 여전히 clean/dirty 상태를 보고해야 하며, 미커밋 상태로 완료하려면 명시적 사유가 필요하다.
+- `CURRENT_STATE.md`는 세션 인수인계 기준이므로 장기 작업에서는 활성 Task와 다음 단계를 갱신한다.
 
-## ?몄뀡 濡쒓렇 ?앹꽦 ?쒖젏
+## 세션 로그 생성 시점
 
-?몄뀡 濡쒓렇???묒뾽???앸궃 ?ㅼ뿉留?留뚮뱶???뚯씪???꾨땲??
+세션 로그는 작업이 끝난 뒤에만 만드는 파일이 아니다.
 
-- ?묒뾽???섑뻾?섎뒗 ?몄뀡?먮뒗 `logs/sessions/SESSION-YYYYMMDD-NNN.md`瑜??섎굹 ?앹꽦?섍굅?? ?대? ?대┛ ?몄뀡 濡쒓렇瑜??ъ궗?⑺븳??
-- 세션 로그 본문은 한국어로 작성한다. 영어 문장은 코드 조각, 경로, 식별자처럼 꼭 필요한 경우만 허용한다.
-- ??Task瑜??쒖옉?????꾩옱 ?몄뀡 濡쒓렇媛 ?놁쑝硫?Phase 0?먯꽌 ?앹꽦?쒕떎.
-- ?숈씪 ?몄뀡???щ윭 Task??媛숈? ?몄뀡 濡쒓렇???꾩쟻?????덈떎.
-- ?몄뀡??吏꾪뻾?섎뒗 ?숈븞 以묒슂??寃곗젙, ?ㅽ뙣, ?ъ떆?? 諛고룷 寃곌낵瑜?怨꾩냽 異붽??쒕떎.
-- ?몄뀡???앸굹硫?理쒖쥌 ?붿빟怨??ㅼ쓬 ?됰룞???뺣━?쒕떎.
+- 작업을 수행하는 세션에는 `logs/sessions/SESSION-YYYYMMDD-NNN.md`를 하나 생성하거나, 이미 열린 세션 로그를 재사용한다.
+- 새 Task를 시작할 때 현재 세션 로그가 없으면 Phase 0에서 생성한다.
+- 동일 세션의 여러 Task는 같은 세션 로그에 누적할 수 있다.
+- 세션이 진행되는 동안 중요한 결정, 실패, 재시도, 배포 결과를 계속 추가한다.
+- 세션이 끝나면 최종 요약과 다음 행동을 정리한다.
+- 세션 로그와 최종 보고서는 한국어로 작성한다. 영어는 코드 조각, 경로, 식별자처럼 꼭 필요한 경우만 허용한다.
 
-利? ?몄뀡 濡쒓렇???ㅼ쓬泥섎읆 ?숈옉?쒕떎.
+즉, 세션 로그는 다음처럼 동작한다.
 
-- ?쒖옉 ???앹꽦
-- 吏꾪뻾 以묒씤 濡쒓렇媛 ?덉쑝硫??ъ궗??
-- 吏꾪뻾 以??꾩쟻 媛깆떊
-- 醫낅즺 ??留덈Т由??뺣━
+- 시작 시 생성
+- 진행 중인 로그가 있으면 재사용
+- 진행 중 누적 갱신
+- 종료 시 마무리 정리
 
-?앸왂 媛???덉쇅:
-
-```text
-?⑥씪 紐낅졊 異쒕젰 ?뺤씤泥섎읆 ?ъ슜???낅뜲?댄듃媛 嫄곗쓽 ?녾퀬 ?뚯씪 蹂寃쎌씠 ?녿뒗 珥덉냼??Task
-```
-
-??寃쎌슦?먮룄 `TASK_COMPLETED.details.session_log_skipped_reason`???앸왂 ?ъ쑀瑜??④릿??
-
-?앸왂 ?덈? 湲덉?:
+생략 가능 예외:
 
 ```text
-?뚯씪 蹂寃쎌씠 1嫄댁씠?쇰룄 ?덉쑝硫?session_log_skipped_reason ?ъ슜 遺덇? ???몄뀡 濡쒓렇 ?꾩닔
+단일 명령 출력 확인처럼 사용자 업데이트가 거의 없고 파일 변경이 없는 초소형 Task
 ```
 
-## ?몄뀡 濡쒓렇 ?곗꽑?쒖쐞
+이 경우에도 `TASK_COMPLETED.details.session_log_skipped_reason`에 생략 사유를 남긴다.
 
-?몄뀡 濡쒓렇??`?묒뾽 ?붿빟`蹂대떎 `?몃씪??蹂닿퀬 ?먮Ц`???곗꽑?쒕떎.
+생략 절대 금지:
 
-- ?몄뀡 以??ъ슜?먯뿉寃?蹂대궦 ?몃씪??蹂닿퀬瑜??꾨씫 ?놁씠 ?먮Ц 洹몃?濡???릿??
-- ?붿빟, 臾몄옣 ?ъ옉?? ?몃? ?댁슜 ??젣濡??먮Ц 蹂닿퀬瑜??泥댄븯吏 ?딅뒗??
-- ?몄뀡 醫낅즺 ?쒖뿉??洹?蹂닿퀬瑜?吏㏐쾶 ?뺣━?댁꽌 `寃곗젙 ?ы빆`??諛섏쁺?쒕떎.
-- 湲곕낯 ?쒗뵆由우뿉?쒕뒗 蹂꾨룄??`?묒뾽 ?붿빟` ?뱀뀡???먯? ?딅뒗??
-
-### ?몃씪??蹂닿퀬 ?먮Ц 蹂댁〈 洹쒖튃
-
-Analyst媛 ?ъ슜?먯뿉寃?蹂대궦 以묎컙 蹂닿퀬???댁쁺 湲곕줉???쇰???
-
-?꾩닔:
-
-```
-[ ] ?ъ슜?먯뿉寃?蹂대궦 紐⑤뱺 commentary/inline update瑜??몄뀡 濡쒓렇???먮Ц 洹몃?濡?湲곕줉
-[ ] ?쒓컙 ?쒖꽌瑜??좎?
-[ ] 理쒖쥌 ?붿빟怨?蹂꾧컻濡?蹂댁〈
-[ ] 誘쇨컧 ?뺣낫媛 ?덉쑝硫?媛믩쭔 留덉뒪?뱁븯怨?臾몃㎘? 蹂댁〈
+```text
+파일 변경이 1건이라도 있으면 session_log_skipped_reason 사용 불가 — 세션 로그 필수
 ```
 
-湲덉?:
+## 세션 로그 우선순위
+
+세션 로그는 `작업 요약`보다 `인라인 보고 원문`을 우선한다.
+
+- 세션 중 사용자에게 보낸 인라인 보고를 누락 없이 원문 그대로 옮긴다.
+- 요약, 문장 재작성, 세부 내용 삭제로 원문 보고를 대체하지 않는다.
+- 세션 종료 시에는 그 보고를 짧게 정리해서 `결정 사항`에 반영한다.
+- 기본 템플릿에서는 별도의 `작업 요약` 섹션을 두지 않는다.
+
+### 인라인 보고 원문 보존 규칙
+
+Analyst가 사용자에게 보낸 중간 보고는 운영 기록의 일부다.
+
+필수:
 
 ```
-[ ] "寃??吏꾪뻾??泥섎읆 異뺤빟?댁꽌 ?泥?
-[ ] ?ъ슜?먯쓽 ?먮떒???곹뼢??以 ?몃? ?ㅻ챸 ??젣
-[ ] 理쒖쥌 蹂닿퀬留??④린怨?以묎컙 蹂닿퀬 ?꾨씫
+[ ] 사용자에게 보낸 모든 commentary/inline update를 세션 로그에 원문 그대로 기록
+[ ] 시간 순서를 유지
+[ ] 최종 요약과 별개로 보존
+[ ] 민감 정보가 있으면 값만 마스킹하고 문맥은 보존
 ```
 
-## ?몄뀡 醫낅즺 ?붿빟 洹쒖튃
-
-?몄뀡???앸궇 ???묒꽦?섎뒗 理쒖쥌 ?붿빟?, ?ъ슜?먯뿉寃??꾨떖??理쒖쥌 ?ㅻ챸怨?媛숈? ?먮쫫?댁뼱???쒕떎.
-
-沅뚯옣 諛⑹떇:
-
-- ?묒뾽 以묒뿉??吏㏐퀬 ?뺥솗???몃씪???낅뜲?댄듃瑜??④릿??
-- ?몄뀡 醫낅즺 ?쒖뿉??洹??댁슜???뺣━?댁꽌 ?몄뀡 濡쒓렇??諛섏쁺?쒕떎.
-- ?ъ슜?먯뿉寃?蹂대궦 理쒖쥌 ?붿빟怨??몄뀡 濡쒓렇??寃곕줎? ?섎?媛 ?쇱튂?댁빞 ?쒕떎.
-- ?몃씪??蹂닿퀬 ?먮Ц ?뱀뀡? 寃곕줎 ?쇱튂 ?щ?? 蹂꾧컻濡??먮Ц 蹂댁〈???곗꽑?쒕떎.
-
-??洹쒖튃??紐⑹쟻? 留먰븳 ?댁슜怨?湲곕줉???댁슜???곕줈 ?吏 ?딄쾶 ?섎뒗 寃껋씠??
-
-### ?ㅼ쓬 ?④퀎 ?뺥빀??洹쒖튃
-
-?몄뀡 濡쒓렇??`## ?ㅼ쓬 ?④퀎`???꾩옱 ?⑥? ?묒뾽留??곷뒗??
-
-?꾩닔:
+금지:
 
 ```
-[ ] Task ?꾨즺 ?? ?몄뀡 濡쒓렇??`## ?ㅼ쓬 ?④퀎`瑜??꾩옱 ?곹깭? ?議고븳??
-[ ] ?대? ?꾨즺????ぉ? ??젣?섍굅???꾨즺 ?ъ떎濡?媛깆떊?쒕떎
-[ ] ?⑥? ?묒뾽???놁쑝硫?`- ?놁쓬`?쇰줈 紐낆떆?쒕떎
-[ ] `CURRENT_STATE.md`???쒖꽦 Task ?놁쓬?쇰줈 湲곕줉??寃쎌슦, 理쒖떊 ?몄뀡 濡쒓렇???ㅼ쓬 ?④퀎???⑥? ?묒뾽 ?놁쓬怨??쇱튂?댁빞 ?쒕떎
+[ ] "검토 진행함"처럼 축약해서 대체
+[ ] 사용자의 판단에 영향을 준 세부 설명 삭제
+[ ] 최종 보고만 남기고 중간 보고 누락
 ```
 
-湲덉?:
+## 세션 종료 요약 규칙
+
+세션이 끝날 때 작성하는 최종 요약은, 사용자에게 전달한 최종 설명과 같은 흐름이어야 한다.
+
+권장 방식:
+
+- 작업 중에는 짧고 정확한 인라인 업데이트를 남긴다.
+- 세션 종료 시에는 그 내용을 정리해서 세션 로그에 반영한다.
+- 사용자에게 보낸 최종 요약과 세션 로그의 결론은 의미가 일치해야 한다.
+- 인라인 보고 원문 섹션은 결론 일치 여부와 별개로 원문 보존을 우선한다.
+
+이 규칙의 목적은 말한 내용과 기록된 내용이 따로 놀지 않게 하는 것이다.
+
+### 다음 단계 정합성 규칙
+
+세션 로그의 `## 다음 단계`는 현재 남은 작업만 적는다.
+
+필수:
 
 ```
-[ ] ?대? ?꾨즺???묒뾽???ㅼ쓬 ?④퀎濡??④꺼?먭린
-[ ] ?덉쟾 ?됯? 寃곌낵???ㅼ쓬 ?④퀎 紐⑸줉??洹몃?濡?諛⑹튂?섍린
-[ ] 理쒖쥌 蹂닿퀬? ?몄뀡 濡쒓렇???ㅼ쓬 ?④퀎媛 ?쒕줈 ?ㅻⅨ ?곹깭瑜?媛由ы궎寃??섍린
+[ ] Task 완료 전, 세션 로그의 `## 다음 단계`를 현재 상태와 대조한다
+[ ] 이미 완료한 항목은 삭제하거나 완료 사실로 갱신한다
+[ ] 남은 작업이 없으면 `- 없음`으로 명시한다
+[ ] `CURRENT_STATE.md`에 활성 Task 없음으로 기록할 경우, 최신 세션 로그의 다음 단계도 남은 작업 없음과 일치해야 한다
 ```
 
-?꾨즺 吏곸쟾 ?먮룞 媛먯궗?먯꽌 理쒖떊 ?몄뀡 濡쒓렇??`## ?ㅼ쓬 ?④퀎`媛 stale ?곹깭?대㈃ `TASK_COMPLETED`瑜?湲곕줉?섏? ?딅뒗??
-
-## Git ?곹깭 ?몄닔?멸퀎 洹쒖튃
-
-Git ??μ냼 紐⑤뱶?먯꽌 ?묒뾽??寃쎌슦 ?몄뀡 濡쒓렇? 理쒖쥌 蹂닿퀬???꾨옒 ?곹깭瑜?諛섎뱶???④릿??
-
-?꾩닔:
+금지:
 
 ```
-[ ] ?꾩옱 釉뚮옖移?
-[ ] ?뚰궧?몃━ clean/dirty ?щ?
-[ ] main怨?origin/main??ahead/behind ?곹깭
-[ ] task 釉뚮옖移?而ㅻ컠 ?щ? (Tier 2/3)
-[ ] main squash merge ?щ? (Tier 2/3)
-[ ] push ?꾨즺 ?щ? (誘몄셿猷?= ?묒뾽 誘몄셿猷?
+[ ] 이미 완료한 작업을 다음 단계로 남겨두기
+[ ] 예전 평가 결과의 다음 단계 목록을 그대로 방치하기
+[ ] 최종 보고와 세션 로그의 다음 단계가 서로 다른 상태를 가리키게 하기
 ```
 
-湲덉?:
+완료 직전 자동 감사에서 최신 세션 로그의 `## 다음 단계`가 stale 상태이면 `TASK_COMPLETED`를 기록하지 않는다.
+
+## Git 상태 인수인계 규칙
+
+Git 저장소 모드에서 작업한 경우 세션 로그와 최종 보고는 아래 상태를 반드시 남긴다.
+
+필수:
 
 ```
-[ ] main??諛섏쁺?섏? ?딆븯?붾뜲 ?꾨즺濡??쒗쁽
-[ ] push?섏? ?딆븯?붾뜲 ?먭꺽 諛섏쁺 ?꾨즺濡??쒗쁽
-[ ] push ?놁씠 ?묒뾽 ?꾨즺濡?泥섎━
-[ ] dirty worktree瑜??뺤긽 ?꾨즺泥섎읆 ?④린湲?
+[ ] 현재 브랜치
+[ ] 워킹트리 clean/dirty 여부
+[ ] main과 origin/main의 ahead/behind 상태
+[ ] task 브랜치 커밋 여부 (Tier 2/3)
+[ ] main squash merge 여부 (Tier 2/3)
+[ ] push 완료 여부 (미완료 = 작업 미완료)
 ```
 
-commit/merge/push????긽 ?명듃?? 紐⑤뱺 ?묒뾽? push源뚯? ?꾨즺?댁빞 `TASK_COMPLETED`瑜?湲곕줉?????덈떎.
-
-?꾩닔:
+금지:
 
 ```
-[ ] push ??`git status --short --branch` 湲곕줉
-[ ] `git push origin main` ?섑뻾
-[ ] push ??`git status --short --branch` 湲곕줉
-[ ] `TASK_COMPLETED.details.push_status`瑜?`PUSHED`濡?湲곕줉
-[ ] push ?ㅽ뙣 ??`TASK_COMPLETED` ???HOLD/PARTIAL/FAILED 以??섎굹濡??곹깭 泥섎━
+[ ] main에 반영하지 않았는데 완료로 표현
+[ ] push하지 않았는데 원격 반영 완료로 표현
+[ ] push 없이 작업 완료로 처리
+[ ] dirty worktree를 정상 완료처럼 숨기기
 ```
 
-## `TASK` ?먯옣??湲곕줉?섎뒗 ?쒖젏
+commit/merge/push는 항상 세트다. 모든 작업은 push까지 완료해야 `TASK_COMPLETED`를 기록할 수 있다.
 
-?꾨옒 ?대깽?몃뒗 ?먯튃?곸쑝濡?`logs/tasks/TASK-{ID}.jsonl`??湲곕줉?쒕떎.
+필수:
 
-| ?쒖젏 | ?대깽??|
+```
+[ ] push 전 `git status --short --branch` 기록
+[ ] `git push origin main` 수행
+[ ] push 후 `git status --short --branch` 기록
+[ ] `TASK_COMPLETED.details.push_status`를 `PUSHED`로 기록
+[ ] push 실패 시 `TASK_COMPLETED` 대신 HOLD/PARTIAL/FAILED 중 하나로 상태 처리
+```
+
+## `TASK` 원장에 기록하는 시점
+
+아래 이벤트는 원칙적으로 `logs/tasks/TASK-{ID}.jsonl`에 기록한다.
+
+| 시점 | 이벤트 |
 |---|---|
-| ?묒뾽 ?쒖옉 | `TASK_CREATED` |
-| 吏???꾨떖 | `INSTRUCTION_SENT` |
-| 以묎컙 寃곌낵 ?섏떊 | `AGENT_RESULT_RECEIVED` |
-| ?앹꽦 ?꾨즺 | `GENERATION_COMPLETED` |
-| 寃利?寃곌낵 | `VALIDATION_RESULT` |
-| ?꾧뎄/?좊떦/荑쇳꽣 臾몄젣 | `RESOURCE_FAILURE` |
-| 諛섎컯 ?쒖텧 | `REBUTTAL_SUBMITTED` |
-| ?먮떒 ?꾨즺 | `ADJUDICATION_COMPLETED` |
-| ?뚮┝ 諛쒖넚 | `NOTIFICATION_SENT` |
-| 諛고룷/蹂묓빀 ?꾨즺 | `MERGE_COMPLETED` |
-| 蹂닿퀬???묒꽦 | `REPORT_WRITTEN` |
-| 媛?대뱶 媛깆떊 | `GUIDE_UPDATED` |
-| 湲곕줉 ?뺤젙 | `CORRECTION` |
-| 媛먯궗 硫붾え | `AUDIT_NOTE` |
-| ?묒뾽 醫낅즺 | `TASK_COMPLETED` |
+| 작업 시작 | `TASK_CREATED` |
+| 지시 전달 | `INSTRUCTION_SENT` |
+| 중간 결과 수신 | `AGENT_RESULT_RECEIVED` |
+| 생성 완료 | `GENERATION_COMPLETED` |
+| 검증 결과 | `VALIDATION_RESULT` |
+| 도구/할당/쿼터 문제 | `RESOURCE_FAILURE` |
+| 반박 제출 | `REBUTTAL_SUBMITTED` |
+| 판단 완료 | `ADJUDICATION_COMPLETED` |
+| 알림 발송 | `NOTIFICATION_SENT` |
+| 배포/병합 완료 | `MERGE_COMPLETED` |
+| 보고서 작성 | `REPORT_WRITTEN` |
+| 가이드 갱신 | `GUIDE_UPDATED` |
+| 기록 정정 | `CORRECTION` |
+| 감사 메모 | `AUDIT_NOTE` |
+| 작업 종료 | `TASK_COMPLETED` |
 
-## ?몄뀡 濡쒓렇??湲곕줉?섎뒗 ?댁슜
+## 세션 로그에 기록하는 내용
 
-?몄뀡 濡쒓렇???묒뾽???먮쫫???щ엺??鍮좊Ⅴ寃??댄빐?????덈룄濡??곷뒗??
+세션 로그는 작업의 흐름을 사람이 빠르게 이해할 수 있도록 적는다.
 
-- ?몄뀡 ?쒖옉 ?쒓컙
-- 二쇱슂 TASK 紐⑸줉
-- 以묒슂??寃곗젙 ?ы빆
-- 寃利??먮뒗 諛고룷 寃곌낵
-- ?ъ슜?먯뿉寃?蹂대궦 理쒖쥌 ?붿빟怨?媛숈? 寃곕줎
-- ?ㅼ쓬 ?몄뀡?먯꽌 ?댁뼱媛???
+- 세션 시작 시간
+- 주요 TASK 목록
+- 중요한 결정 사항
+- 검증 또는 배포 결과
+- 사용자에게 보낸 최종 요약과 같은 결론
+- 다음 세션에서 이어갈 일
 
-## 梨낆엫 遺꾨━
+## 책임 분리
 
-| 二쇱껜 | 梨낆엫 |
+| 주체 | 책임 |
 |---|---|
-| Analyst | TASK ?먯옣 ?앹꽦, ?몄뀡 濡쒓렇 媛깆떊, 理쒖쥌 蹂닿퀬???묒꽦 |
-| Researcher | 議곗궗 寃곌낵瑜?Analyst?먭쾶 ?꾨떖 |
-| Generator | 肄붾뱶/臾몄꽌 蹂寃?寃곌낵瑜?Analyst?먭쾶 蹂닿퀬 |
-| Validator-A/B | 寃利?寃곌낵瑜?Analyst?먭쾶 蹂닿퀬 |
+| Analyst | TASK 원장 생성, 세션 로그 갱신, 최종 보고서 작성 |
+| Researcher | 조사 결과를 Analyst에게 전달 |
+| Generator | 코드/문서 변경 결과를 Analyst에게 보고 |
+| Validator-A/B | 검증 결과를 Analyst에게 보고 |
 
-## ?꾨즺 議곌굔
+## 완료 조건
 
-?묒뾽???꾨즺濡?泥섎━?섎젮硫??꾨옒媛 異⑹”?섏뼱???쒕떎.
+작업을 완료로 처리하려면 아래가 충족되어야 한다.
 
-- `logs/tasks/TASK-{ID}.jsonl`??`TASK_COMPLETED`媛 議댁옱?댁빞 ?쒕떎.
-- 蹂닿퀬??寃뚯씠?몄뿉 ?곕씪 `reports/TASK-{ID}.md`媛 ?묒꽦?섏뼱???쒕떎.
-- ?덉쭏 ?먯닔 寃뚯씠?몄뿉 ?곕씪 `logs/quality-scores.jsonl`???먯닔媛 湲곕줉?섏뼱???쒕떎.
-- ?뚯씪 蹂寃쎌씠 1嫄댁씠?쇰룄 ?덉쑝硫?`logs/sessions/SESSION-{YYYYMMDD}-{NNN}.md` 媛깆떊??**commit蹂대떎 癒쇱?** ?꾨즺?섏뼱???쒕떎.
+- `logs/tasks/TASK-{ID}.jsonl`에 `TASK_COMPLETED`가 존재해야 한다.
+- 보고서 게이트에 따라 `reports/TASK-{ID}.md`가 작성되어야 한다.
+- 품질 점수 게이트에 따라 `logs/quality-scores.jsonl`에 점수가 기록되어야 한다.
+- 파일 변경이 1건이라도 있으면 `logs/sessions/SESSION-{YYYYMMDD}-{NNN}.md` 갱신이 **commit보다 먼저** 완료되어야 한다.
 
-**?몄뀡 濡쒓렇 媛깆떊? git add/commit ?댁쟾 留덉?留??④퀎?? ?쒖꽌瑜?諛붽씀吏 ?딅뒗??**
+**세션 로그 갱신은 git add/commit 이전 마지막 단계다. 순서를 바꾸지 않는다.**
 
 ```
-?щ컮瑜??쒖꽌:
-1. TASK_COMPLETED 湲곕줉
-2. ?몄뀡 濡쒓렇 媛깆떊  ???ш린瑜?鍮좊쑉由ъ? ?딅뒗??
-3. git add (?몄뀡 濡쒓렇 ?ы븿)
+올바른 순서:
+1. TASK_COMPLETED 기록
+2. 세션 로그 갱신  ← 여기를 빠뜨리지 않는다
+3. git add (세션 로그 포함)
 4. git commit
 5. git push
 
-湲덉?:
-TASK_COMPLETED ??git commit ???몄뀡 濡쒓렇 (?쒖꽌 ??쟾)
-TASK_COMPLETED ??git commit ???몄뀡 濡쒓렇 ?앸왂
+금지:
+TASK_COMPLETED → git commit → 세션 로그 (순서 역전)
+TASK_COMPLETED → git commit → 세션 로그 생략
 ```
 
-Tier 2/3 異붽? ?꾨즺 議곌굔:
+Tier 2/3 추가 완료 조건:
 
-- `VALIDATION_RESULT`媛 議댁옱?댁빞 ?쒕떎. 媛?대뱶 ?좎?蹂댁닔??legacy 蹂댁젙泥섎읆 Validator瑜??앸왂??寃쎌슦 `TASK_COMPLETED.details.validation_omission_reason`???ъ쑀瑜??④릿??
-- git ??μ냼 紐⑤뱶?먯꽌 ?꾨즺?섎뒗 寃쎌슦 `MERGE_COMPLETED`媛 議댁옱?댁빞 ?쒕떎. 癒몄?瑜??섑뻾?섏? ?딆? 濡쒖뺄/媛?대뱶 蹂댁젙 ?묒뾽? `TASK_COMPLETED.details.merge_omission_reason`???ъ쑀瑜??④릿??
-- ?꾨즺 ?쒖젏???묒뾽怨듦컙??dirty?쇰㈃ `TASK_COMPLETED.details.git_dirty_allowed_reason`???ъ쑀瑜??④릿?? ???ъ쑀???꾩떆 ?덉슜?대ŉ, ?쒗뭹 肄붾뱶 ?묒뾽?먯꽌???ъ슜?????녿떎.
-- Task Spec SSOT媛 `tasks/specs/TASK-{ID}.json`, `TASK_CREATED.details.spec`, `TASK_CREATED.details.spec_path` 以??섎굹濡?議댁옱?댁빞 ?쒕떎. Legacy ?묒뾽? `CORRECTION.details.legacy_spec_omission_reason`???덉뼱??媛먯궗 ?듦낵媛 媛?ν븯??
+- `VALIDATION_RESULT`가 존재해야 한다. 가이드 유지보수나 legacy 보정처럼 Validator를 생략한 경우 `TASK_COMPLETED.details.validation_omission_reason`에 사유를 남긴다.
+- git 저장소 모드에서 완료하는 경우 `MERGE_COMPLETED`가 존재해야 한다. 머지를 수행하지 않은 로컬/가이드 보정 작업은 `TASK_COMPLETED.details.merge_omission_reason`에 사유를 남긴다.
+- 완료 시점에 작업공간이 dirty라면 `TASK_COMPLETED.details.git_dirty_allowed_reason`에 사유를 남긴다. 이 사유는 임시 허용이며, 제품 코드 작업에서는 사용할 수 없다.
+- Task Spec SSOT가 `tasks/specs/TASK-{ID}.json`, `TASK_CREATED.details.spec`, `TASK_CREATED.details.spec_path` 중 하나로 존재해야 한다. Legacy 작업은 `CORRECTION.details.legacy_spec_omission_reason`이 있어야 감사 통과가 가능하다.
 
-### 蹂닿퀬??寃뚯씠??
+### 보고서 게이트
 
-| ?곹솴 | 蹂닿퀬??泥섎━ |
+| 상황 | 보고서 처리 |
 |---|---|
-| Tier 1 ?쇰컲 ?묒뾽 | ?뚯씪 蹂닿퀬???좏깮. ?몃씪??蹂닿퀬? ?먯옣?쇰줈 ?꾨즺 媛??|
-| Tier 1 ?댁쁺 洹쒖튃/媛?대뱶 蹂寃?| 蹂닿퀬??沅뚯옣. 蹂寃?洹쇨굅媛 ?⑥븘???섎뒗 寃쎌슦 ?묒꽦 |
-| Tier 1 ?ъ슜???붿껌 | ?ъ슜?먭? 蹂닿퀬?쒕? ?붿껌?섎㈃ ?꾩닔 |
-| Tier 2 | `reports/TASK-{ID}.md` ?꾩닔 |
-| Tier 3 | `reports/TASK-{ID}.md` ?꾩닔 |
-| HOLD / Resource Failure / FAILED | ?곹깭쨌?먯씤쨌?곹뼢쨌?ㅼ쓬 議곗튂 蹂닿퀬???꾩닔 |
-| Adjudication | ?먯젙 洹쇨굅? 梨꾪깮/湲곌컖 ?ъ쑀 蹂닿퀬???꾩닔 |
+| Tier 1 일반 작업 | 파일 보고서 선택. 인라인 보고와 원장으로 완료 가능 |
+| Tier 1 운영 규칙/가이드 변경 | 보고서 권장. 변경 근거가 남아야 하는 경우 작성 |
+| Tier 1 사용자 요청 | 사용자가 보고서를 요청하면 필수 |
+| Tier 2 | `reports/TASK-{ID}.md` 필수 |
+| Tier 3 | `reports/TASK-{ID}.md` 필수 |
+| HOLD / Resource Failure / FAILED | 상태·원인·영향·다음 조치 보고서 필수 |
+| Adjudication | 판정 근거와 채택/기각 사유 보고서 필수 |
 
-蹂닿퀬?쒓? ?꾩닔???곹솴?먯꽌 蹂닿퀬?쒕? ?묒꽦?섏? 紐삵븯硫?`TASK_COMPLETED`瑜?湲곕줉?섏? ?딅뒗??
+보고서가 필수인 상황에서 보고서를 작성하지 못하면 `TASK_COMPLETED`를 기록하지 않는다.
 
-### ?덉쭏 ?먯닔 寃뚯씠??
+### 품질 점수 게이트
 
-| ?곹솴 | ?덉쭏 ?먯닔 泥섎━ |
+| 상황 | 품질 점수 처리 |
 |---|---|
-| Tier 1 ?쇰컲 ?묒뾽 | ?좏깮 |
-| Tier 1 ?댁쁺 洹쒖튃/媛?대뱶 蹂寃?| ?꾩닔 |
-| Tier 2 | ?꾩닔 |
-| Tier 3 | ?꾩닔 |
-| HOLD / Resource Failure | ?꾨즺 ?꾧퉴吏 蹂대쪟. Resource Failure ?먯껜???덉쭏 ?ㅽ뙣濡?梨꾩젏?섏? ?딆쓬 |
-| FAILED | ?꾩닔. ?ㅽ뙣 ?먯씤怨??꾨줈?몄뒪 ?먯닔瑜?諛섏쁺 |
+| Tier 1 일반 작업 | 선택 |
+| Tier 1 운영 규칙/가이드 변경 | 필수 |
+| Tier 2 | 필수 |
+| Tier 3 | 필수 |
+| HOLD / Resource Failure | 완료 전까지 보류. Resource Failure 자체는 품질 실패로 채점하지 않음 |
+| FAILED | 필수. 실패 원인과 프로세스 점수를 반영 |
 
-?덉쭏 ?먯닔瑜??앸왂?섎뒗 寃쎌슦:
+품질 점수를 생략하는 경우:
 
 ```json
 {
@@ -298,10 +298,10 @@ Tier 2/3 異붽? ?꾨즺 議곌굔:
 }
 ```
 
-???ъ쑀瑜?`TASK_COMPLETED.details`??湲곕줉?쒕떎.
+위 사유를 `TASK_COMPLETED.details`에 기록한다.
 
-## 蹂댁〈 ?먯튃
+## 보존 원칙
 
-- `logs/tasks/*.jsonl`? append-only濡??좎??쒕떎.
-- `logs/sessions/*.md`???몄뀡蹂?湲곕줉?쇰줈 蹂댁〈?쒕떎.
-- 誘쇨컧 ?뺣낫媛 ?ㅼ뼱媛硫?利됱떆 留덉뒪?뱁븯怨? 留덉뒪???ъ떎??硫뷀??곗씠?곗뿉 ?④릿??
+- `logs/tasks/*.jsonl`은 append-only로 유지한다.
+- `logs/sessions/*.md`는 세션별 기록으로 보존한다.
+- 민감 정보가 들어가면 즉시 마스킹하고, 마스킹 사실을 메타데이터에 남긴다.
