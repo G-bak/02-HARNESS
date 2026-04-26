@@ -6,21 +6,7 @@
 
 ---
 
-## 부속 프로젝트 (LandingHub)
-
-하네스와 별개로 이 저장소에서 함께 관리되는 프로젝트입니다.
-
-| 파일 | 설명 |
-|---|---|
-| `public/showcase.html` | 랜딩페이지 쇼케이스 (Tailwind CDN) |
-| `public/admin.html` | 관리자 페이지 — 구독자·뉴스레터·발송 이력 관리 |
-| `api/worker.js` | Cloudflare Worker — D1 + Resend API |
-
-상세 기획: `docs/plans/showcase-plan.md`, `docs/plans/newsletter-admin-plan.md`
-
----
-
-## Claude Code 전용 — Thinking 모드
+## Thinking 모드 (Claude Code 전용)
 
 상세: `docs/guides/thinking-mode.md`
 
