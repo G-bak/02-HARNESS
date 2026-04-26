@@ -1,0 +1,2 @@
+{"timestamp": "2026-04-26T18:07:00+09:00", "event": "TASK_CREATED", "task_id": "TASK-20260426-050", "details": {"description": "어드민 페이지 로고 원복 (파비콘 + 텍스트)", "tier": "1"}}
+{"timestamp": "2026-04-26T18:08:00+09:00", "event": "TASK_COMPLETED", "task_id": "TASK-20260426-050", "details": {"status": "success", "branch": "task/TASK-20260426-050"}}

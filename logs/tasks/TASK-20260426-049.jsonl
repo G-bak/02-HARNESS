@@ -1,1 +1,2 @@
 {"timestamp": "2026-04-26T18:04:00+09:00", "event": "TASK_CREATED", "task_id": "TASK-20260426-049", "details": {"description": "로고 크기 3차 확대", "tier": "1"}}
+{"timestamp": "2026-04-26T18:05:00+09:00", "event": "TASK_COMPLETED", "task_id": "TASK-20260426-049", "details": {"status": "success", "branch": "task/TASK-20260426-049"}}
