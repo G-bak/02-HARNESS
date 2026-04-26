@@ -189,6 +189,7 @@ select option{background:#0e0e1f;color:#ede9ff}
     <a href="#showcase" class="px-3 py-1.5 rounded-lg text-[#8b8aaa] hover:text-[#ede9ff] hover:bg-white/[.05] transition-all no-underline">쇼케이스</a>
     <a href="#notify"   class="px-3 py-1.5 rounded-lg text-[#8b8aaa] hover:text-[#ede9ff] hover:bg-white/[.05] transition-all no-underline">알림 받기</a>
     <a href="#"         class="px-3 py-1.5 rounded-lg text-[#8b8aaa] hover:text-[#ede9ff] hover:bg-white/[.05] transition-all no-underline">소개</a>
+    <a href="/quotes"   class="px-3 py-1.5 rounded-lg text-[#8b8aaa] hover:text-[#ede9ff] hover:bg-white/[.05] transition-all no-underline">명언집</a>
   </div>
 
   <div class="flex items-center gap-2">
@@ -218,6 +219,7 @@ select option{background:#0e0e1f;color:#ede9ff}
     <a href="#showcase" onclick="closeMobNav()" class="mob-nav-link">쇼케이스</a>
     <a href="#notify"   onclick="closeMobNav()" class="mob-nav-link">알림 받기</a>
     <a href="#"         onclick="closeMobNav()" class="mob-nav-link">소개</a>
+    <a href="/quotes"   onclick="closeMobNav()" class="mob-nav-link">명언집</a>
   </div>
   <div class="w-16 h-px" style="background:rgba(255,255,255,.1)"></div>
   <button class="glow-btn px-8 py-3 text-base font-bold text-white rounded-[10px]" onclick="closeMobNav()" style="background:linear-gradient(135deg,#7c6af5,#8b5cf6);box-shadow:0 4px 24px rgba(124,106,245,.4)">
@@ -615,6 +617,7 @@ select option{background:#0e0e1f;color:#ede9ff}
           <a href="#" class="text-[.83rem] text-[#6b6b8a] hover:text-[#ede9ff] transition-colors no-underline">쇼케이스</a>
           <a href="#" class="text-[.83rem] text-[#6b6b8a] hover:text-[#ede9ff] transition-colors no-underline">작품 제출</a>
           <a href="#notify" class="text-[.83rem] text-[#6b6b8a] hover:text-[#ede9ff] transition-colors no-underline">알림 받기</a>
+          <a href="/quotes" class="text-[.83rem] text-[#6b6b8a] hover:text-[#ede9ff] transition-colors no-underline">명언집</a>
         </div>
       </div>
       <div>
@@ -679,7 +682,20 @@ function handleMobNavBgClick(e) {
    카드 추가: CARDS 배열에 아래 형식으로 객체 추가
    { id, title, author, tag, tags:[], url, thumb, date, views, likes }
 ─────────────────────────────── */
-const CARDS = [];
+const CARDS = [
+  {
+    id: 1,
+    title: '유명 명언 모음',
+    author: 'LandingHub',
+    tag: '포트폴리오',
+    tags: ['다크 테마', '미니멀', '인터랙션'],
+    url: '/quotes',
+    thumb: 'assets/quotes-thumb.svg',
+    date: '2026-04-26',
+    views: 0,
+    likes: 0
+  }
+];
 
 /* ───────────────────────────────
    STATE

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>유명 명언 모음</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: #0f0f1a;
+      color: #e8e0d5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      width: 100%;
+      padding: 48px 24px 32px;
+      text-align: center;
+      border-bottom: 1px solid #2a2a3e;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      font-weight: normal;
+      letter-spacing: 0.08em;
+      color: #c9b99a;
+    }
+
+    header p {
+      margin-top: 10px;
+      font-size: 0.95rem;
+      color: #6e6e8a;
+      font-style: italic;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 28px 24px 0;
+      max-width: 900px;
+      width: 100%;
+    }
+
+    .filter-btn {
+      padding: 8px 20px;
+      border: 1px solid #3a3a5c;
+      background: transparent;
+      color: #9090aa;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 0.88rem;
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+      background: #c9b99a;
+      border-color: #c9b99a;
+      color: #0f0f1a;
+    }
+
+    .quotes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+      padding: 40px 24px 80px;
+      max-width: 1100px;
+      width: 100%;
+    }
+
+    .card {
+      background: #16162a;
+      border: 1px solid #2a2a3e;
+      border-radius: 12px;
+      padding: 32px 28px;
+      position: relative;
+      transition: transform 0.2s, border-color 0.2s;
+      cursor: default;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: #4a4a6e;
+    }
+
+    .card::before {
+      content: '\201C';
+      position: absolute;
+      top: 16px;
+      left: 20px;
+      font-size: 4rem;
+      color: #2e2e4a;
+      line-height: 1;
+      font-family: Georgia, serif;
+    }
+
+    .quote-text {
+      font-size: 1.05rem;
+      line-height: 1.75;
+      color: #d8d0c5;
+      margin-top: 24px;
+      font-style: italic;
+    }
+
+    .quote-author {
+      margin-top: 20px;
+      font-size: 0.88rem;
+      color: #c9b99a;
+      font-style: normal;
+      font-weight: bold;
+      letter-spacing: 0.05em;
+    }
+
+    .quote-author::before {
+      content: '— ';
+    }
+
+    .quote-tag {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 4px 12px;
+      background: #1e1e34;
+      border: 1px solid #3a3a5c;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      color: #6e6e9a;
+    }
+
+    .card.hidden {
+      display: none;
+    }
+
+    .random-btn {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      background: #c9b99a;
+      color: #0f0f1a;
+      border: none;
+      border-radius: 50px;
+      padding: 14px 24px;
+      font-size: 0.92rem;
+      font-family: Georgia, serif;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .random-btn:hover {
+      background: #e0cfb4;
+      transform: scale(1.05);
+    }
+
+    .highlight {
+      animation: flash 0.6s ease;
+    }
+
+    @keyframes flash {
+      0%   { box-shadow: 0 0 0 0 rgba(201,185,154,0.6); }
+      50%  { box-shadow: 0 0 0 12px rgba(201,185,154,0); }
+      100% { box-shadow: none; }
+    }
+
+    @media (max-width: 600px) {
+      header h1 { font-size: 1.6rem; }
+      .quotes-grid { grid-template-columns: 1fr; padding: 24px 16px 80px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>유명 명언 모음</h1>
+  <p>세상을 바꾼 말들</p>
+</header>
+
+<div class="controls">
+  <button class="filter-btn active" data-filter="all">전체</button>
+  <button class="filter-btn" data-filter="인생">인생</button>
+  <button class="filter-btn" data-filter="도전">도전</button>
+  <button class="filter-btn" data-filter="지혜">지혜</button>
+  <button class="filter-btn" data-filter="행복">행복</button>
+  <button class="filter-btn" data-filter="성공">성공</button>
+</div>
+
+<div class="quotes-grid" id="grid">
+
+  <div class="card" data-tag="인생">
+    <p class="quote-text">인생은 자전거를 타는 것과 같다. 균형을 잡으려면 계속 움직여야 한다.</p>
+    <p class="quote-author">알베르트 아인슈타인</p>
+    <span class="quote-tag">인생</span>
+  </div>
+
+  <div class="card" data-tag="도전">
+    <p class="quote-text">천 번의 실패는 단지 천 가지의 방법이 통하지 않는다는 것을 발견한 것일 뿐이다.</p>
+    <p class="quote-author">토마스 에디슨</p>
+    <span class="quote-tag">도전</span>
+  </div>
+
+  <div class="card" data-tag="지혜">
+    <p class="quote-text">나는 아무것도 모른다는 것을 안다.</p>
+    <p class="quote-author">소크라테스</p>
+    <span class="quote-tag">지혜</span>
+  </div>
+
+  <div class="card" data-tag="행복">
+    <p class="quote-text">행복은 목적지가 아니라 여정이다.</p>
+    <p class="quote-author">랄프 왈도 에머슨</p>
+    <span class="quote-tag">행복</span>
+  </div>
+
+  <div class="card" data-tag="성공">
+    <p class="quote-text">성공이란 열정을 잃지 않고 실패에서 실패로 나아가는 능력이다.</p>
+    <p class="quote-author">윈스턴 처칠</p>
+    <span class="quote-tag">성공</span>
+  </div>
+
+  <div class="card" data-tag="인생">
+    <p class="quote-text">오늘 할 수 있는 일을 내일로 미루지 마라.</p>
+    <p class="quote-author">벤자민 프랭클린</p>
+    <span class="quote-tag">인생</span>
+  </div>
+
+  <div class="card" data-tag="도전">
+    <p class="quote-text">당신이 할 수 있다고 생각하든, 할 수 없다고 생각하든, 당신이 옳다.</p>
+    <p class="quote-author">헨리 포드</p>
+    <span class="quote-tag">도전</span>
+  </div>
+
+  <div class="card" data-tag="지혜">
+    <p class="quote-text">어리석은 자는 경험으로부터 배우고, 현명한 자는 역사로부터 배운다.</p>
+    <p class="quote-author">오토 폰 비스마르크</p>
+    <span class="quote-tag">지혜</span>
+  </div>
+
+  <div class="card" data-tag="행복">
+    <p class="quote-text">지금 이 순간이 항상 있어왔던 것 중 가장 좋은 때이다.</p>
+    <p class="quote-author">에크하르트 톨레</p>
+    <span class="quote-tag">행복</span>
+  </div>
+
+  <div class="card" data-tag="성공">
+    <p class="quote-text">위대한 일을 이루는 유일한 방법은 당신이 하는 일을 사랑하는 것이다.</p>
+    <p class="quote-author">스티브 잡스</p>
+    <span class="quote-tag">성공</span>
+  </div>
+
+  <div class="card" data-tag="인생">
+    <p class="quote-text">삶이 있는 곳에 희망이 있다.</p>
+    <p class="quote-author">마르쿠스 툴리우스 키케로</p>
+    <span class="quote-tag">인생</span>
+  </div>
+
+  <div class="card" data-tag="도전">
+    <p class="quote-text">바다가 잔잔하다고 해서 훌륭한 선원이 되는 것은 아니다.</p>
+    <p class="quote-author">아프리카 속담</p>
+    <span class="quote-tag">도전</span>
+  </div>
+
+  <div class="card" data-tag="지혜">
+    <p class="quote-text">두 가지를 항상 기억하라. 첫째, 언젠가 죽는다는 것. 둘째, 지금 아직 살아있다는 것.</p>
+    <p class="quote-author">마르쿠스 아우렐리우스</p>
+    <span class="quote-tag">지혜</span>
+  </div>
+
+  <div class="card" data-tag="행복">
+    <p class="quote-text">다른 사람을 행복하게 만들지 않고는 자신이 행복해질 수 없다.</p>
+    <p class="quote-author">알베르트 슈바이처</p>
+    <span class="quote-tag">행복</span>
+  </div>
+
+  <div class="card" data-tag="성공">
+    <p class="quote-text">준비가 기회와 만날 때, 그것을 사람들은 운이라고 부른다.</p>
+    <p class="quote-author">세네카</p>
+    <span class="quote-tag">성공</span>
+  </div>
+
+  <div class="card" data-tag="인생">
+    <p class="quote-text">우리는 우리가 반복적으로 하는 것들이다. 따라서 탁월함은 행동이 아니라 습관이다.</p>
+    <p class="quote-author">아리스토텔레스</p>
+    <span class="quote-tag">인생</span>
+  </div>
+
+</div>
+
+<button class="random-btn" id="randomBtn">✦ 랜덤 명언</button>
+
+<script>
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const cards = document.querySelectorAll('.card');
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const filter = btn.dataset.filter;
+      cards.forEach(card => {
+        if (filter === 'all' || card.dataset.tag === filter) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    });
+  });
+
+  document.getElementById('randomBtn').addEventListener('click', () => {
+    const visible = [...cards].filter(c => !c.classList.contains('hidden'));
+    if (!visible.length) return;
+    const pick = visible[Math.floor(Math.random() * visible.length)];
+    pick.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    pick.classList.remove('highlight');
+    void pick.offsetWidth;
+    pick.classList.add('highlight');
+  });
+</script>
+
+</body>
+</html>
