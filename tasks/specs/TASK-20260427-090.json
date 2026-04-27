@@ -1,0 +1,42 @@
+{
+  "schema_version": "task-spec.v1",
+  "task_id": "TASK-20260427-090",
+  "title": "Repair legacy ledger audit failures and document prevention rules",
+  "tier": "Tier2",
+  "created_at": "2026-04-27T14:21:27+09:00",
+  "requested_by": "user",
+  "summary": "Analyze the existing audit:harness failures in legacy task ledgers, apply append-only or minimally scoped repairs, and update guide documentation so the same ledger/session logging mistakes are less likely to recur.",
+  "scope": {
+    "include": [
+      "logs/tasks/TASK-20260426-062.jsonl through affected legacy ledgers reported by audit:harness",
+      "session log artifacts needed to satisfy strict-era completion gates",
+      "work-history or related operational guide documentation",
+      "verification with audit:harness"
+    ],
+    "exclude": [
+      "product/runtime code changes",
+      "secret or PII handling changes",
+      "rewriting completed historical task events except where required to repair invalid JSON"
+    ]
+  },
+  "success_criteria": [
+    "Root causes for each audit:harness failure are identified and recorded in the session/report.",
+    "All affected legacy ledger failures are repaired without creating new incomplete tasks.",
+    "Guide documentation includes a concrete prevention rule for session artifact and JSONL integrity mistakes.",
+    "npm run audit:harness passes after the repair.",
+    "Changes are committed, merged to main, pushed, and task branch cleanup is reported."
+  ],
+  "validation_plan": [
+    "Run npm run audit:harness before and after fixes.",
+    "Run git diff --check.",
+    "Inspect affected JSONL files with a parser after edits.",
+    "Review documentation diff for scope and consistency."
+  ],
+  "risk_assessment": {
+    "tier_reason": "Multiple operational ledgers and guide documents may be edited; no product runtime code or security/authentication logic changes.",
+    "risks": [
+      "Accidentally rewriting historical ledger facts instead of appending correction metadata.",
+      "Masking a real process issue without documenting prevention guidance."
+    ]
+  }
+}

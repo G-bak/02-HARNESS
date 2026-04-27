@@ -3,7 +3,7 @@
 > Analyst가 유지·갱신하는 파일입니다. 새 세션 시작 시 이 파일을 먼저 읽으세요.
 > 새 세션 시작 방법: `/clear` 후 → "CURRENT_STATE.md를 읽고 이어서 진행해줘."
 
-**마지막 갱신:** 2026-04-27 (세션 재진입 점검 — TASK-20260427-089 Git 정리 상태 정정)
+**마지막 갱신:** 2026-04-27 (TASK-20260427-090 완료 — 레거시 원장 감사 실패 보정 및 재발 방지 규칙 반영)
 
 ---
 
@@ -28,7 +28,7 @@
 | 머지 조건·승인 주체 (권위) | `docs/operations/git-branch-policy.md` | v1.7 | 2026-04-27 |
 | 도구 권한 | `docs/operations/tool-permissions.md` | v1.7 | 2026-04-26 |
 | 외부 알림 정책 | `docs/operations/notification-policy.md` | v1.6 | 2026-04-26 |
-| 작업 이력 저장 정책 | `docs/operations/work-history-policy.md` | v1.11 | 2026-04-27 |
+| 작업 이력 저장 정책 | `docs/operations/work-history-policy.md` | v1.12 | 2026-04-27 |
 | Tier 분류 기준 | `docs/workflows/tier-classification.md` | v1.3 | 2026-04-26 |
 | Task 수명 주기 | `docs/workflows/task-lifecycle.md` | v1.16 | 2026-04-26 |
 | 실패 처리 | `docs/workflows/failure-handling.md` | v1.3 | 2026-04-25 |
@@ -89,14 +89,14 @@
 ## 활성 Task
 
 현재 진행 중인 Task 없음.
-마지막 완료 Task: TASK-20260427-089 Researcher 역할 우선 라우팅 규칙 보강 (2026-04-27)
+마지막 완료 Task: TASK-20260427-090 레거시 원장 감사 실패 보정 및 재발 방지 가이드 반영 (2026-04-27)
 
 ---
 
 ## 남은 작업
 
-현재 미완료 작업 없음. Researcher 역할 우선 라우팅 규칙 보강과 검증이 완료된 상태.
-Git 인수인계 정정: `main`은 `origin/main`과 동기화되어 있고, 로컬 `task/TASK-20260427-089` 브랜치는 이미 삭제됨. 남은 로컬 브랜치는 `main`뿐이다.
+현재 미완료 작업 없음.
+TASK-20260427-090에서 기존 `audit:harness` 실패 원인 분석, 레거시 원장 보정, `work-history-policy.md` 재발 방지 규칙 반영, 전체 감사 통과 확인을 완료했다.
 
 ---
 

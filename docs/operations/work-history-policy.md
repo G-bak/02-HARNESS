@@ -1,6 +1,6 @@
 # Work History Policy
 
-**버전:** 1.11 | **최종 수정:** 2026-04-27
+**버전:** 1.12 | **최종 수정:** 2026-04-27
 
 이 문서는 작업 이력의 저장 위치, 기록 시점, 책임 주체를 정의한다.
 
@@ -316,6 +316,32 @@ Tier 2/3 추가 완료 조건:
 - `logs/tasks/*.jsonl`은 append-only로 유지한다.
 - `logs/sessions/*.md`는 세션별 기록으로 보존한다.
 - 민감 정보가 들어가면 즉시 마스킹하고, 마스킹 사실을 메타데이터에 남긴다.
+
+## 감사 실패 재발 방지 규칙
+
+완료 이벤트는 사람이 읽는 요약과 자동 감사가 읽는 구조화 필드를 모두 가져야 한다.
+
+필수:
+
+```
+[ ] 세션 로그가 있으면 `artifact_refs`에 `{"type":"session","path":"logs/sessions/SESSION-YYYYMMDD-NNN.md"}`를 기록
+[ ] `details.session_log`만 단독으로 기록하지 않음
+[ ] Tier 2/3 완료는 `VALIDATION_RESULT`와 `MERGE_COMPLETED` 이벤트를 남김
+[ ] 레거시 보정처럼 이벤트를 뒤늦게 재구성할 수 없으면 `TASK_COMPLETED.details` 또는 `CORRECTION.details`에 `validation_omission_reason`과 `merge_omission_reason`을 명시
+[ ] Tier 2/3 완료는 구조화된 `quality_score` 또는 품질 점수 artifact를 남김
+[ ] `TASK_COMPLETED` 기록 직후 해당 `TASK-*.jsonl`을 JSONL 파서로 확인
+[ ] 손상된 JSONL은 append-only로 보정할 수 없으므로, 최소 문자 수정으로 파싱을 복구하고 `CORRECTION`에 복구 사유를 기록
+[ ] 레거시 완료 이벤트를 보정할 때 기존 사실을 덮어쓰지 않고 `CORRECTION.artifact_refs` 또는 `CORRECTION.details`로 감사 필드만 보강
+```
+
+금지:
+
+```
+[ ] 완료 산출물을 자연어 필드에만 남기기
+[ ] `validation` 배열, `quality_score` 문자열, 보고서 문장만 믿고 구조화 게이트 필드를 생략하기
+[ ] 파싱 실패 원장을 후속 이벤트 추가만으로 해결하려고 하기
+[ ] 과거 완료 이벤트의 결과·시간·작성 주체를 감사 통과 목적만으로 임의 변경하기
+```
 
 ## 문서 인코딩 복구 규칙
 
