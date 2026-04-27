@@ -3,7 +3,7 @@
 > Analyst가 유지·갱신하는 파일입니다. 새 세션 시작 시 이 파일을 먼저 읽으세요.
 > 새 세션 시작 방법: `/clear` 후 → "CURRENT_STATE.md를 읽고 이어서 진행해줘."
 
-**마지막 갱신:** 2026-04-27 (TASK-20260427-086 완료 후 머지 후 브랜치 정리 규칙 강화)
+**마지막 갱신:** 2026-04-27 (TASK-20260427-087 완료 — Researcher 실행 모델 단일화)
 
 ---
 
@@ -21,10 +21,10 @@
 | 전체 에이전트 구조·절대규칙 | `AGENTS.md` | v1.7 | 2026-04-26 |
 | 시스템 아키텍처 | `ARCHITECTURE.md` | v1.2 | 2026-04-26 |
 | 보안 규칙 | `SECURITY.md` | v1.3 | 2026-04-26 |
-| Analyst 역할·보고·리셋 | `docs/agents/analyst.md` | v2.5 | 2026-04-27 |
+| Analyst 역할·보고·리셋 | `docs/agents/analyst.md` | v2.6 | 2026-04-27 |
 | Validator 역할·검증 절차 | `docs/agents/validator.md` | v1.4 | 2026-04-26 |
 | Generator 역할 | `docs/agents/generator.md` | v1.4 | 2026-04-26 |
-| Researcher 역할 | `docs/agents/researcher.md` | v1.2 | 2026-04-26 |
+| Researcher 역할 | `docs/agents/researcher.md` | v1.3 | 2026-04-27 |
 | 머지 조건·승인 주체 (권위) | `docs/operations/git-branch-policy.md` | v1.7 | 2026-04-27 |
 | 도구 권한 | `docs/operations/tool-permissions.md` | v1.7 | 2026-04-26 |
 | 외부 알림 정책 | `docs/operations/notification-policy.md` | v1.6 | 2026-04-26 |
@@ -56,6 +56,7 @@
 - **장기 작업 알림**: 기본 10분 초과, HOLD, Resource Failure, 사용자 판단 필요, 완료/실패 시 `NOTIFICATION_EVENT` 발행
 - **작업 이력 원장**: 모든 Task는 `logs/tasks/TASK-{ID}.jsonl`에 append-only 이벤트를 기록하고, 필요 시 `logs/sessions/SESSION-{YYYYMMDD}-{NNN}.md`에 세션 요약을 남김
 - **Researcher → Generator 전달**: Analyst 경유 필수 (직접 전달 금지)
+- **Researcher 실행 기준**: Researcher는 독립 런타임 서비스가 아니라 Analyst가 호출하는 조사 역할/절차다. 기본은 세션 내 Analyst 통제 조사이며, Codex CLI `gpt-5.4` 같은 외부 실행은 명시적 필요가 있을 때만 fallback으로 사용하고 command/model/sandbox/결과를 원장 또는 보고서에 기록한다.
 - **환경변수**: 키 이름 참조만 허용, 실제 값을 컨텍스트에 포함 금지
 - **머지 방식**: Squash Merge 기본
 - **Tier 1 보고**: 인라인 보고만, 파일 보고서 불필요
@@ -86,14 +87,14 @@
 ## 활성 Task
 
 현재 진행 중인 Task 없음.
-마지막 완료 Task: TASK-20260427-086 머지 후 브랜치 정리 규칙 강화 (2026-04-27)
+마지막 완료 Task: TASK-20260427-087 Researcher 실행 모델 단일화 (2026-04-27)
 
 ---
 
 ## 남은 작업
 
-현재 미완료 작업 없음. 머지 후 브랜치 정리 규칙 강화 및 stale 로컬 브랜치 정리 완료 상태.
-Git 인수인계: `main`은 `origin/main`과 동기화된 상태에서 다음 작업을 시작해야 한다. 다음 세션은 `git status --short --branch`로 동기화 상태를 먼저 확인해 보고한다.
+현재 미완료 작업 없음. Researcher 실행 모델 단일화 문서 정리와 검증이 완료된 상태.
+Git 인수인계: main push 후 로컬 `task/TASK-20260427-087` 브랜치를 삭제하고 최종 브랜치 목록을 확인해야 한다.
 
 ---
 
