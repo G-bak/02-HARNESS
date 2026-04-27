@@ -1,0 +1,51 @@
+{
+  "task_id": "TASK-20260427-084",
+  "created_at": "2026-04-27T10:32:00+09:00",
+  "complexity_tier": "Tier2",
+  "tier_rationale": "직전 인코딩 수정 작업의 누락된 작업 원장, 세션 로그, 보고서, 현재 상태 문서를 보정하는 복수 파일 운영 기록 작업이다. 제품 런타임 코드는 변경하지 않는다.",
+  "status": "ACTIVE",
+  "depends_on": ["TASK-20260427-083"],
+  "request_summary": "직전 작업에서 AGENTS.md 절차를 누락한 문제를 보정하고 다음 작업을 진행한다.",
+  "goal": "TASK-20260427-083 인코딩 수정 커밋에 대한 누락된 하네스 기록을 append-only 방식으로 보정하고, 현재 세션 상태를 최신화한다.",
+  "constraints": {
+    "positive": [
+      "TASK_CREATED 이벤트를 작업 원장에 기록한다.",
+      "세션 로그를 한국어로 작성한다.",
+      "Tier 2 보고서를 작성한다.",
+      "CURRENT_STATE.md의 마지막 완료 작업과 인수인계 상태를 최신화한다.",
+      "기존 이벤트는 수정하지 않고 새 파일 또는 append-only 기록만 사용한다."
+    ],
+    "negative": [
+      "제품 런타임 코드는 변경하지 않는다.",
+      "민감 정보, 토큰, 비밀번호, PII를 기록하지 않는다.",
+      "과거 깨진 로그 전문을 대량 복원하거나 재작성하지 않는다."
+    ]
+  },
+  "success_criteria": [
+    "logs/tasks/TASK-20260427-084.jsonl에 TASK_CREATED와 TASK_COMPLETED 이벤트가 존재한다.",
+    "logs/sessions/SESSION-20260427-003.md에 재진입 체크 결과와 보정 작업 요약이 기록된다.",
+    "reports/TASK-20260427-084.md가 작성된다.",
+    "CURRENT_STATE.md가 TASK-20260427-084 완료 기준으로 갱신된다.",
+    "npm run check:encoding과 node --check api/worker.js가 통과한다."
+  ],
+  "assigned_agents": ["Analyst"],
+  "context": {
+    "relevant_history": "TASK-20260427-083에 해당하는 인코딩 수정은 커밋 d15becd 및 머지 커밋 6cded8c로 origin/main에 반영됐지만, 작업 시작 전 AGENTS.md를 읽지 않아 하네스 기록이 누락됐다.",
+    "reference_docs": [
+      "AGENTS.md",
+      "CURRENT_STATE.md",
+      "docs/operations/work-history-policy.md",
+      "docs/workflows/task-lifecycle.md",
+      "docs/schemas/task-spec.md",
+      "docs/schemas/output-formats.md"
+    ],
+    "artifact_refs": [
+      {
+        "source_task_id": "TASK-20260427-083",
+        "artifact_type": "commit",
+        "path": "6cded8c",
+        "description": "인코딩 아티팩트 수정 및 방지 스크립트 추가가 main에 머지된 커밋"
+      }
+    ]
+  }
+}
