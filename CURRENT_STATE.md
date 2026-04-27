@@ -3,7 +3,7 @@
 > Analyst가 유지·갱신하는 파일입니다. 새 세션 시작 시 이 파일을 먼저 읽으세요.
 > 새 세션 시작 방법: `/clear` 후 → "CURRENT_STATE.md를 읽고 이어서 진행해줘."
 
-**마지막 갱신:** 2026-04-27 (TASK-20260427-084 완료 후 인코딩 수정 작업 기록 보정)
+**마지막 갱신:** 2026-04-27 (TASK-20260427-085 완료 후 JSON/JSONL 언어 기준 명확화)
 
 ---
 
@@ -28,13 +28,13 @@
 | 머지 조건·승인 주체 (권위) | `docs/operations/git-branch-policy.md` | v1.6 | 2026-04-26 |
 | 도구 권한 | `docs/operations/tool-permissions.md` | v1.7 | 2026-04-26 |
 | 외부 알림 정책 | `docs/operations/notification-policy.md` | v1.6 | 2026-04-26 |
-| 작업 이력 저장 정책 | `docs/operations/work-history-policy.md` | v1.10 | 2026-04-27 |
+| 작업 이력 저장 정책 | `docs/operations/work-history-policy.md` | v1.11 | 2026-04-27 |
 | Tier 분류 기준 | `docs/workflows/tier-classification.md` | v1.3 | 2026-04-26 |
 | Task 수명 주기 | `docs/workflows/task-lifecycle.md` | v1.16 | 2026-04-26 |
 | 실패 처리 | `docs/workflows/failure-handling.md` | v1.3 | 2026-04-25 |
 | 컨텍스트 관리 | `docs/workflows/context-management.md` | v1.0 | 2026-04-24 |
-| Task Spec 스키마 | `docs/schemas/task-spec.md` | v1.4 | 2026-04-26 |
-| 에이전트 출력 형식 | `docs/schemas/output-formats.md` | v1.16 | 2026-04-27 |
+| Task Spec 스키마 | `docs/schemas/task-spec.md` | v1.5 | 2026-04-27 |
+| 에이전트 출력 형식 | `docs/schemas/output-formats.md` | v1.17 | 2026-04-27 |
 | 품질 루브릭 | `QUALITY_SCORE.md` | v1.3 | 2026-04-26 |
 | 실행 비용·리소스 관측 | `docs/operations/eval-harness.md` | v1.7 | 2026-04-26 |
 | 보고서 예시 | `reports/TASK-EXAMPLE.md` | v1.6 | 2026-04-26 |
@@ -78,19 +78,20 @@
 - **문서 클래스 구분**: Authority / Operational guide / Product/runtime doc / Plan/archive를 구분하고, 권위 규칙은 Authority 문서에만 둠.
 - **commit/merge/push 세트 규칙**: 모든 Tier에서 commit/merge(Tier 2/3)/push는 항상 세트. 요청 여부와 무관하게 push까지 완료해야 작업 완료. push 없이 `TASK_COMPLETED` 기록 금지. (Non-git 작업공간 모드 제외)
 - **대표 보고용 품질 점수 표시**: 보고서에는 JSON 원문보다 `95점 / 100점 (S등급)` 형식의 요약, 구분 표, 좋았던 점, 감점/주의를 먼저 표시. JSON은 내부 원장 또는 부록용.
+- **JSON/JSONL 언어 기준**: `tasks/specs/*.json`과 `logs/tasks/*.jsonl`은 영어 작성 가능·권장. 세션 로그(`logs/sessions/*.md`)와 최종 보고서(`reports/*.md`)만 한국어 작성 필수.
 
 ---
 
 ## 활성 Task
 
 현재 진행 중인 Task 없음.
-마지막 완료 Task: TASK-20260427-084 인코딩 수정 작업 기록 보정 (2026-04-27)
+마지막 완료 Task: TASK-20260427-085 JSON/JSONL 언어 기준 명확화 (2026-04-27)
 
 ---
 
 ## 남은 작업
 
-현재 미완료 작업 없음. 문서 체계 2차 보강 및 TASK-20260427-083 인코딩 수정 작업 기록 보정 완료 상태.
+현재 미완료 작업 없음. JSON/JSONL 언어 기준 명확화 완료 상태.
 Git 인수인계: `main`은 `origin/main`과 동기화된 상태에서 다음 작업을 시작해야 한다. 다음 세션은 `git status --short --branch`로 동기화 상태를 먼저 확인해 보고한다.
 
 ---

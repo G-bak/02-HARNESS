@@ -1,0 +1,41 @@
+{
+  "task_id": "TASK-20260427-085",
+  "created_at": "2026-04-27T10:36:00+09:00",
+  "complexity_tier": "Tier2",
+  "tier_rationale": "This updates multiple guide documents to clarify language policy for structured JSON artifacts. It does not modify runtime product code.",
+  "status": "ACTIVE",
+  "depends_on": ["TASK-20260427-084"],
+  "request_summary": "Clarify that Task Spec JSON and task ledger JSONL can be written in English, while session logs and reports remain Korean.",
+  "goal": "Update the authoritative guide documents so future agents use English for structured JSON artifacts when practical and Korean only for user-facing session logs and reports.",
+  "constraints": {
+    "positive": [
+      "Clarify language rules for tasks/specs/*.json.",
+      "Clarify language rules for logs/tasks/*.jsonl.",
+      "Keep logs/sessions/*.md and reports/*.md as Korean user-facing documents.",
+      "Preserve existing enum and schema fields in English."
+    ],
+    "negative": [
+      "Do not change runtime product code.",
+      "Do not rewrite historical task ledgers or specs.",
+      "Do not include secrets, tokens, passwords, or PII."
+    ]
+  },
+  "success_criteria": [
+    "docs/schemas/output-formats.md explicitly separates JSON/JSONL artifact language from session/report language.",
+    "docs/operations/work-history-policy.md states task ledgers may use English for structured fields and details.",
+    "docs/schemas/task-spec.md states Task Spec JSON may be written in English.",
+    "CURRENT_STATE.md records the clarified rule.",
+    "npm run check:encoding passes."
+  ],
+  "assigned_agents": ["Analyst"],
+  "context": {
+    "relevant_history": "The previous TASK-20260427-084 used Korean in JSON and JSONL artifacts even though the current rules only require Korean for session logs and final reports.",
+    "reference_docs": [
+      "docs/schemas/output-formats.md",
+      "docs/operations/work-history-policy.md",
+      "docs/schemas/task-spec.md",
+      "CURRENT_STATE.md"
+    ],
+    "artifact_refs": []
+  }
+}

@@ -1,6 +1,6 @@
 # Work History Policy
 
-**버전:** 1.10 | **최종 수정:** 2026-04-27
+**버전:** 1.11 | **최종 수정:** 2026-04-27
 
 이 문서는 작업 이력의 저장 위치, 기록 시점, 책임 주체를 정의한다.
 
@@ -33,6 +33,17 @@ CURRENT_STATE.md
 | `logs/insights.jsonl` | 장기 인사이트 누적 | JSON Lines | Analyst |
 | `reports/TASK-{ID}.md` | 최종 보고서 | Markdown | Analyst |
 | `CURRENT_STATE.md` | 현재 세션의 기준 상태 | Markdown | Analyst |
+
+## 언어 기준
+
+| 위치 | 언어 기준 | 설명 |
+|---|---|---|
+| `logs/tasks/TASK-{ID}.jsonl` | 영어 가능, 권장 | 구조화 이벤트 원장이다. enum, status, phase, event_type, field name은 영어를 유지한다. |
+| `tasks/specs/TASK-{ID}.json` | 영어 가능, 권장 | 에이전트 전달과 자동 검증을 위한 Task Spec 원본이다. |
+| `logs/sessions/SESSION-{YYYYMMDD}-{NNN}.md` | 한국어 필수 | 사용자가 직접 읽는 세션 기록이다. 인라인 보고 원문을 보존한다. |
+| `reports/TASK-{ID}.md` | 한국어 필수 | 사용자와 운영자가 직접 읽는 최종 보고서다. |
+
+JSON/JSONL 자유 텍스트 필드는 영어로 작성할 수 있다. 사용자 발화 원문, UI 문구, 한국어 보고 문장을 보존해야 할 때만 한국어를 포함한다.
 
 ## 핵심 규칙
 
@@ -67,7 +78,7 @@ CURRENT_STATE.md
 - 동일 세션의 여러 Task는 같은 세션 로그에 누적할 수 있다.
 - 세션이 진행되는 동안 중요한 결정, 실패, 재시도, 배포 결과를 계속 추가한다.
 - 세션이 끝나면 최종 요약과 다음 행동을 정리한다.
-- 세션 로그와 최종 보고서는 한국어로 작성한다. 영어는 코드 조각, 경로, 식별자처럼 꼭 필요한 경우만 허용한다.
+- 세션 로그와 최종 보고서는 한국어로 작성한다. 영어는 코드 조각, 경로, 식별자처럼 꼭 필요한 경우만 허용한다. 이 제한은 `logs/tasks/*.jsonl`과 `tasks/specs/*.json`에는 적용하지 않는다.
 
 즉, 세션 로그는 다음처럼 동작한다.
 
