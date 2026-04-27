@@ -1,0 +1,85 @@
+{
+  "schema_version": "generator-handoff.v1",
+  "task_id": "TASK-20260427-092",
+  "agent": "Generator",
+  "invocation": {
+    "runtime": "Claude CLI",
+    "fresh_session_required": true,
+    "forbid_resume_or_continue": true,
+    "recommended_flags": [
+      "--bare",
+      "--print",
+      "--input-format text",
+      "--output-format json",
+      "--no-session-persistence",
+      "--permission-mode acceptEdits"
+    ]
+  },
+  "refs": {
+    "spec": "tasks/specs/TASK-20260427-092.json",
+    "ledger": "logs/tasks/TASK-20260427-092.jsonl",
+    "session": "logs/sessions/SESSION-20260427-011.md"
+  },
+  "allowed_context": {
+    "goal": "Define and scaffold the Generator handoff flow so Analyst can invoke Claude CLI without sharing overlapping Analyst/Researcher context.",
+    "target_files": [
+      "docs/agents/analyst.md",
+      "docs/agents/generator.md",
+      "docs/schemas/output-formats.md",
+      "docs/schemas/generator-handoff.schema.json",
+      "docs/workflows/task-lifecycle.md",
+      "docs/operations/tool-permissions.md",
+      "CURRENT_STATE.md"
+    ],
+    "success_criteria": [
+      "The Analyst-to-Generator handoff contract is documented with allowed and forbidden context.",
+      "The Claude CLI invocation model is documented as fresh, task-scoped execution.",
+      "The expected Generator input and output artifacts are specified.",
+      "Ledger events for Generator instruction and result capture are specified.",
+      "Validation instructions for the next Validator handoff remain compatible with Tier 2 and Tier 3 flows.",
+      "Repository audits pass for the changed harness files."
+    ],
+    "constraints": {
+      "positive": [
+        "Use task-scoped handoff input for Claude CLI Generator invocation.",
+        "Keep Researcher output routed through Analyst.",
+        "Record command shape and artifact paths in the task ledger."
+      ],
+      "negative": [
+        "Do not pass the full Analyst conversation to Generator.",
+        "Do not use claude --continue or claude --resume.",
+        "Do not use permission bypass flags.",
+        "Do not include secrets, credentials, PII, or environment variable values.",
+        "Do not modify product runtime behavior."
+      ]
+    },
+    "research_summary": {
+      "summary": "No external research was required. Local Claude CLI help confirmed support for --print, --bare, --input-format, --output-format, --no-session-persistence, --permission-mode, --allowedTools, and --disallowedTools.",
+      "confidence": "HIGH",
+      "snippets": [
+        {
+          "source": "Local command: claude --help",
+          "snippet": "Claude Code starts interactive by default; use -p/--print for non-interactive output."
+        }
+      ],
+      "unverified_claims": []
+    },
+    "ledger_events": [
+      "TASK-20260427-091 established the isolated Claude CLI invocation boundary.",
+      "TASK-20260427-092 was created to implement the handoff contract in harness docs."
+    ],
+    "session_excerpts": [
+      "Generator는 Claude CLI의 새 실행 세션으로 호출한다. Analyst 대화 전체를 넘기지 않고 task-scoped handoff 파일만 전달해 컨텍스트 중첩을 방지한다."
+    ]
+  },
+  "forbidden_context": [
+    "Full Analyst conversation",
+    "Full CURRENT_STATE.md",
+    "Unrelated ledgers or sessions",
+    "Full external source documents",
+    "Validator private context",
+    "Secrets, credentials, PII, or environment variable values"
+  ],
+  "expected_output_path": "tasks/handoffs/TASK-20260427-092/generator-result.json",
+  "expected_output_schema": "docs/schemas/output-formats.md#generator-output"
+}

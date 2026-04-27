@@ -1,6 +1,6 @@
 # Task Lifecycle
 
-**버전:** 1.16 | **최종 수정:** 2026-04-26
+**버전:** 1.17 | **최종 수정:** 2026-04-27
 
 이 문서는 요청이 들어온 뒤 작업이 어떻게 시작되고, 검증되고, 종료되는지 정의한다.
 
@@ -104,6 +104,15 @@ Generator가 실제 변경을 수행한다.
 
 Generator에게는 위 자료 전체를 그대로 던지지 않고, 필요한 부분만 추려 전달한다.
 단, 성공 기준과 negative constraints는 의미가 바뀌지 않게 원문 보존을 우선한다.
+
+Claude CLI Generator 호출은 항상 새 실행으로 처리한다.
+
+1. Analyst가 `tasks/handoffs/TASK-{ID}/generator-input.json` 또는 `.md`를 작성한다.
+2. 입력에는 Task Spec, 관련 ledger 이벤트, 필요한 session excerpt, Research Summary snippet만 포함한다.
+3. `claude --continue`, `claude --resume`은 금지한다.
+4. 가능하면 `claude --bare --print --no-session-persistence` 형태로 비대화식 실행한다.
+5. 실행 명령 형태와 입력/결과 경로를 `INSTRUCTION_SENT`와 `GENERATION_COMPLETED` 이벤트에 기록한다.
+6. Generator가 추가 외부 조사가 필요하다고 보고하면 Analyst가 Researcher 재투입 여부를 판단한다.
 
 1. `task/{TASK-ID}` 브랜치에서 작업한다.
 2. 작은 단위로 수정한다.

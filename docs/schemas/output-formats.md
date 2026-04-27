@@ -1,6 +1,6 @@
 # 에이전트 출력 형식
 
-**버전:** 1.17 | **최종 수정:** 2026-04-27
+**버전:** 1.18 | **최종 수정:** 2026-04-27
 
 이 문서는 각 에이전트가 어떤 형식으로 결과를 남겨야 하는지 정의한다.
 
@@ -200,6 +200,80 @@ Analyst가 남기는 작업 기록은 `logs/tasks/TASK-{ID}.jsonl`에 append-onl
   ]
 }
 ```
+
+## Generator 출력
+
+## Generator Handoff 입력
+
+Analyst가 Claude CLI 기반 Generator를 호출할 때는 Task 단위 handoff 입력을 만든다.
+이 입력은 전체 대화가 아니라 필요한 최소 컨텍스트만 포함한다.
+
+권장 저장 위치:
+
+```text
+tasks/handoffs/TASK-{ID}/generator-input.json
+```
+
+기계 검증용 스키마:
+
+```text
+docs/schemas/generator-handoff.schema.json
+```
+
+```json
+{
+  "schema_version": "generator-handoff.v1",
+  "task_id": "TASK-20260424-001",
+  "agent": "Generator",
+  "invocation": {
+    "runtime": "Claude CLI",
+    "fresh_session_required": true,
+    "forbid_resume_or_continue": true,
+    "recommended_flags": [
+      "--bare",
+      "--print",
+      "--input-format text",
+      "--output-format json",
+      "--no-session-persistence"
+    ]
+  },
+  "refs": {
+    "spec": "tasks/specs/TASK-20260424-001.json",
+    "ledger": "logs/tasks/TASK-20260424-001.jsonl",
+    "session": "logs/sessions/SESSION-20260424-001.md"
+  },
+  "allowed_context": {
+    "goal": "작업 목표",
+    "target_files": ["수정 대상 파일"],
+    "success_criteria": ["검증 가능한 완료 기준"],
+    "constraints": {
+      "positive": [],
+      "negative": []
+    },
+    "research_summary": {
+      "summary": "필요 시 포함",
+      "confidence": "HIGH | MEDIUM | LOW | NONE",
+      "snippets": [],
+      "unverified_claims": []
+    },
+    "ledger_events": ["관련 이벤트 요약만"],
+    "session_excerpts": ["필요한 사용자 의도 원문만"]
+  },
+  "forbidden_context": [
+    "Full Analyst conversation",
+    "Full CURRENT_STATE.md",
+    "Unrelated ledgers or sessions",
+    "Full external source documents",
+    "Validator private context",
+    "Secrets, credentials, PII, or environment variable values"
+  ],
+  "expected_output_path": "tasks/handoffs/TASK-20260424-001/generator-result.json",
+  "expected_output_schema": "Generator 출력 형식"
+}
+```
+
+Analyst는 `INSTRUCTION_SENT` 이벤트에 입력 경로와 Claude CLI 명령 형태를 기록한다.
+Generator 결과 수신 후에는 `AGENT_RESULT_RECEIVED` 또는 `GENERATION_COMPLETED` 이벤트에 결과 경로를 기록한다.
 
 ## Generator 출력
 

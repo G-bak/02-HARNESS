@@ -3,7 +3,7 @@
 > Analyst가 유지·갱신하는 파일입니다. 새 세션 시작 시 이 파일을 먼저 읽으세요.
 > 새 세션 시작 방법: `/clear` 후 → "CURRENT_STATE.md를 읽고 이어서 진행해줘."
 
-**마지막 갱신:** 2026-04-27 (TASK-20260427-090 완료 — 레거시 원장 감사 실패 보정 및 재발 방지 규칙 반영)
+**마지막 갱신:** 2026-04-27 (TASK-20260427-092 완료 — Claude CLI Generator 격리 호출 계약 반영)
 
 ---
 
@@ -21,20 +21,20 @@
 | 전체 에이전트 구조·절대규칙 | `AGENTS.md` | v1.7 | 2026-04-26 |
 | 시스템 아키텍처 | `ARCHITECTURE.md` | v1.2 | 2026-04-26 |
 | 보안 규칙 | `SECURITY.md` | v1.3 | 2026-04-26 |
-| Analyst 역할·보고·리셋 | `docs/agents/analyst.md` | v2.8 | 2026-04-27 |
+| Analyst 역할·보고·리셋 | `docs/agents/analyst.md` | v2.9 | 2026-04-27 |
 | Validator 역할·검증 절차 | `docs/agents/validator.md` | v1.4 | 2026-04-26 |
-| Generator 역할 | `docs/agents/generator.md` | v1.4 | 2026-04-26 |
+| Generator 역할 | `docs/agents/generator.md` | v1.5 | 2026-04-27 |
 | Researcher 역할 | `docs/agents/researcher.md` | v1.5 | 2026-04-27 |
 | 머지 조건·승인 주체 (권위) | `docs/operations/git-branch-policy.md` | v1.7 | 2026-04-27 |
-| 도구 권한 | `docs/operations/tool-permissions.md` | v1.7 | 2026-04-26 |
+| 도구 권한 | `docs/operations/tool-permissions.md` | v1.8 | 2026-04-27 |
 | 외부 알림 정책 | `docs/operations/notification-policy.md` | v1.6 | 2026-04-26 |
 | 작업 이력 저장 정책 | `docs/operations/work-history-policy.md` | v1.12 | 2026-04-27 |
 | Tier 분류 기준 | `docs/workflows/tier-classification.md` | v1.3 | 2026-04-26 |
-| Task 수명 주기 | `docs/workflows/task-lifecycle.md` | v1.16 | 2026-04-26 |
+| Task 수명 주기 | `docs/workflows/task-lifecycle.md` | v1.17 | 2026-04-27 |
 | 실패 처리 | `docs/workflows/failure-handling.md` | v1.3 | 2026-04-25 |
 | 컨텍스트 관리 | `docs/workflows/context-management.md` | v1.0 | 2026-04-24 |
 | Task Spec 스키마 | `docs/schemas/task-spec.md` | v1.5 | 2026-04-27 |
-| 에이전트 출력 형식 | `docs/schemas/output-formats.md` | v1.17 | 2026-04-27 |
+| 에이전트 출력 형식 | `docs/schemas/output-formats.md` | v1.18 | 2026-04-27 |
 | 품질 루브릭 | `QUALITY_SCORE.md` | v1.3 | 2026-04-26 |
 | 실행 비용·리소스 관측 | `docs/operations/eval-harness.md` | v1.7 | 2026-04-26 |
 | 보고서 예시 | `reports/TASK-EXAMPLE.md` | v1.6 | 2026-04-26 |
@@ -56,6 +56,7 @@
 - **장기 작업 알림**: 기본 10분 초과, HOLD, Resource Failure, 사용자 판단 필요, 완료/실패 시 `NOTIFICATION_EVENT` 발행
 - **작업 이력 원장**: 모든 Task는 `logs/tasks/TASK-{ID}.jsonl`에 append-only 이벤트를 기록하고, 필요 시 `logs/sessions/SESSION-{YYYYMMDD}-{NNN}.md`에 세션 요약을 남김
 - **Researcher → Generator 전달**: Analyst 경유 필수 (직접 전달 금지)
+- **Generator 호출 방식**: Claude CLI를 이전 대화와 분리된 새 실행으로 호출한다. `tasks/handoffs/TASK-{ID}/generator-input.*`에 필요한 최소 컨텍스트만 담고 `--continue`/`--resume` 및 permission bypass 계열 플래그는 사용하지 않는다.
 - **Researcher 실행 기준**: Researcher는 독립 런타임 서비스가 아니라 Analyst가 호출하는 조사 역할/절차다. 기본은 세션 내 Analyst 통제 조사이며, Codex CLI 같은 외부 실행은 명시적 필요가 있을 때만 fallback으로 사용하고 command/model/sandbox/결과를 원장 또는 보고서에 기록한다.
 - **Researcher 역할 우선 라우팅**: 검색·조사·최신/현재 외부 사실·공식 문서 검증·모델 가용성 확인 요청은 Analyst 단독 답변으로 처리하지 않고 Researcher 절차로 라우팅한다. 같은 세션에서 수행해도 Researcher 지시서, 출처 검토, confidence, Research Summary, 실행 모드 기록이 있어야 Researcher 수행으로 인정한다.
 - **Researcher 모델 선택**: 단일 고정 모델이 아니라 조사 위험도와 비용에 따라 선택한다. 고가치·고위험 외부 조사는 실행 환경에서 지원되는 최신 flagship 모델(`gpt-5.5` 지원 시 우선)을 사용하고, 단순 조회는 경량 모델 또는 현재 세션 모델을 허용하며, 최신 모델 미지원 시 사유를 기록하고 `gpt-5.4`로 fallback한다.
@@ -89,14 +90,14 @@
 ## 활성 Task
 
 현재 진행 중인 Task 없음.
-마지막 완료 Task: TASK-20260427-090 레거시 원장 감사 실패 보정 및 재발 방지 가이드 반영 (2026-04-27)
+마지막 완료 Task: TASK-20260427-092 Claude CLI Generator 격리 호출 계약 반영 (2026-04-27)
 
 ---
 
 ## 남은 작업
 
 현재 미완료 작업 없음.
-TASK-20260427-090에서 기존 `audit:harness` 실패 원인 분석, 레거시 원장 보정, `work-history-policy.md` 재발 방지 규칙 반영, 전체 감사 통과 확인을 완료했다.
+TASK-20260427-092에서 Analyst → Generator handoff 계약, Claude CLI fresh execution 호출 원칙, 입력 JSON Schema, task-scoped handoff 예시, 권한 제한 규칙 반영을 완료했다.
 
 ---
 

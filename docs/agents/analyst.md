@@ -1,6 +1,6 @@
 # Analyst 역할 문서
 
-**버전:** 2.8 | **최종 수정:** 2026-04-27
+**버전:** 2.9 | **최종 수정:** 2026-04-27
 
 Analyst는 하네스의 중심 조정자다.
 사용자 요청을 해석하고, 작업 원장을 만들고, Tier를 판단하고, 다른 에이전트에게 필요한 맥락만 추려서 지시하며, 최종 보고를 작성한다.
@@ -232,6 +232,48 @@ codex exec --full-auto never -s workspace-write --json -m gpt-5.5 "{프롬프트
 - 성공 기준
 - 최근의 중요한 결정
 - 관련 세션 맥락
+
+#### Claude CLI 격리 호출 기준
+
+Generator는 Claude CLI의 새 실행으로 호출한다.
+Analyst 대화의 연장이 아니라, Task 단위 입력 파일을 받는 독립 실행자로 취급한다.
+
+필수 원칙:
+
+- `claude --continue`, `claude --resume`을 사용하지 않는다.
+- 가능하면 `--no-session-persistence`와 `--bare`를 사용해 이전 대화·프로젝트 자동 컨텍스트 유입을 줄인다.
+- 입력은 `tasks/handoffs/TASK-{ID}/generator-input.json` 또는 같은 경로의 Markdown 프롬프트 하나로 제한한다.
+- 결과는 `tasks/handoffs/TASK-{ID}/generator-result.json`에 맞는 구조로 회수한다.
+- 실행 명령, 사용한 주요 플래그, 입력/결과 파일 경로를 원장에 기록한다.
+- CLI가 지원하지 않는 플래그가 있으면 실행하지 말고 지원되는 대체 플래그와 사유를 원장에 기록한다.
+
+Generator에게 넘길 수 있는 컨텍스트:
+
+- Task Spec의 목표, 성공 기준, positive/negative constraints
+- 수정 대상 파일 목록과 관련 규칙 문서 경로
+- 작업 원장의 관련 이벤트만 추린 요약
+- 사용자가 명시한 의도 중 필요한 원문 일부
+- Research Summary의 summary, confidence, snippet, unverified_claims
+- 예상 출력 JSON 스키마
+
+Generator에게 넘기면 안 되는 컨텍스트:
+
+- Analyst 전체 대화 원문
+- `CURRENT_STATE.md` 전체 전문
+- 관련 없는 Task 원장 또는 세션 로그 전체
+- Researcher가 수집한 외부 원문 전체
+- Validator-A/B의 비공개 판단, 다른 Validator 결과, Tier 3 독립성에 영향을 주는 정보
+- API 키, 비밀번호, 환경변수 값, PII
+
+권장 호출 형태:
+
+```powershell
+Get-Content -Raw -Encoding UTF8 tasks/handoffs/TASK-{ID}/generator-input.md |
+  claude --bare --print --input-format text --output-format json --no-session-persistence --permission-mode acceptEdits
+```
+
+`--allowedTools`와 `--disallowedTools`는 Task 위험도에 맞춰 좁게 지정한다.
+Generator에게 웹 검색이 필요한 경우는 직접 허용하지 않고 Analyst에게 Researcher 재투입을 요청하게 한다.
 
 예시:
 

@@ -1,0 +1,54 @@
+{
+  "task_id": "TASK-20260427-092",
+  "created_at": "2026-04-27T17:21:34+09:00",
+  "complexity_tier": "Tier2",
+  "tier_rationale": "Multiple harness operation documents and scaffolding files may be updated; no product runtime behavior changes.",
+  "status": "ACTIVE",
+  "depends_on": ["TASK-20260427-091"],
+  "request_summary": "Implement a clear Analyst-to-Generator invocation contract using isolated Claude CLI execution.",
+  "goal": "Define and scaffold the Generator handoff flow so Analyst can invoke Claude CLI without sharing overlapping Analyst/Researcher context.",
+  "constraints": {
+    "positive": [
+      "Generator must be invoked as a fresh Claude CLI execution with task-scoped input.",
+      "Analyst must pass only minimal, selected context.",
+      "Researcher outputs must pass through Analyst and include only summary, snippets, confidence, and unverified claims.",
+      "The design must record command shape and artifact paths without secrets."
+    ],
+    "negative": [
+      "Do not pass the full Analyst conversation to Generator.",
+      "Do not pass full Researcher source documents or unbounded URLs to Generator.",
+      "Do not pass Validator private context or other Validator results to Generator.",
+      "Do not include API keys, environment variable values, passwords, PII, or secrets.",
+      "Do not modify product runtime behavior in this task."
+    ]
+  },
+  "success_criteria": [
+    "The Analyst-to-Generator handoff contract is documented with allowed and forbidden context.",
+    "The Claude CLI invocation model is documented as fresh, task-scoped execution.",
+    "The expected Generator input and output artifacts are specified.",
+    "Ledger events for Generator instruction and result capture are specified.",
+    "Validation instructions for the next Validator handoff remain compatible with Tier 2 and Tier 3 flows.",
+    "Repository audits pass for the changed harness files."
+  ],
+  "assigned_agents": ["Analyst", "Generator", "Validator-A"],
+  "context": {
+    "relevant_history": "TASK-20260427-091 established that Generator integration should begin with an isolated handoff contract rather than a shared conversation or full runtime automation.",
+    "reference_docs": [
+      "AGENTS.md",
+      "SECURITY.md",
+      "docs/agents/analyst.md",
+      "docs/agents/generator.md",
+      "docs/schemas/output-formats.md",
+      "docs/workflows/task-lifecycle.md",
+      "docs/operations/tool-permissions.md"
+    ],
+    "artifact_refs": [
+      {
+        "source_task_id": "TASK-20260427-091",
+        "artifact_type": "planning-ledger",
+        "path": "logs/tasks/TASK-20260427-091.jsonl",
+        "description": "Planning decision for isolated Claude CLI Generator invocation."
+      }
+    ]
+  }
+}

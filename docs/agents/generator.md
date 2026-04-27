@@ -1,6 +1,6 @@
 # Generator — 운영 명세
 
-**버전:** 1.4 | **최종 수정:** 2026-04-26  
+**버전:** 1.5 | **최종 수정:** 2026-04-27
 **역할:** 시스템의 손. Task Spec과 규칙 문서를 기반으로 코드 및 결과물을 생성한다.  
 **실행 환경:** Claude Code CLI | **적용 Tier:** 1, 2, 3
 
@@ -21,6 +21,43 @@
    - Tier 3: Analyst에게 완료 보고 → Analyst가 Validator-A/B에게 독립 병렬 발행
    → 필요 시 수정 대신 Rebuttal 1회 제출 가능
 8. 작업 이력 기록 (`log[]` 작성, 저장 정책은 docs/operations/work-history-policy.md 참조)
+```
+
+## Claude CLI 실행 모델
+
+Generator는 Claude CLI의 독립 실행 세션에서 동작한다.
+이전 Analyst 대화나 Researcher 대화 컨텍스트를 이어받지 않고, Analyst가 만든 Task 단위 handoff 입력만 사용한다.
+
+입력 경로:
+
+```text
+tasks/handoffs/TASK-{ID}/generator-input.json
+또는
+tasks/handoffs/TASK-{ID}/generator-input.md
+```
+
+결과 경로:
+
+```text
+tasks/handoffs/TASK-{ID}/generator-result.json
+```
+
+필수 동작:
+
+- 입력 파일에 포함된 `allowed_context`만 사용한다.
+- `forbidden_context`에 해당하는 정보가 필요하면 추측하지 않고 Analyst에게 차단 사유를 포함해 보고한다.
+- 외부 API 명세, 최신 문서, 웹 검색이 필요하면 직접 탐색하지 않고 Analyst에게 Researcher 재투입을 요청한다.
+- Task Spec 범위 밖 파일을 수정해야 할 것 같으면 작업을 중단하고 재분류 또는 범위 변경을 요청한다.
+- 출력 JSON에는 변경 파일, 자체 검토, 실행한 검증 명령, 재분류 필요 여부를 포함한다.
+
+컨텍스트 격리 금지 사항:
+
+```
+[ ] Analyst 전체 대화 또는 세션 로그 전체를 전제로 구현
+[ ] Researcher가 수집한 외부 원문 전체를 직접 해석
+[ ] Validator 결과를 미리 보고 통과용으로 구현
+[ ] `--continue` 또는 `--resume` 기반 이전 Claude 세션 재사용
+[ ] 입력 파일에 없는 사용자 의도 추정
 ```
 
 ---

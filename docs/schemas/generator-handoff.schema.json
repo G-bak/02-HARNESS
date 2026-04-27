@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://landinghub.local/schemas/generator-handoff.schema.json",
+  "title": "Generator Handoff",
+  "description": "Task-scoped Analyst-to-Generator handoff payload for isolated Claude CLI execution.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "task_id",
+    "agent",
+    "invocation",
+    "refs",
+    "allowed_context",
+    "forbidden_context",
+    "expected_output_path",
+    "expected_output_schema"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "generator-handoff.v1"
+    },
+    "task_id": {
+      "type": "string",
+      "pattern": "^TASK-[0-9]{8}-[0-9]{3}$"
+    },
+    "agent": {
+      "const": "Generator"
+    },
+    "invocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runtime",
+        "fresh_session_required",
+        "forbid_resume_or_continue",
+        "recommended_flags"
+      ],
+      "properties": {
+        "runtime": {
+          "const": "Claude CLI"
+        },
+        "fresh_session_required": {
+          "const": true
+        },
+        "forbid_resume_or_continue": {
+          "const": true
+        },
+        "recommended_flags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "refs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["spec", "ledger"],
+      "properties": {
+        "spec": {
+          "type": "string"
+        },
+        "ledger": {
+          "type": "string"
+        },
+        "session": {
+          "type": "string"
+        }
+      }
+    },
+    "allowed_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "goal",
+        "target_files",
+        "success_criteria",
+        "constraints"
+      ],
+      "properties": {
+        "goal": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target_files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "success_criteria": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "constraints": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["positive", "negative"],
+          "properties": {
+            "positive": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "negative": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "research_summary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["summary", "confidence", "snippets", "unverified_claims"],
+          "properties": {
+            "summary": {
+              "type": "string"
+            },
+            "confidence": {
+              "enum": ["HIGH", "MEDIUM", "LOW", "NONE"]
+            },
+            "snippets": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["source", "snippet"],
+                "properties": {
+                  "source": {
+                    "type": "string"
+                  },
+                  "snippet": {
+                    "type": "string",
+                    "maxLength": 500
+                  }
+                }
+              }
+            },
+            "unverified_claims": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "ledger_events": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "session_excerpts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "forbidden_context": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "expected_output_path": {
+      "type": "string"
+    },
+    "expected_output_schema": {
+      "type": "string"
+    }
+  }
+}

@@ -1,6 +1,6 @@
 # Tool Permissions — 도구 권한 정책
 
-**버전:** 1.7 | **최종 수정:** 2026-04-26  
+**버전:** 1.8 | **최종 수정:** 2026-04-27
 **원칙:** 각 에이전트는 해당 작업에 필요한 최소 권한만 보유한다.
 
 ---
@@ -111,6 +111,34 @@ Sandbox에서 금지되는 작업:
 - 영구 파일 시스템 변경 (task/* 브랜치 외)
 - 시스템 설정 변경
 - 다른 프로세스 실행 또는 종료
+
+### Claude CLI Generator 호출 권한
+
+Analyst가 Generator를 호출할 때 Claude CLI는 Task 단위 새 실행으로만 사용한다.
+
+허용:
+
+```text
+claude --bare --print --input-format text --output-format json --no-session-persistence
+```
+
+조건:
+
+- 입력은 `tasks/handoffs/TASK-{ID}/generator-input.*`로 제한한다.
+- `--allowedTools`는 Task에 필요한 파일 읽기/쓰기와 제한된 git 명령 중심으로 좁힌다.
+- `--disallowedTools`로 웹 검색·외부 URL 접근을 막는다. 외부 조사는 Researcher가 담당한다.
+- 실제 API 키나 환경변수 값을 명령 인자, 입력 파일, 로그에 포함하지 않는다.
+
+금지:
+
+```text
+claude --continue
+claude --resume
+claude --dangerously-skip-permissions
+claude --allow-dangerously-skip-permissions
+```
+
+위험 격리가 별도 샌드박스에서 증명되지 않은 한 permission bypass 계열 플래그는 사용하지 않는다.
 
 ---
 
