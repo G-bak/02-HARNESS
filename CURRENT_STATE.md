@@ -3,7 +3,7 @@
 > Analyst가 유지·갱신하는 파일입니다. 새 세션 시작 시 이 파일을 먼저 읽으세요.
 > 새 세션 시작 방법: `/clear` 후 → "CURRENT_STATE.md를 읽고 이어서 진행해줘."
 
-**마지막 갱신:** 2026-04-27 (TASK-20260427-085 완료 후 JSON/JSONL 언어 기준 명확화)
+**마지막 갱신:** 2026-04-27 (TASK-20260427-086 완료 전: 머지 후 브랜치 정리 규칙 강화)
 
 ---
 
@@ -25,7 +25,7 @@
 | Validator 역할·검증 절차 | `docs/agents/validator.md` | v1.4 | 2026-04-26 |
 | Generator 역할 | `docs/agents/generator.md` | v1.4 | 2026-04-26 |
 | Researcher 역할 | `docs/agents/researcher.md` | v1.2 | 2026-04-26 |
-| 머지 조건·승인 주체 (권위) | `docs/operations/git-branch-policy.md` | v1.6 | 2026-04-26 |
+| 머지 조건·승인 주체 (권위) | `docs/operations/git-branch-policy.md` | v1.7 | 2026-04-27 |
 | 도구 권한 | `docs/operations/tool-permissions.md` | v1.7 | 2026-04-26 |
 | 외부 알림 정책 | `docs/operations/notification-policy.md` | v1.6 | 2026-04-26 |
 | 작업 이력 저장 정책 | `docs/operations/work-history-policy.md` | v1.11 | 2026-04-27 |
@@ -77,6 +77,7 @@
 - **품질 점수 최근값 기준**: 최근 5건 평균은 append 순서가 아니라 `recorded_at` 및 `task_id` 기준으로 산정.
 - **문서 클래스 구분**: Authority / Operational guide / Product/runtime doc / Plan/archive를 구분하고, 권위 규칙은 Authority 문서에만 둠.
 - **commit/merge/push 세트 규칙**: 모든 Tier에서 commit/merge(Tier 2/3)/push는 항상 세트. 요청 여부와 무관하게 push까지 완료해야 작업 완료. push 없이 `TASK_COMPLETED` 기록 금지. (Non-git 작업공간 모드 제외)
+- **머지 후 브랜치 정리**: `git branch --merged main`으로 완료 브랜치를 확인하고 머지 완료된 로컬 `task/{TASK-ID}` 브랜치를 삭제한 뒤 남은 브랜치 목록을 원장 또는 보고서에 요약.
 - **대표 보고용 품질 점수 표시**: 보고서에는 JSON 원문보다 `95점 / 100점 (S등급)` 형식의 요약, 구분 표, 좋았던 점, 감점/주의를 먼저 표시. JSON은 내부 원장 또는 부록용.
 - **JSON/JSONL 언어 기준**: `tasks/specs/*.json`과 `logs/tasks/*.jsonl`은 영어 작성 가능·권장. 세션 로그(`logs/sessions/*.md`)와 최종 보고서(`reports/*.md`)만 한국어 작성 필수.
 
@@ -84,14 +85,14 @@
 
 ## 활성 Task
 
-현재 진행 중인 Task 없음.
+현재 진행 중인 Task: TASK-20260427-086 머지 후 브랜치 정리 규칙 강화.
 마지막 완료 Task: TASK-20260427-085 JSON/JSONL 언어 기준 명확화 (2026-04-27)
 
 ---
 
 ## 남은 작업
 
-현재 미완료 작업 없음. JSON/JSONL 언어 기준 명확화 완료 상태.
+현재 미완료 작업: TASK-20260427-086 완료 및 push 필요.
 Git 인수인계: `main`은 `origin/main`과 동기화된 상태에서 다음 작업을 시작해야 한다. 다음 세션은 `git status --short --branch`로 동기화 상태를 먼저 확인해 보고한다.
 
 ---

@@ -1,0 +1,41 @@
+{
+  "task_id": "TASK-20260427-086",
+  "created_at": "2026-04-27T10:41:00+09:00",
+  "complexity_tier": "Tier2",
+  "tier_rationale": "This updates git branch policy guidance and records cleanup of already-merged local branches. It does not modify runtime product code.",
+  "status": "ACTIVE",
+  "depends_on": ["TASK-20260427-085"],
+  "request_summary": "Clean up merged task branches and strengthen the guide so branch deletion is not missed after merge and push.",
+  "goal": "Delete local branches that have already been merged into main and update the branch policy completion checklist to require merged branch cleanup evidence.",
+  "constraints": {
+    "positive": [
+      "Delete only branches confirmed as merged into main.",
+      "Keep main and origin/main intact.",
+      "Update git branch policy with a completion checklist item for branch cleanup.",
+      "Record cleanup result in session/report/ledger."
+    ],
+    "negative": [
+      "Do not delete unmerged branches.",
+      "Do not rewrite history.",
+      "Do not modify runtime product code.",
+      "Do not include secrets, tokens, passwords, or PII."
+    ]
+  },
+  "success_criteria": [
+    "Merged local branches fix/encoding-repair, task/TASK-20260427-084, and task/TASK-20260427-085 are deleted.",
+    "docs/operations/git-branch-policy.md explicitly requires post-merge local branch cleanup verification.",
+    "CURRENT_STATE.md reflects the guide version update and completed task.",
+    "node scripts/check-doc-headers.mjs passes.",
+    "git branch --list shows no stale merged task branches from TASK-20260427-084 or TASK-20260427-085."
+  ],
+  "assigned_agents": ["Analyst"],
+  "context": {
+    "relevant_history": "After TASK-20260427-083 through TASK-20260427-085, merged local branches remained in the repository even though git-branch-policy.md already says task branches should be deleted after merge.",
+    "reference_docs": [
+      "docs/operations/git-branch-policy.md",
+      "CURRENT_STATE.md",
+      "docs/operations/work-history-policy.md"
+    ],
+    "artifact_refs": []
+  }
+}

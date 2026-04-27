@@ -1,6 +1,6 @@
 # Git Branch Policy — 브랜치 격리 정책
 
-**버전:** 1.6 | **최종 수정:** 2026-04-26  
+**버전:** 1.7 | **최종 수정:** 2026-04-27  
 **원칙:** 모든 생성 작업은 전용 브랜치에서 수행한다. Generator는 main에 직접 접근하지 않는다.  
 **권위 문서:** 머지 조건·승인 주체에 관한 규칙은 이 문서가 단일 기준(Single Source of Truth)이다. SECURITY.md와 각 에이전트 문서는 이 문서를 참조하며 독자적인 규칙을 정의하지 않는다.
 
@@ -88,6 +88,8 @@ task/{TASK-ID}
    [Tier 3] Validator-A + Validator-B 둘 다 PASS + Analyst 승인 → Validator-A가 머지 실행
 
 6. 머지 완료 후 task/{TASK-ID} 브랜치 삭제
+   git branch -d task/{TASK-ID}
+   git branch --merged main
 ```
 
 ---
@@ -155,6 +157,8 @@ Squash merge 시 아래 순서를 따른다.
 6. Validator 결과와 Tier가 포함된 squash commit을 생성한다.
 7. 최종 감사 스크립트 3종을 실행한다.
 8. `git status --short --branch`로 `main` 상태와 `origin/main` ahead 여부를 확인해 사용자에게 보고한다.
+9. `git branch --merged main`으로 머지된 작업 브랜치를 확인하고, 완료된 `task/{TASK-ID}` 브랜치를 삭제한다.
+10. 삭제 후 `git branch --list` 결과를 원장 또는 보고서에 요약한다.
 
 커밋 해시 기록 주의:
 
@@ -178,6 +182,9 @@ push 완료 후 필수 기록:
 [ ] `MERGE_COMPLETED.details.push_status`를 `PUSHED`로 기록
 [ ] push 대상 remote/branch 기록 (`origin/main`)
 [ ] push 전후 `git status --short --branch` 결과를 원장 또는 보고서에 요약
+[ ] `git branch --merged main`으로 완료 브랜치 병합 여부 확인
+[ ] 완료된 로컬 `task/{TASK-ID}` 브랜치 삭제
+[ ] 삭제 후 남은 로컬 브랜치 목록을 원장 또는 보고서에 요약
 ```
 
 금지:
@@ -186,7 +193,28 @@ push 완료 후 필수 기록:
 [ ] push하지 않았는데 원격 반영 완료로 보고
 [ ] push 실패를 Task COMPLETE로 숨기기
 [ ] push 없이 작업 완료로 처리
+[ ] 머지 완료된 task 브랜치를 이유 없이 남겨두기
 ```
+
+### Post-merge Branch Cleanup
+
+머지와 push가 끝난 뒤에는 로컬 작업 브랜치를 정리한다. 브랜치 정리는 이력 삭제가 아니라 로컬 작업공간 정리이며, main에 반영된 커밋은 유지된다.
+
+권장 명령:
+
+```powershell
+git branch --merged main
+git branch -d task/TASK-YYYYMMDD-NNN
+git branch --list
+```
+
+규칙:
+
+- `git branch --merged main`에 표시되는 완료 브랜치만 삭제한다.
+- 현재 체크아웃된 브랜치와 `main`은 삭제하지 않는다.
+- 삭제 대상에 확신이 없으면 삭제하지 말고 보고서에 남김 사유를 적는다.
+- 원격 task 브랜치가 존재한다면 별도 승인 없이 삭제하지 않는다. 우선 사용자에게 보고한다.
+- 완료 보고에는 삭제한 브랜치와 삭제 후 남은 브랜치 목록을 요약한다.
 
 ### Squash 머지 커밋 메시지 형식
 
