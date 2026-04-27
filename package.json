@@ -1,5 +1,6 @@
 {
   "scripts": {
-    "audit:harness": "node scripts/audit-harness.mjs"
+    "audit:harness": "node scripts/audit-harness.mjs",
+    "check:encoding": "node scripts/check-encoding.mjs"
   }
 }

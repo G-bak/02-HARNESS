@@ -434,14 +434,14 @@ async function handleListTemplates(env) {
 
 async function handleCreateTemplate(request, env) {
   let body;
-  try { body = await request.json(); } catch { return err('??? ?????.', 400, env); }
-  if (!body.subject || !body.body_html) return err('??? ??? ?????.', 400, env);
+  try { body = await request.json(); } catch { return err('잘못된 요청입니다.', 400, env); }
+  if (!body.subject || !body.body_html) return err('제목과 본문은 필수입니다.', 400, env);
 
   const result = await env.DB.prepare(
     'INSERT INTO templates (subject,preview_text,body_html,body_text) VALUES (?,?,?,?) RETURNING id'
   ).bind(body.subject, body.preview_text || null, body.body_html, body.body_text || null).first();
 
-  return json({ id: result.id, message: '???? ???????.' }, 201, env);
+  return json({ id: result.id, message: '템플릿이 생성되었습니다.' }, 201, env);
 }
 
 async function handleGetTemplate(id, env) {
@@ -452,11 +452,11 @@ async function handleGetTemplate(id, env) {
 
 async function handlePatchTemplate(id, request, env) {
   let body;
-  try { body = await request.json(); } catch { return err('?섎せ???붿껌?낅땲??', 400, env); }
+  try { body = await request.json(); } catch { return err('잘못된 요청입니다.', 400, env); }
 
   const tpl = await env.DB.prepare('SELECT id FROM templates WHERE id=?').bind(id).first();
   if (!tpl) return err('템플릿을 찾을 수 없습니다.', 404, env);
-  if (!body.subject || !body.body_html) return err('?쒕ぉ怨?蹂몃Ц? ?꾩닔?낅땲??', 400, env);
+  if (!body.subject || !body.body_html) return err('제목과 본문은 필수입니다.', 400, env);
 
   await env.DB.prepare(
     "UPDATE templates SET subject=?, preview_text=?, body_html=?, body_text=?, updated_at=datetime('now') WHERE id=?"
@@ -474,23 +474,23 @@ async function handleDeleteTemplate(id, env) {
 
 async function handleCreateCampaign(request, env) {
   let body;
-  try { body = await request.json(); } catch { return err('??? ?????.', 400, env); }
-  if (!body.subject || !body.body_html) return err('??? ??? ?????.', 400, env);
+  try { body = await request.json(); } catch { return err('잘못된 요청입니다.', 400, env); }
+  if (!body.subject || !body.body_html) return err('제목과 본문은 필수입니다.', 400, env);
   const templateId = body.template_id === undefined || body.template_id === null || body.template_id === "" ? null : Number(body.template_id);
-  if (templateId !== null && !Number.isFinite(templateId)) return err('??? ?????.', 400, env);
+  if (templateId !== null && !Number.isFinite(templateId)) return err('잘못된 템플릿 ID입니다.', 400, env);
   if (templateId !== null) {
     const tpl = await env.DB.prepare('SELECT id FROM templates WHERE id=?').bind(templateId).first();
-    if (!tpl) return err('???? ?? ? ????.', 404, env);
+    if (!tpl) return err('템플릿을 찾을 수 없습니다.', 404, env);
   }
 
   const result = await env.DB.prepare(
     'INSERT INTO campaigns (subject,preview_text,body_html,body_text,template_id) VALUES (?,?,?,?,?) RETURNING id'
   ).bind(body.subject, body.preview_text || null, body.body_html, body.body_text || null, templateId).first();
 
-  return json({ id: result.id, message: '?????????.' }, 201, env);
+  return json({ id: result.id, message: '캠페인이 생성되었습니다.' }, 201, env);
 }
 
-// ???? ???????? ??????????????????????????????????????????????????????????????????????????????????
+// 캠페인 목록
 async function handleListCampaigns(url, env) {
   const status = url.searchParams.get('status') || 'all';
   const page   = Math.max(1, parseInt(url.searchParams.get('page') || '1'));
