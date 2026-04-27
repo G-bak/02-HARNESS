@@ -1,6 +1,6 @@
 # Analyst 역할 문서
 
-**버전:** 2.6 | **최종 수정:** 2026-04-27
+**버전:** 2.7 | **최종 수정:** 2026-04-27
 
 Analyst는 하네스의 중심 조정자다.
 사용자 요청을 해석하고, 작업 원장을 만들고, Tier를 판단하고, 다른 에이전트에게 필요한 맥락만 추려서 지시하며, 최종 보고를 작성한다.
@@ -167,29 +167,33 @@ Research Summary 결과 처리:
 외부 CLI fallback 예시:
 
 ```bash
-codex exec --full-auto never -s workspace-write --json -m gpt-5.4 "{프롬프트}"
+codex exec --full-auto never -s workspace-write --json -m gpt-5.5 "{프롬프트}"
 ```
+
+`gpt-5.5`가 실행 CLI/account에서 지원되지 않으면 실패 사유를 기록하고 `gpt-5.4`로 fallback한다.
 
 | 옵션 | fallback 기본값 | 가능한 값 | 의미 |
 |---|---|---|---|
 | `--full-auto` | `--full-auto` | `--full-auto` | 격리 실행 중 승인 요청 없이 조사 수행 |
 | `-s` / `--sandbox` | `workspace-write` | `none` · `workspace-read` · `workspace-write` · `full` | 파일 접근 범위 |
 | `--json` | 사용 | flag (값 없음) | 결과를 JSON으로 출력 |
-| `-m` / `--model` | `gpt-5.4` | 모델 ID 문자열 | 사용할 모델. 오타 시 즉시 abort |
+| `-m` / `--model` | `gpt-5.5` if supported, else `gpt-5.4` | 모델 ID 문자열 | 사용할 모델. 미지원 시 기록 후 fallback |
 | `-q` / `--quiet` | 선택 | flag (값 없음) | 진행 로그 숨김 |
 
-#### Codex CLI 모델 선택표
+#### Researcher 모델 선택표
 
-| 모델 ID | 속도 | 입력 비용(credits/1M) | 최적 용도 | 사용 가능 여부 |
-|---|---|---|---|---|
-| `gpt-5.4` | 중간 | 62.5 | 일반 추론 · 외부 기술 조사 (하네스 기본값) | API key + ChatGPT |
-| `gpt-5.4-mini` | 빠름 | 18.75 | 고빈도 자동화 · 비용 절감 | API key + ChatGPT |
-| `gpt-5.3-codex` | 빠름 (61.9 tok/s) | 43.75 | 터미널/CLI 자동화 · 순수 코드 | API key + ChatGPT |
-| `gpt-5.2` | 중간 | 43.75 | 레거시 호환 | API key |
-| `gpt-5.5` | 중간 | 125 | — | API key 불가 ❌ |
-| `gpt-5.3-codex-spark` | 매우 빠름 | 비공개 | — | ChatGPT Pro 전용 ❌ |
+| 조사 유형 | 우선 모델 | fallback | Analyst 판단 |
+|---|---|---|---|
+| 단순 사실 확인, 공식 문서 한두 개 확인 | `gpt-5.4-mini` 또는 현재 세션 모델 | `gpt-5.4` | 비용과 속도 우선. Researcher 분리 호출 자체가 불필요할 수 있다. |
+| 일반 외부 기술 조사, API 문서 요약 | 최신 지원 flagship 모델 (`gpt-5.5` 지원 시 우선) | `gpt-5.4` | 기본 외부 CLI fallback 기준. |
+| 여러 출처 충돌 판정, 보안·아키텍처 영향 조사 | 최신 지원 flagship 모델 (`gpt-5.5` 지원 시 우선) | `gpt-5.4` | 출처 선별과 판단 품질 우선. |
+| 장시간 고난도 조사, 의사결정 근거 정리 | 최신 지원 pro/advanced 모델 (`gpt-5.5-pro` 지원 시 선택) | 최신 지원 flagship 모델 | 비용 증가를 감수할 가치가 있는 경우만 선택. |
 
-> `gpt-5.5`·`gpt-5.3-codex-spark`는 API key 미지원 — 자동화 스크립트 사용 금지.
+기록 규칙:
+
+- Researcher 외부 CLI fallback을 실행하면 사용 모델, fallback 여부, 실패한 모델 ID, command, sandbox를 원장 또는 보고서에 남긴다.
+- 고위험 조사에 경량 모델을 사용하면 `confidence`를 HIGH로 올리지 않는다.
+- 최신 모델 사용 가능 여부는 문서가 아니라 실행 CLI/account 결과로 최종 판단한다.
 
 **모델 ID 오류 시 동작:**
 

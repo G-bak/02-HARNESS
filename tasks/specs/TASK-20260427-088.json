@@ -1,0 +1,46 @@
+{
+  "task_id": "TASK-20260427-088",
+  "created_at": "2026-04-27T10:58:49+09:00",
+  "complexity_tier": "Tier2",
+  "tier_rationale": "This updates multiple operational guide documents with Researcher model-selection policy. It does not modify runtime product code.",
+  "status": "COMPLETE",
+  "depends_on": ["TASK-20260427-087"],
+  "request_summary": "Persist the Researcher model-selection guidance so it is not lost after the session.",
+  "goal": "Document an available-first Researcher model policy: use the strongest current supported model for high-value research, use lightweight models for low-risk lookups, and fallback to supported prior models when the latest model is unavailable.",
+  "constraints": {
+    "positive": [
+      "Update Researcher and Analyst guides with tiered model-selection criteria.",
+      "Update CURRENT_STATE.md authority versions and core decisions.",
+      "Preserve Analyst-mediated Researcher execution.",
+      "Record the official-docs basis and the availability check requirement."
+    ],
+    "negative": [
+      "Do not hardcode unsupported model usage as mandatory.",
+      "Do not add runtime product code.",
+      "Do not remove the external CLI fallback execution recording requirement.",
+      "Do not allow Researcher to send results directly to Generator."
+    ]
+  },
+  "success_criteria": [
+    "docs/agents/researcher.md documents model selection by research risk and cost.",
+    "docs/agents/analyst.md mirrors the model policy for Researcher handoff and fallback selection.",
+    "CURRENT_STATE.md records the updated document versions and Researcher model policy.",
+    "The policy states latest supported model first for high-value research, lightweight model for low-risk lookup, and gpt-5.4 fallback when gpt-5.5 is unavailable.",
+    "npm run check:encoding and node scripts/check-doc-headers.mjs pass.",
+    "Merged local task branch is deleted after main push."
+  ],
+  "assigned_agents": ["Analyst"],
+  "context": {
+    "relevant_history": "TASK-20260427-087 clarified Researcher execution as an Analyst-invoked role/procedure with Codex CLI as optional fallback. The current task persists model-selection guidance discussed in the session.",
+    "source_basis": [
+      "OpenAI API Models documentation indicated GPT-5.5 as the current strongest starting point when available.",
+      "Availability must be verified in the executing CLI/account before using a model ID."
+    ],
+    "reference_docs": [
+      "docs/agents/researcher.md",
+      "docs/agents/analyst.md",
+      "CURRENT_STATE.md"
+    ],
+    "artifact_refs": []
+  }
+}
