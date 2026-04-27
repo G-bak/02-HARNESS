@@ -1,0 +1,43 @@
+{
+  "task_id": "TASK-20260427-089",
+  "created_at": "2026-04-27T11:05:57+09:00",
+  "complexity_tier": "Tier2",
+  "tier_rationale": "This updates multiple operational role guide documents to require role-based Researcher routing for search/research/current-fact requests. It does not modify runtime product code.",
+  "status": "COMPLETE",
+  "depends_on": ["TASK-20260427-088"],
+  "request_summary": "Strengthen the guides so research/search/current-fact work is routed through the Researcher role instead of being treated as an Analyst-only answer.",
+  "goal": "Document a role-first routing rule: if a user asks for search, research, current external facts, official documentation verification, or model availability guidance, Analyst must create a Researcher instruction and execute the Researcher procedure, even if the procedure is performed inside the same session.",
+  "constraints": {
+    "positive": [
+      "Update Analyst guide with mandatory Researcher routing triggers.",
+      "Update Researcher guide so in-session execution still counts as Researcher work when the Researcher procedure and output are used.",
+      "Update CURRENT_STATE.md authority versions and core decisions.",
+      "Preserve the rule that external CLI fallback is optional unless explicitly needed or requested.",
+      "Require disclosure of the execution mode in the answer or records."
+    ],
+    "negative": [
+      "Do not require external CLI fallback for every research request.",
+      "Do not violate runtime platform restrictions on subagent spawning.",
+      "Do not allow Researcher to bypass Analyst.",
+      "Do not add runtime product code."
+    ]
+  },
+  "success_criteria": [
+    "docs/agents/analyst.md states that user requests for search/research/latest/current external facts/official docs/model availability must be routed through Researcher procedure.",
+    "docs/agents/analyst.md distinguishes Researcher role routing from external CLI fallback and prevents Analyst-only answers for research triggers.",
+    "docs/agents/researcher.md defines in-session Researcher execution as valid only when the Researcher instruction, source review, confidence, and Research Summary are produced.",
+    "CURRENT_STATE.md records the updated document versions and role-first research routing decision.",
+    "npm run check:encoding and node scripts/check-doc-headers.mjs pass.",
+    "Merged local task branch is deleted after main push."
+  ],
+  "assigned_agents": ["Analyst"],
+  "context": {
+    "relevant_history": "The assistant previously answered a model-selection question using session web search without clearly routing it as Researcher work. The user wants role-based execution to be mandatory.",
+    "reference_docs": [
+      "docs/agents/analyst.md",
+      "docs/agents/researcher.md",
+      "CURRENT_STATE.md"
+    ],
+    "artifact_refs": []
+  }
+}
