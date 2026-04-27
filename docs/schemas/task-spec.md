@@ -1,6 +1,6 @@
 # Task Spec — 스키마 정의
 
-**버전:** 1.4 | **최종 수정:** 2026-04-26  
+**버전:** 1.5 | **최종 수정:** 2026-04-27  
 **작성자:** Analyst | **소비자:** Generator, Validator (일부 필드는 Researcher)
 
 ---
@@ -44,6 +44,7 @@
 ## 저장 위치
 
 Task Spec 원본은 아래 둘 중 하나에 반드시 저장한다.
+Task Spec은 구조화 JSON 산출물이므로 영어로 작성할 수 있으며, 에이전트 전달과 자동 검증을 위해 영어 사용을 권장한다.
 
 권장 SSOT:
 
@@ -72,6 +73,8 @@ logs/tasks/TASK-{ID}.jsonl 의 TASK_CREATED.details.spec_path = "tasks/specs/TAS
 - `tasks/specs/` 디렉터리가 없으면 Analyst가 생성한다.
 - 신규 strict Task는 `tasks/specs/TASK-{ID}.json`, `TASK_CREATED.details.spec`, `TASK_CREATED.details.spec_path` 중 하나가 없으면 `validate-ledger`에서 실패한다.
 - 과거 legacy Task에 원본 Spec이 없으면 기존 이벤트를 수정하지 않고 `CORRECTION.details.legacy_spec_omission_reason`을 append 한다.
+- 필드명, enum, status, tier 값은 영어를 유지한다.
+- 자유 텍스트 필드는 영어로 작성할 수 있다. 사용자 요청 원문이나 한국어 UI 문구를 보존해야 할 때만 한국어를 포함한다.
 
 ---
 
