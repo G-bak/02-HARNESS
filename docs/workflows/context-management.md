@@ -1,6 +1,6 @@
 # Context Management — 컨텍스트 관리 전략
 
-**버전:** 1.0 | **최종 수정:** 2026-04-24  
+**버전:** 1.1 | **최종 수정:** 2026-04-28
 **원칙:** 길이보다 high-signal. 목표 달성에 직접 필요한 정보만 남겨야 모델이 집중할 수 있다.
 
 ---
@@ -48,6 +48,50 @@
 ❌ (압축 가능) 탐색 과정의 원문 데이터
 ❌ (압축 가능) 검증 단계의 개별 체크 결과 (최종 판정만 보존)
 ```
+
+---
+
+## 작업 종료 인사이트 캡처
+
+작업 중 새로 알게 된 운영 지식, 반복 오류 원인, 스크립트/도구의 실제 동작 차이, 다음 세션에서 반드시 기억해야 할 설계 판단은 `logs/insights.jsonl`에 장기 인사이트로 남긴다.
+
+기록 대상:
+
+```
+✅ 문서와 실제 도구 동작이 달랐던 부분
+✅ 후속 작업에서 같은 실수를 막는 안전 규칙
+✅ Validator/Generator/Researcher 호출 방식에 영향을 주는 발견
+✅ 실패 원인과 재발 방지책
+✅ 가이드 문서에 반영했거나 반영 후보로 남길 내용
+```
+
+기록하지 않는 대상:
+
+```
+❌ 단순 진행 상황
+❌ 일회성 명령 출력
+❌ 민감 정보, 환경변수 값, 사용자 비밀값
+❌ 최종 보고서만 보면 충분한 일반 요약
+```
+
+권장 JSONL 형식:
+
+```json
+{
+  "recorded_at": "ISO8601",
+  "task_id": "TASK-YYYYMMDD-NNN",
+  "category": "generator-wrapper | validator-loop | researcher | git-policy | audit",
+  "summary": "짧은 인사이트",
+  "details": "왜 다음 세션에서 기억해야 하는지",
+  "source_refs": ["파일 또는 보고서 경로"],
+  "guide_update": {
+    "status": "applied | candidate | not_needed",
+    "paths": ["docs/..."]
+  }
+}
+```
+
+세션 재진입 시 Analyst는 `CURRENT_STATE.md`와 함께 최근 관련 `logs/insights.jsonl` 항목을 확인해 다음 Task 인수인계에 반영한다. 모든 인사이트를 매번 전달하지 않고, 현재 Task와 직접 관련된 항목만 L2/L3 컨텍스트로 사용한다.
 
 ---
 

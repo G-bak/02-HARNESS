@@ -1,6 +1,6 @@
 # Work History Policy
 
-**버전:** 1.12 | **최종 수정:** 2026-04-27
+**버전:** 1.13 | **최종 수정:** 2026-04-28
 
 이 문서는 작업 이력의 저장 위치, 기록 시점, 책임 주체를 정의한다.
 
@@ -253,6 +253,7 @@ commit/merge/push는 항상 세트다. 모든 작업은 push까지 완료해야 
 - 보고서 게이트에 따라 `reports/TASK-{ID}.md`가 작성되어야 한다.
 - 품질 점수 게이트에 따라 `logs/quality-scores.jsonl`에 점수가 기록되어야 한다.
 - 파일 변경이 1건이라도 있으면 `logs/sessions/SESSION-{YYYYMMDD}-{NNN}.md` 갱신이 **commit보다 먼저** 완료되어야 한다.
+- 작업 중 새로 알게 된 재사용 가능한 운영 인사이트가 있으면 `logs/insights.jsonl`에 기록하거나, `TASK_COMPLETED.details.insight_capture`에 `not_needed` 사유를 남겨야 한다.
 
 **세션 로그 갱신은 git add/commit 이전 마지막 단계다. 순서를 바꾸지 않는다.**
 
@@ -275,6 +276,41 @@ Tier 2/3 추가 완료 조건:
 - git 저장소 모드에서 완료하는 경우 `MERGE_COMPLETED`가 존재해야 한다. 머지를 수행하지 않은 로컬/가이드 보정 작업은 `TASK_COMPLETED.details.merge_omission_reason`에 사유를 남긴다.
 - 완료 시점에 작업공간이 dirty라면 `TASK_COMPLETED.details.git_dirty_allowed_reason`에 사유를 남긴다. 이 사유는 임시 허용이며, 제품 코드 작업에서는 사용할 수 없다.
 - Task Spec SSOT가 `tasks/specs/TASK-{ID}.json`, `TASK_CREATED.details.spec`, `TASK_CREATED.details.spec_path` 중 하나로 존재해야 한다. Legacy 작업은 `CORRECTION.details.legacy_spec_omission_reason`이 있어야 감사 통과가 가능하다.
+
+### 인사이트 캡처 게이트
+
+Analyst는 `TASK_COMPLETED` 직전에 아래 질문을 확인한다.
+
+```text
+[ ] 이번 작업에서 다음 세션이나 다른 에이전트가 잊으면 같은 오류를 반복할 지식이 생겼는가?
+[ ] 도구 실제 동작, CLI 옵션, 권한 경계, 감사 실패 원인처럼 문서보다 운영 경험이 중요한 내용이 있었는가?
+[ ] 그 내용이 이미 권위 문서/운영 가이드/세션 로그/보고서 중 한 곳에 충분히 반영됐는가?
+```
+
+재사용 가능한 인사이트가 있으면 `logs/insights.jsonl`에 append 한다. 동시에 `TASK_COMPLETED.details.insight_capture`에는 아래 중 하나를 기록한다.
+
+```json
+{
+  "insight_capture": {
+    "status": "recorded",
+    "path": "logs/insights.jsonl",
+    "count": 1
+  }
+}
+```
+
+또는:
+
+```json
+{
+  "insight_capture": {
+    "status": "not_needed",
+    "reason": "No reusable operational insight beyond the final report."
+  }
+}
+```
+
+인사이트가 권위 규칙 변경을 요구하면 별도 Task로 문서 개정한다. 단순 발견이나 운영 팁이면 `logs/insights.jsonl`과 관련 운영 가이드에만 기록한다.
 
 ### 보고서 게이트
 

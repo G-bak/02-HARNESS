@@ -21,18 +21,18 @@
 | 전체 에이전트 구조·절대규칙 | `AGENTS.md` | v1.7 | 2026-04-26 |
 | 시스템 아키텍처 | `ARCHITECTURE.md` | v1.2 | 2026-04-26 |
 | 보안 규칙 | `SECURITY.md` | v1.3 | 2026-04-26 |
-| Analyst 역할·보고·리셋 | `docs/agents/analyst.md` | v2.9 | 2026-04-27 |
+| Analyst 역할·보고·리셋 | `docs/agents/analyst.md` | v3.0 | 2026-04-28 |
 | Validator 역할·검증 절차 | `docs/agents/validator.md` | v1.4 | 2026-04-26 |
 | Generator 역할 | `docs/agents/generator.md` | v1.5 | 2026-04-27 |
 | Researcher 역할 | `docs/agents/researcher.md` | v1.5 | 2026-04-27 |
 | 머지 조건·승인 주체 (권위) | `docs/operations/git-branch-policy.md` | v1.7 | 2026-04-27 |
 | 도구 권한 | `docs/operations/tool-permissions.md` | v1.8 | 2026-04-27 |
 | 외부 알림 정책 | `docs/operations/notification-policy.md` | v1.6 | 2026-04-26 |
-| 작업 이력 저장 정책 | `docs/operations/work-history-policy.md` | v1.12 | 2026-04-27 |
+| 작업 이력 저장 정책 | `docs/operations/work-history-policy.md` | v1.13 | 2026-04-28 |
 | Tier 분류 기준 | `docs/workflows/tier-classification.md` | v1.3 | 2026-04-26 |
 | Task 수명 주기 | `docs/workflows/task-lifecycle.md` | v1.17 | 2026-04-27 |
 | 실패 처리 | `docs/workflows/failure-handling.md` | v1.3 | 2026-04-25 |
-| 컨텍스트 관리 | `docs/workflows/context-management.md` | v1.0 | 2026-04-24 |
+| 컨텍스트 관리 | `docs/workflows/context-management.md` | v1.1 | 2026-04-28 |
 | Task Spec 스키마 | `docs/schemas/task-spec.md` | v1.5 | 2026-04-27 |
 | 에이전트 출력 형식 | `docs/schemas/output-formats.md` | v1.18 | 2026-04-27 |
 | 품질 루브릭 | `QUALITY_SCORE.md` | v1.3 | 2026-04-26 |
@@ -84,6 +84,7 @@
 - **머지 후 브랜치 정리**: `git branch --merged main`으로 완료 브랜치를 확인하고 머지 완료된 로컬 `task/{TASK-ID}` 브랜치를 삭제한 뒤 남은 브랜치 목록을 원장 또는 보고서에 요약.
 - **대표 보고용 품질 점수 표시**: 보고서에는 JSON 원문보다 `95점 / 100점 (S등급)` 형식의 요약, 구분 표, 좋았던 점, 감점/주의를 먼저 표시. JSON은 내부 원장 또는 부록용.
 - **JSON/JSONL 언어 기준**: `tasks/specs/*.json`과 `logs/tasks/*.jsonl`은 영어 작성 가능·권장. 세션 로그(`logs/sessions/*.md`)와 최종 보고서(`reports/*.md`)만 한국어 작성 필수.
+- **작업 종료 인사이트 캡처**: Task 완료 전 재사용 가능한 운영 인사이트를 확인하고, 있으면 `logs/insights.jsonl`에 기록한다. 없으면 `TASK_COMPLETED.details.insight_capture.status=not_needed`와 사유를 남긴다.
 
 ---
 

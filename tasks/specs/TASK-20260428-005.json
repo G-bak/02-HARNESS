@@ -1,0 +1,39 @@
+{
+  "schema_version": "task-spec.v1",
+  "task_id": "TASK-20260428-005",
+  "title": "Document post-task engineering insight capture",
+  "task_tier": "Tier2",
+  "task_type": "harness-policy-doc-update",
+  "created_at": "2026-04-28T17:05:00+09:00",
+  "goal": "Clarify recent Generator wrapper work execution mode and Tier, and strengthen the harness process for recording newly learned operational insights for future sessions.",
+  "scope": {
+    "include": [
+      "docs/workflows/context-management.md",
+      "docs/operations/work-history-policy.md",
+      "docs/agents/analyst.md",
+      "logs/insights.jsonl",
+      "task ledger, session log, report"
+    ],
+    "exclude": [
+      "Product runtime code",
+      "Generator/Validator automation implementation"
+    ]
+  },
+  "success_criteria": [
+    "The user receives a direct answer about whether the last work used Generator Claude CLI.",
+    "The user receives the Tier classification of the last work.",
+    "The harness records the newly learned Generator wrapper insights in long-term memory.",
+    "Analyst post-task insight capture is documented as a completion step.",
+    "Audits pass."
+  ],
+  "constraints": {
+    "positive": [
+      "Prefer existing logs/insights.jsonl and context-management policy.",
+      "Keep the rule concise and discoverable during session re-entry."
+    ],
+    "negative": [
+      "Do not include secrets, credentials, PII, or environment variable values.",
+      "Do not claim real Generator execution happened if it did not."
+    ]
+  }
+}
