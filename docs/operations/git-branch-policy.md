@@ -1,6 +1,6 @@
 # Git Branch Policy — 브랜치 격리 정책
 
-**버전:** 1.7 | **최종 수정:** 2026-04-27  
+**버전:** 1.8 | **최종 수정:** 2026-04-28  
 **원칙:** 모든 생성 작업은 전용 브랜치에서 수행한다. Generator는 main에 직접 접근하지 않는다.  
 **권위 문서:** 머지 조건·승인 주체에 관한 규칙은 이 문서가 단일 기준(Single Source of Truth)이다. SECURITY.md와 각 에이전트 문서는 이 문서를 참조하며 독자적인 규칙을 정의하지 않는다.
 
@@ -200,21 +200,56 @@ push 완료 후 필수 기록:
 
 머지와 push가 끝난 뒤에는 로컬 작업 브랜치를 정리한다. 브랜치 정리는 이력 삭제가 아니라 로컬 작업공간 정리이며, main에 반영된 커밋은 유지된다.
 
-권장 명령:
+#### 검증 기준 — Squash 트리 동등성 (Squash Tree Equivalence)
 
-```powershell
-git branch --merged main
-git branch -d task/TASK-YYYYMMDD-NNN
-git branch --list
+이 저장소는 squash merge를 기본으로 쓰기 때문에 task 브랜치 tip은 main의 ancestor가 되지 않는다. 따라서 git의 `--merged` 검사(`git branch --merged main`)는 항상 false negative이고, `git branch -d`도 거부된다. 또한 단순 `git diff main..<branch>`는 main이 squash 후 다른 task로 진행된 경우 false positive(아직 안 머지된 것처럼 보임)를 낸다. 이 절은 두 한계를 동시에 피하기 위해 **squash 커밋의 트리와 브랜치 tip의 트리를 직접 비교**한다.
+
+```bash
+# branch가 main에 squash로 반영됐는지 확인하는 안전한 방법
+task_id="TASK-YYYYMMDD-NNN"
+branch_tree=$(git rev-parse "task/${task_id}^{tree}")
+squash_commit=$(git log main --grep "\\[${task_id}\\]" --reverse --pretty=format:%H | head -1)
+squash_tree=$(git rev-parse "${squash_commit}^{tree}")
+[ "$branch_tree" = "$squash_tree" ] && echo "MATCH (safe to delete)" || echo "DIFFER (keep)"
 ```
 
-규칙:
+이 검사가 정확한 이유:
 
-- `git branch --merged main`에 표시되는 완료 브랜치만 삭제한다.
-- 현재 체크아웃된 브랜치와 `main`은 삭제하지 않는다.
-- 삭제 대상에 확신이 없으면 삭제하지 말고 보고서에 남김 사유를 적는다.
-- 원격 task 브랜치가 존재한다면 별도 승인 없이 삭제하지 않는다. 우선 사용자에게 보고한다.
-- 완료 보고에는 삭제한 브랜치와 삭제 후 남은 브랜치 목록을 요약한다.
+- main의 **첫 번째** `[TASK-ID]` 커밋이 squash merge 그 자체다. 이후 main에 추가된 후속 작업(다른 task)이 같은 파일을 건드려도 squash 커밋의 트리는 그대로 남아 있다.
+- 브랜치 tip의 트리가 squash 커밋의 트리와 **완전히 같다면**, 그 브랜치의 모든 기여가 main에 반영됐다는 결정적 증거다.
+- 트리가 다르면 두 가지 의미: (a) squash 후 브랜치에 추가 커밋이 있음, 또는 (b) main에 머지된 적이 없음. 둘 다 보존이 안전.
+
+#### 권장 명령
+
+```bash
+# 1. 자동 정리 (스크립트, 권장)
+npm run clean:branches                                                  # dry-run 보고만
+npm run clean:branches -- --force                                       # 트리 동등성 통과한 브랜치 일괄 -D
+npm run clean:branches -- --branch task/TASK-YYYYMMDD-NNN --force      # 단일 브랜치 정리
+
+# 2. 수동 검증 (스크립트 신뢰가 어려울 때만)
+git rev-parse "task/${task_id}^{tree}"
+git log main --grep "\\[${task_id}\\]" --reverse --pretty=format:%H | head -1 | xargs -I{} git rev-parse "{}^{tree}"
+```
+
+#### 규칙
+
+- 브랜치 tip의 tree 객체와 main의 첫 번째 `[TASK-ID]` 커밋의 tree 객체가 **identical**인 브랜치만 삭제한다.
+- 현재 체크아웃된 브랜치와 `main`은 어떤 옵션 조합으로도 삭제하지 않는다.
+- 트리가 다르거나 main에 같은 task_id 커밋이 없으면 보존하고, 보고서에 보존 사유를 적는다.
+- 원격 task 브랜치(`origin/task/...`)는 별도 승인 없이 삭제하지 않는다. 우선 사용자에게 보고한다.
+- 완료 보고에는 검사한 브랜치, 삭제한 브랜치, 보존한 브랜치, 보존 사유를 요약한다.
+- `scripts/clean-merged-task-branches.mjs`는 기본 dry-run으로 동작하며, 삭제는 `--force` 명시가 필요하다.
+
+#### Legacy 명령 (참고)
+
+```bash
+git branch --merged main          # squash merge 환경에서는 main만 표시됨 (cleanup 단일 기준으로 부적합)
+git branch -d task/TASK-...       # squash 후엔 거의 항상 거부됨
+git diff main..task/TASK-...      # main이 진행된 경우 false positive 가능
+```
+
+위 명령들은 일반 merge 환경의 git 기본 안전장치이며, 본 저장소의 squash merge 기본 정책에서는 cleanup의 단일 기준으로 사용하지 않는다.
 
 ### Squash 머지 커밋 메시지 형식
 

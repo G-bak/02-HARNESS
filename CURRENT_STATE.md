@@ -3,7 +3,7 @@
 > Analyst가 유지·갱신하는 파일입니다. 새 세션 시작 시 이 파일을 먼저 읽으세요.
 > 새 세션 시작 방법: `/clear` 후 → "CURRENT_STATE.md를 읽고 이어서 진행해줘."
 
-**마지막 갱신:** 2026-04-28 (TASK-20260428-005 완료 — post-task insight capture policy)
+**마지막 갱신:** 2026-04-28 (TASK-20260428-006 완료 — Branch cleanup 정책 트리 동등성 격상 + 자동 정리 스크립트 + 잔존 4건 정리)
 
 ---
 
@@ -25,7 +25,7 @@
 | Validator 역할·검증 절차 | `docs/agents/validator.md` | v1.4 | 2026-04-26 |
 | Generator 역할 | `docs/agents/generator.md` | v1.5 | 2026-04-27 |
 | Researcher 역할 | `docs/agents/researcher.md` | v1.5 | 2026-04-27 |
-| 머지 조건·승인 주체 (권위) | `docs/operations/git-branch-policy.md` | v1.7 | 2026-04-27 |
+| 머지 조건·승인 주체 (권위) | `docs/operations/git-branch-policy.md` | v1.8 | 2026-04-28 |
 | 도구 권한 | `docs/operations/tool-permissions.md` | v1.8 | 2026-04-27 |
 | 외부 알림 정책 | `docs/operations/notification-policy.md` | v1.6 | 2026-04-26 |
 | 작업 이력 저장 정책 | `docs/operations/work-history-policy.md` | v1.13 | 2026-04-28 |
@@ -92,12 +92,13 @@
 
 현재 진행 중인 Task 없음.
 
-마지막 완료 Task: TASK-20260428-005 post-task insight capture policy (`docs/workflows/context-management.md`, `docs/operations/work-history-policy.md`, `docs/agents/analyst.md`, `logs/insights.jsonl`) (2026-04-28)
+마지막 완료 Task: TASK-20260428-006 Branch cleanup 정책 트리 동등성 격상 + `scripts/clean-merged-task-branches.mjs` + 잔존 4건 정리 (2026-04-28)
 
 ---
 
 ## 남은 작업
 
+- `task/TASK-20260427-092` 잔존 1건은 트리 동등성 검사에서 보존됨 (브랜치 tip이 main의 squash와 트리 차이). 별도 수동 검토 필요.
 - 다음 신규 Task에서 Validator-A 실행 wrapper와 retry handoff 자동 생성 파이프라인 설계 승인 후 구현 검토.
 - 후속 후보: `TASK_COMPLETED.details.insight_capture` 자동 감사 스크립트 연결.
 

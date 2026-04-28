@@ -1,0 +1,50 @@
+{
+  "schema_version": "task-spec.v1",
+  "task_id": "TASK-20260428-006",
+  "title": "Replace --merged check with tree-equivalence in branch cleanup policy + add automation script",
+  "task_tier": "Tier2",
+  "task_type": "harness-policy-doc-update + harness-automation",
+  "created_at": "2026-04-28T18:00:00+09:00",
+  "goal": "Fix the post-merge branch cleanup policy mismatch with squash-merge workflow by replacing git's --merged ancestor check with a tree-equivalence diff check, add a safe automation script, and clean up the five orphan task branches that accumulated under the old policy.",
+  "scope": {
+    "include": [
+      "docs/operations/git-branch-policy.md",
+      "scripts/clean-merged-task-branches.mjs",
+      "package.json",
+      "task ledger, session log, report, quality score, CURRENT_STATE"
+    ],
+    "exclude": [
+      "Product runtime code (api/, public/, wrangler.toml)",
+      "Generator/Validator runtime behavior",
+      "Other authority documents not directly related to branch cleanup"
+    ]
+  },
+  "success_criteria": [
+    "git-branch-policy.md Post-merge Branch Cleanup section requires `git diff main..task/{ID} --quiet` (tree equivalence) before deletion, replacing the prior reliance on `git branch --merged main`.",
+    "scripts/clean-merged-task-branches.mjs exists and supports --dry-run, --force, --branch <name> options. Default: dry-run report.",
+    "Script refuses to delete branches where `git diff main..<branch> --quiet` exits non-zero (unique work present).",
+    "Script refuses to delete the currently checked-out branch and `main`.",
+    "package.json exposes the script as `npm run clean:branches`.",
+    "Five orphan branches (task/TASK-20260427-092, task/TASK-20260428-001, task/TASK-20260428-002, task/TASK-20260428-004, task/TASK-20260428-005) are removed using the new script after tree-equivalence verification.",
+    "TASK-20260428-006 ledger has TASK_CREATED, INSTRUCTION_SENT, GENERATION_COMPLETED, VALIDATION_RESULT, REPORT_WRITTEN, MERGE_COMPLETED, TASK_COMPLETED with insight_capture.",
+    "reports/TASK-20260428-006.md exists with Executive Summary, validation results, branch cleanup outcome.",
+    "logs/quality-scores.jsonl has a row for TASK-20260428-006.",
+    "CURRENT_STATE.md `마지막 갱신` and `활성 Task` reflect this Task.",
+    "npm run audit:harness reports PASS.",
+    "task/TASK-20260428-006 itself is removed by the new script after main merge + push."
+  ],
+  "constraints": {
+    "positive": [
+      "Use only Node.js built-ins (no new npm dependencies).",
+      "Default behavior must be dry-run; deletion requires explicit --force flag.",
+      "Log every checked branch with its tree-diff outcome.",
+      "Record command shape and outcome in the task ledger."
+    ],
+    "negative": [
+      "Do not include secrets, credentials, PII, or environment variable values.",
+      "Do not modify other authority documents in the same Task.",
+      "Do not delete the current checked-out branch or main.",
+      "Do not push or modify origin remote branches."
+    ]
+  }
+}

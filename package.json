@@ -2,6 +2,7 @@
   "scripts": {
     "audit:harness": "node scripts/audit-harness.mjs",
     "check:encoding": "node scripts/check-encoding.mjs",
-    "run:generator": "node scripts/run-generator.mjs"
+    "run:generator": "node scripts/run-generator.mjs",
+    "clean:branches": "node scripts/clean-merged-task-branches.mjs"
   }
 }
