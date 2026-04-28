@@ -1,0 +1,42 @@
+{
+  "schema_version": "task-spec.v1",
+  "task_id": "TASK-20260428-003",
+  "title": "End-to-end review of Generator connection pipeline",
+  "task_tier": "Tier1",
+  "task_type": "review",
+  "requested_by": "user",
+  "created_at": "2026-04-28T16:00:00+09:00",
+  "goal": "Review the recently built Generator connection pipeline from start to finish and report completeness, edge cases, and improvement points.",
+  "scope": {
+    "include": [
+      "Generator handoff contract",
+      "Generator execution wrapper",
+      "Generator pipeline guide",
+      "Failure and retry guide",
+      "Agent role documents",
+      "Work history and completion gates",
+      "Recent task reports and ledgers related to Generator pipeline"
+    ],
+    "exclude": [
+      "Real Claude CLI generation",
+      "Implementation of follow-up fixes unless separately requested"
+    ]
+  },
+  "success_criteria": [
+    "Trace the pipeline from task creation through handoff, Generator execution, artifacts, validation boundary, retry handling, and reporting.",
+    "Identify concrete risks and edge cases with file references.",
+    "Distinguish automated behavior from manual/operator behavior.",
+    "Give a readiness assessment and prioritized improvement plan."
+  ],
+  "constraints": {
+    "positive": [
+      "Use local repository evidence.",
+      "Avoid executing real external Generator runs.",
+      "Run safe static or dry-run checks where useful."
+    ],
+    "negative": [
+      "Do not include secrets or environment variable values.",
+      "Do not modify production or harness behavior during this review."
+    ]
+  }
+}
