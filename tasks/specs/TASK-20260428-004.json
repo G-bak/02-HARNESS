@@ -1,0 +1,38 @@
+{
+  "schema_version": "task-spec.v1",
+  "task_id": "TASK-20260428-004",
+  "title": "Harden Generator wrapper safety gates",
+  "task_tier": "Tier2",
+  "task_type": "harness-script-change",
+  "created_at": "2026-04-28T16:15:00+09:00",
+  "goal": "Strengthen Generator wrapper branch isolation, task-scoped output path enforcement, and JSON result validation; explain remaining automation design before implementation.",
+  "scope": {
+    "include": [
+      "scripts/run-generator.mjs",
+      "docs/guides/generator-pipeline-ko.md",
+      "TASK ledger, spec, and session log"
+    ],
+    "exclude": [
+      "Validator-A wrapper implementation",
+      "Retry handoff generator implementation",
+      "Real Claude CLI generation"
+    ]
+  },
+  "success_criteria": [
+    "Wrapper rejects real Generator runs unless current branch is task/{TASK-ID}.",
+    "Wrapper constrains expected_output_path to tasks/handoffs/{TASK-ID}/.",
+    "Wrapper parses Generator stdout as JSON and validates required Generator output fields before marking PENDING_VALIDATION.",
+    "Markdown handoff behavior is explained and hardened.",
+    "Validator/retry automation design is provided to the user before implementation."
+  ],
+  "constraints": {
+    "positive": [
+      "Use dry-run and static checks only.",
+      "Keep changes tightly scoped."
+    ],
+    "negative": [
+      "Do not run real Claude CLI generation.",
+      "Do not implement Validator/retry automation before user approval."
+    ]
+  }
+}

@@ -32,9 +32,9 @@ Generator는 Claude CLI의 독립 실행 세션에서 동작한다.
 
 ```text
 tasks/handoffs/TASK-{ID}/generator-input.json
-또는
-tasks/handoffs/TASK-{ID}/generator-input.md
 ```
+
+wrapper 실행 입력은 JSON을 사용한다. Markdown handoff는 사람이 읽는 보조 문서로만 허용하며, 실제 Claude CLI Generator 실행에는 전달하지 않는다.
 
 결과 경로:
 

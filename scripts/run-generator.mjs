@@ -27,6 +27,7 @@ Options:
   --disallowed-tools <value> Override --disallowedTools value
   --fallback-model <model>   Optional Claude fallback model
   --allow-git-write          Add git branch/add/commit commands to the default allowedTools
+  --allow-non-task-branch    Allow real run outside task/<TASK-ID> for isolated local tests only
   --allow-bypass-permissions Allow permission-mode bypassPermissions for isolated test environments only
 `);
 }
@@ -40,6 +41,7 @@ function parseArgs(argv) {
     permissionMode: process.env.GENERATOR_PERMISSION_MODE || 'auto',
     fallbackModel: process.env.GENERATOR_CLAUDE_FALLBACK_MODEL || null,
     allowBypassPermissions: false,
+    allowNonTaskBranch: false,
     allowGitWrite: false,
     input: null,
     allowedTools: null,
@@ -66,6 +68,8 @@ function parseArgs(argv) {
       args.fallbackModel = argv[++index];
     } else if (arg === '--allow-bypass-permissions') {
       args.allowBypassPermissions = true;
+    } else if (arg === '--allow-non-task-branch') {
+      args.allowNonTaskBranch = true;
     } else if (arg === '--allow-git-write') {
       args.allowGitWrite = true;
     } else if (arg === '--allowed-tools') {
@@ -127,6 +131,17 @@ function resolveInsideRoot(inputPath) {
   return absolute;
 }
 
+function resolveInsideDirectory(inputPath, directoryPath, label) {
+  const absolute = resolveInsideRoot(inputPath);
+  const relative = path.relative(directoryPath, absolute);
+
+  if (relative.startsWith('..') || path.isAbsolute(relative)) {
+    throw new Error(`${label} must stay inside ${relativePath(directoryPath)}: ${inputPath}`);
+  }
+
+  return absolute;
+}
+
 function defaultInputPath(taskId) {
   const base = path.join(root, 'tasks', 'handoffs', taskId);
   const json = path.join(base, 'generator-input.json');
@@ -141,12 +156,7 @@ function parseHandoff(inputPath, taskId) {
   const raw = fs.readFileSync(inputPath, 'utf8');
 
   if (!inputPath.endsWith('.json')) {
-    return {
-      raw,
-      data: null,
-      outputPath: path.join(root, 'tasks', 'handoffs', taskId, 'generator-result.json'),
-      ledgerPath: path.join(root, 'logs', 'tasks', `${taskId}.jsonl`),
-    };
+    throw new Error('Markdown Generator handoff is disabled for wrapper execution. Use generator-input.json so refs, context, and output path can be validated.');
   }
 
   const data = JSON.parse(raw);
@@ -199,10 +209,16 @@ function parseHandoff(inputPath, taskId) {
     throw new Error(`Referenced ledger directory does not exist: ${relativePath(ledgerDir)}`);
   }
 
+  const handoffDir = path.join(root, 'tasks', 'handoffs', taskId);
+  const outputPath = resolveInsideDirectory(data.expected_output_path, handoffDir, 'expected_output_path');
+  if (!path.basename(outputPath).startsWith('generator-result') || path.extname(outputPath) !== '.json') {
+    throw new Error('expected_output_path must be a generator-result*.json file inside the task handoff directory.');
+  }
+
   return {
     raw,
     data,
-    outputPath: resolveInsideRoot(data.expected_output_path),
+    outputPath,
     ledgerPath,
     specPath,
   };
@@ -226,6 +242,8 @@ function commandArgs(args) {
     'text',
     '--output-format',
     'json',
+    '--json-schema',
+    generatorResultSchema(),
     '--no-session-persistence',
     '--permission-mode',
     args.permissionMode,
@@ -274,6 +292,191 @@ function inferTaskTier(handoff, fallback = 'Tier2') {
   } catch {
     return fallback;
   }
+}
+
+function generatorResultSchema() {
+  return JSON.stringify({
+    type: 'object',
+    additionalProperties: true,
+    required: [
+      'task_id',
+      'agent',
+      'status',
+      'artifacts',
+      'change_summary',
+      'self_review',
+      'tier_reclassification_needed',
+      'log',
+    ],
+    properties: {
+      task_id: { type: 'string', pattern: '^TASK-[0-9]{8}-[0-9]{3}$' },
+      agent: { const: 'Generator' },
+      status: { const: 'PENDING_VALIDATION' },
+      artifacts: { type: 'array' },
+      change_summary: { type: 'string' },
+      self_review: { type: 'string' },
+      tier_reclassification_needed: { type: 'boolean' },
+      log: { type: 'array' },
+    },
+  });
+}
+
+function currentGitBranch() {
+  try {
+    const result = spawnSync('git', ['branch', '--show-current'], {
+      cwd: root,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+
+    if (result.status !== 0) return null;
+    return result.stdout.trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+function enforceTaskBranch(taskId, allowNonTaskBranch) {
+  if (allowNonTaskBranch) return { branch: currentGitBranch(), enforced: false };
+
+  const branch = currentGitBranch();
+  const expected = `task/${taskId}`;
+  if (branch !== expected) {
+    throw new Error(`Generator real run requires current branch ${expected}; current branch is ${branch ?? 'unknown'}. Use --dry-run for validation only.`);
+  }
+
+  return { branch, enforced: true };
+}
+
+function parseJsonText(text, label) {
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    throw new Error(`${label} must be valid JSON (${error.message})`);
+  }
+}
+
+function unwrapClaudeJsonOutput(rawStdout) {
+  const parsed = parseJsonText(rawStdout, 'Claude stdout');
+  if (parsed && parsed.task_id && parsed.agent === 'Generator') {
+    return { generatorResult: parsed, rawWrapper: null };
+  }
+
+  const resultText = typeof parsed?.result === 'string' ? parsed.result.trim() : null;
+  if (resultText) {
+    return {
+      generatorResult: parseJsonText(resultText, 'Claude stdout result field'),
+      rawWrapper: parsed,
+    };
+  }
+
+  throw new Error('Claude stdout JSON does not contain a direct Generator result or a string result field.');
+}
+
+function validateGeneratorResult(parsed, taskId) {
+
+  const required = [
+    'task_id',
+    'agent',
+    'status',
+    'artifacts',
+    'change_summary',
+    'self_review',
+    'tier_reclassification_needed',
+    'log',
+  ];
+
+  for (const key of required) {
+    if (!(key in parsed)) {
+      throw new Error(`Generator result is missing required field: ${key}`);
+    }
+  }
+
+  if (parsed.task_id !== taskId) {
+    throw new Error(`Generator result task_id ${parsed.task_id} does not match ${taskId}`);
+  }
+
+  if (parsed.agent !== 'Generator') {
+    throw new Error(`Generator result agent must be Generator, got ${parsed.agent}`);
+  }
+
+  if (parsed.status !== 'PENDING_VALIDATION') {
+    throw new Error(`Generator result status must be PENDING_VALIDATION, got ${parsed.status}`);
+  }
+
+  if (!Array.isArray(parsed.artifacts)) {
+    throw new Error('Generator result artifacts must be an array.');
+  }
+
+  if (!Array.isArray(parsed.log)) {
+    throw new Error('Generator result log must be an array.');
+  }
+
+  return parsed;
+}
+
+function gitChangedFiles() {
+  const files = new Set();
+
+  const diffResult = spawnSync('git', ['diff', '--name-only', 'main...HEAD'], {
+    cwd: root,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'ignore'],
+  });
+
+  if (diffResult.status === 0) {
+    for (const line of diffResult.stdout.split(/\r?\n/).map((item) => item.trim()).filter(Boolean)) {
+      files.add(line.replaceAll(path.sep, '/'));
+    }
+  }
+
+  const statusResult = spawnSync('git', ['status', '--porcelain'], {
+    cwd: root,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'ignore'],
+  });
+
+  if (statusResult.status === 0) {
+    for (const line of statusResult.stdout.split(/\r?\n/).filter(Boolean)) {
+      const filePath = line.slice(3).trim();
+      if (!filePath) continue;
+      const normalized = filePath.includes(' -> ')
+        ? filePath.split(' -> ').at(-1).trim()
+        : filePath;
+      files.add(normalized.replaceAll('\\', '/'));
+    }
+  }
+
+  return [...files].sort();
+}
+
+function enforceTargetFiles(handoff, taskId) {
+  const targetFiles = new Set((handoff.data?.allowed_context?.target_files ?? [])
+    .map((item) => item.replaceAll('\\', '/')));
+  const allowedOperationalFiles = new Set([
+    `logs/tasks/${taskId}.jsonl`,
+    `tasks/handoffs/${taskId}/generator-result.json`,
+    `tasks/handoffs/${taskId}/generator-stdout.raw.json`,
+    `tasks/handoffs/${taskId}/generator-stderr.log`,
+    `tasks/handoffs/${taskId}/generator-run.json`,
+    `tasks/handoffs/${taskId}/.generator.lock`,
+  ]);
+
+  const changed = gitChangedFiles();
+  const outOfScope = changed.filter((filePath) =>
+    !targetFiles.has(filePath)
+    && !allowedOperationalFiles.has(filePath)
+  );
+
+  if (outOfScope.length > 0) {
+    throw new Error(`Generator changed files outside allowed_context.target_files: ${outOfScope.join(', ')}`);
+  }
+
+  return {
+    changed_files: changed,
+    target_files: [...targetFiles].sort(),
+    out_of_scope_files: outOfScope,
+  };
 }
 
 function appendLedger(ledgerPath, event) {
@@ -341,10 +544,14 @@ function main() {
   const handoff = parseHandoff(inputPath, args.taskId);
   const outputDir = path.dirname(handoff.outputPath);
   const stderrPath = path.join(outputDir, 'generator-stderr.log');
+  const rawStdoutPath = path.join(outputDir, 'generator-stdout.raw.json');
   const metadataPath = path.join(outputDir, 'generator-run.json');
   const cliArgs = commandArgs(args);
   const safeCommand = [args.claudeBin, ...cliArgs];
   const taskTier = inferTaskTier(handoff);
+  const branchCheck = args.dryRun
+    ? { branch: currentGitBranch(), enforced: false }
+    : enforceTaskBranch(args.taskId, args.allowNonTaskBranch);
   const lock = acquireLock(outputDir, args.taskId, args.dryRun);
 
   console.log(`[generator] task: ${args.taskId}`);
@@ -379,6 +586,8 @@ function main() {
       permission_mode: args.permissionMode,
       fallback_model: args.fallbackModel,
       allow_git_write: args.allowGitWrite,
+      branch: branchCheck.branch,
+      task_branch_enforced: branchCheck.enforced,
       lock_path: relativePath(lock.lockPath),
       fresh_session_required: true,
       forbidden_flags_enforced: [...forbiddenFlags],
@@ -403,7 +612,7 @@ function main() {
     });
     finishedAt = timestamp();
 
-    fs.writeFileSync(handoff.outputPath, result.stdout ?? '', 'utf8');
+    fs.writeFileSync(rawStdoutPath, result.stdout ?? '', 'utf8');
     fs.writeFileSync(stderrPath, result.stderr ?? '', 'utf8');
     fs.writeFileSync(metadataPath, `${JSON.stringify({
       task_id: args.taskId,
@@ -413,6 +622,7 @@ function main() {
       signal: result.signal,
       input_path: relativePath(inputPath),
       output_path: relativePath(handoff.outputPath),
+      raw_stdout_path: relativePath(rawStdoutPath),
       stderr_path: relativePath(stderrPath),
       command_shape: safeCommand,
       model: args.model,
@@ -420,6 +630,8 @@ function main() {
       permission_mode: args.permissionMode,
       fallback_model: args.fallbackModel,
       allow_git_write: args.allowGitWrite,
+      branch: branchCheck.branch,
+      task_branch_enforced: branchCheck.enforced,
       lock_path: relativePath(lock.lockPath),
     }, null, 2)}\n`, 'utf8');
 
@@ -442,12 +654,54 @@ function main() {
         },
         artifact_refs: [
           { type: 'generator_run_metadata', path: relativePath(metadataPath) },
+          { type: 'generator_stdout_raw', path: relativePath(rawStdoutPath) },
           { type: 'generator_stderr', path: relativePath(stderrPath) },
         ],
         redaction: { applied: false, notes: 'No secret values recorded.' },
         next_action: 'Fix Claude CLI availability or command configuration and retry.',
       });
       throw result.error;
+    }
+
+    let parsedResult = null;
+    let rawWrapper = null;
+    let targetFileCheck = null;
+    if (result.status === 0) {
+      try {
+        const unwrapped = unwrapClaudeJsonOutput(result.stdout ?? '');
+        parsedResult = validateGeneratorResult(unwrapped.generatorResult, args.taskId);
+        rawWrapper = unwrapped.rawWrapper;
+        fs.writeFileSync(handoff.outputPath, `${JSON.stringify(parsedResult, null, 2)}\n`, 'utf8');
+        targetFileCheck = enforceTargetFiles(handoff, args.taskId);
+      } catch (error) {
+        appendLedger(handoff.ledgerPath, {
+          schema_version: 'work-history.v1',
+          event_id: nextEventId(handoff.ledgerPath, args.taskId),
+          task_id: args.taskId,
+          task_tier: taskTier,
+          agent: 'Analyst',
+          timestamp: finishedAt,
+          phase: 'GENERATOR_HANDOFF',
+          event_type: 'AGENT_RESULT_RECEIVED',
+          status: 'HOLD',
+          summary: 'Generator result failed post-run validation',
+          details: {
+            output_path: relativePath(handoff.outputPath),
+            raw_stdout_path: relativePath(rawStdoutPath),
+            stderr_path: relativePath(stderrPath),
+            metadata_path: relativePath(metadataPath),
+            validation_error: error.message,
+          },
+          artifact_refs: [
+            { type: 'generator_stdout_raw', path: relativePath(rawStdoutPath) },
+            { type: 'generator_run_metadata', path: relativePath(metadataPath) },
+            { type: 'generator_stderr', path: relativePath(stderrPath) },
+          ],
+          redaction: { applied: false, notes: 'Stdout/stderr are stored as artifacts and must be reviewed before sharing externally.' },
+          next_action: 'Fix Generator output format or rerun with a valid Generator output JSON.',
+        });
+        throw error;
+      }
     }
 
     appendLedger(handoff.ledgerPath, {
@@ -467,9 +721,14 @@ function main() {
         output_path: relativePath(handoff.outputPath),
         stderr_path: relativePath(stderrPath),
         metadata_path: relativePath(metadataPath),
+        result_schema_validated: result.status === 0,
+        claude_output_wrapped: Boolean(rawWrapper),
+        artifact_count: parsedResult?.artifacts?.length ?? null,
+        target_file_check: targetFileCheck,
       },
       artifact_refs: [
-        { type: 'generator_result', path: relativePath(handoff.outputPath) },
+        ...(result.status === 0 ? [{ type: 'generator_result', path: relativePath(handoff.outputPath) }] : []),
+        { type: 'generator_stdout_raw', path: relativePath(rawStdoutPath) },
         { type: 'generator_run_metadata', path: relativePath(metadataPath) },
         { type: 'generator_stderr', path: relativePath(stderrPath) },
       ],
