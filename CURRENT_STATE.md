@@ -3,7 +3,7 @@
 > Analyst가 유지·갱신하는 파일입니다. 새 세션 시작 시 이 파일을 먼저 읽으세요.
 > 새 세션 시작 방법: `/clear` 후 → "CURRENT_STATE.md를 읽고 이어서 진행해줘."
 
-**마지막 갱신:** 2026-04-28 (TASK-20260428-001 완료 — Generator 실행 파이프라인 추가)
+**마지막 갱신:** 2026-04-28 (TASK-20260428-002 완료 — Generator wrapper hardening)
 
 ---
 
@@ -91,7 +91,7 @@
 
 현재 진행 중인 Task 없음.
 
-마지막 완료 Task: TASK-20260428-001 Claude Code CLI 한국어 옵션 가이드 + Generator 실행 파이프라인 + Researcher 절차 통일 (`docs/guides/`, `scripts/run-generator.mjs`) (2026-04-28)
+마지막 완료 Task: TASK-20260428-002 Generator wrapper hardening (`scripts/run-generator.mjs`, `docs/guides/generator-pipeline-ko.md`) (2026-04-28)
 
 ---
 

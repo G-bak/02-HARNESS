@@ -1,0 +1,50 @@
+{
+  "task_id": "TASK-20260428-002",
+  "created_at": "2026-04-28T15:06:35+09:00",
+  "complexity_tier": "Tier2",
+  "tier_rationale": "This hardens the Generator execution wrapper and operational guide. It changes harness automation scripts and documentation, but not product runtime code.",
+  "status": "ACTIVE",
+  "depends_on": ["TASK-20260428-001"],
+  "request_summary": "Harden scripts/run-generator.mjs based on Claude CLI review before building Validator automation.",
+  "goal": "Make the Generator wrapper safer for real operation by fixing unsupported model defaults, strengthening permission handling, validating references, separating prompt from handoff input, and preventing same-task concurrent runs.",
+  "constraints": {
+    "positive": [
+      "Use official Claude Code model aliases or explicit model IDs; do not default to an undocumented alias.",
+      "Keep permission bypass disabled by default.",
+      "Preserve fresh execution and no-resume/no-continue policy.",
+      "Keep web access disallowed for Generator.",
+      "Record validation results in the task ledger."
+    ],
+    "negative": [
+      "Do not modify product runtime code under api/, public/, or wrangler.toml.",
+      "Do not expose secrets, credentials, PII, or environment variable values.",
+      "Do not implement Validator-A automation in this task.",
+      "Do not push or merge until validation and reporting gates pass."
+    ]
+  },
+  "success_criteria": [
+    "scripts/run-generator.mjs defaults to an official Claude Code model alias or explicit model ID, not `best`.",
+    "scripts/run-generator.mjs supports permission-mode fallback or clear Resource Failure handling for unsupported permission modes.",
+    "scripts/run-generator.mjs validates refs.spec and refs.ledger paths before execution.",
+    "scripts/run-generator.mjs separates system guidance from handoff stdin using Claude CLI supported prompt options when available.",
+    "scripts/run-generator.mjs prevents concurrent runs for the same Task ID with a lockfile or equivalent guard.",
+    "Git write permissions are not enabled by default; if supported, they require an explicit flag.",
+    "docs/guides/generator-pipeline-ko.md documents the hardened behavior and remaining operator responsibilities.",
+    "Local syntax, dry-run, bypass-block, encoding, diff, and harness audits pass."
+  ],
+  "assigned_agents": ["Analyst", "Generator", "Validator-A"],
+  "context": {
+    "relevant_history": "TASK-20260428-001 added the initial Generator wrapper. Claude CLI review identified hardening issues around model alias, git permissions, prompt separation, ref existence checks, concurrent runs, and stderr sensitivity.",
+    "reference_docs": [
+      "AGENTS.md",
+      "docs/agents/generator.md",
+      "docs/operations/tool-permissions.md",
+      "docs/workflows/failure-handling.md",
+      "docs/guides/generator-pipeline-ko.md"
+    ],
+    "artifact_refs": [
+      "scripts/run-generator.mjs",
+      "docs/guides/generator-pipeline-ko.md"
+    ]
+  }
+}

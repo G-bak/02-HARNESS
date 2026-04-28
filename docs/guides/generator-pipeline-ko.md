@@ -96,10 +96,10 @@ GENERATOR_CLAUDE_BIN=claude npm run run:generator -- TASK-20260428-001
 모델·effort 지정:
 
 ```bash
-npm run run:generator -- TASK-20260428-001 --model best --effort xhigh
+npm run run:generator -- TASK-20260428-001 --model opus --effort xhigh
 ```
 
-기본값은 `--model best --effort xhigh`다. `best`는 Claude Code의 "가장 강한 모델" 별칭으로 운영하고, 최신 모델명은 Claude Code 공식 문서와 설치된 CLI 버전에 따른다. 특정 모델을 고정해야 하면 `--model claude-opus-4-5`처럼 명시한다.
+기본값은 `--model opus --effort xhigh`다. `opus`는 Claude Code 공식 모델 alias다. 특정 모델 버전을 고정해야 하면 `--model claude-opus-4-7`처럼 명시한다. 문서화되지 않은 임의 alias는 기본값으로 쓰지 않는다.
 
 권한 모드 지정:
 
@@ -116,13 +116,25 @@ npm run run:generator -- TASK-20260428-001 --permission-mode auto
 `scripts/run-generator.mjs`는 다음 호출 형태를 사용한다.
 
 ```text
-claude --bare --print --model best --effort xhigh --input-format text --output-format json --no-session-persistence --permission-mode auto
+claude --bare --print --model opus --effort xhigh --append-system-prompt "<02-HARNESS Generator system guidance>" --input-format text --output-format json --no-session-persistence --permission-mode auto
 ```
 
 기본 도구 allowlist:
 
 ```text
-Read,Edit,Write,Bash(npm test),Bash(git diff *)
+Read,Edit,Write,Bash(npm test),Bash(git diff *),Bash(git status *)
+```
+
+기본값에는 git 쓰기 권한이 없다. Generator에게 task 브랜치 생성·커밋까지 맡기는 격리 실행에서만 `--allow-git-write`를 명시한다.
+
+```bash
+npm run run:generator -- TASK-20260428-001 --allow-git-write
+```
+
+이 경우에만 아래 도구가 추가된다.
+
+```text
+Bash(git checkout *),Bash(git add *),Bash(git commit *)
 ```
 
 기본 도구 blocklist:
@@ -146,6 +158,12 @@ WebSearch,WebFetch
 
 `bypassPermissions` 모드는 CLI 플래그가 아니라 `--permission-mode bypassPermissions` 값으로도 지정할 수 있다. wrapper는 이 값도 기본 차단하며, 격리된 테스트 환경에서 운영자가 명시적으로 `--allow-bypass-permissions`를 준 경우에만 허용한다. 일반 Generator 실행 기본값은 `auto`다.
 
+system guidance는 `--append-system-prompt`로 전달하고, stdin에는 handoff payload 원문만 전달한다. 이렇게 해서 운영 지침과 입력 데이터가 한 덩어리로 섞이는 위험을 줄인다.
+
+wrapper는 실행 전에 `refs.spec`, `refs.ledger`, `expected_output_path`가 저장소 루트 안에 있는지 확인한다. `refs.spec`이 없거나 `refs.ledger`가 해당 Task 원장을 가리키지 않으면 실행하지 않는다.
+
+동일 Task의 동시 실행을 막기 위해 실제 실행 시 `tasks/handoffs/TASK-{ID}/.generator.lock`을 만든다. 실행이 끝나면 자동 삭제한다. lock이 남아 있으면 실행 중인 프로세스가 없는지 확인한 뒤에만 수동 삭제한다.
+
 ---
 
 ## 5. 산출물
@@ -164,7 +182,7 @@ tasks/handoffs/TASK-{ID}/generator-run.json
 | `generator-stderr.log` | Claude CLI stderr. 오류·경고 확인용이다. |
 | `generator-run.json` | 실행 시작/종료 시각, exit status, artifact 경로, command shape 메타데이터다. |
 
-`generator-stderr.log`와 `generator-result.json`은 외부 공유 전에 민감 정보 포함 여부를 확인한다. wrapper는 환경변수 값을 기록하지 않지만, Generator가 출력한 내용은 별도 검토가 필요하다.
+`generator-stderr.log`와 `generator-result.json`은 외부 공유 전에 민감 정보 포함 여부를 확인한다. wrapper는 환경변수 값을 기록하지 않지만, Generator가 출력한 내용은 별도 검토가 필요하다. 특히 stderr는 CLI 오류, 모델 경고, 도구 실패 메시지를 그대로 담으므로 보고서나 사용자 답변에 원문 전체를 붙이지 않는다.
 
 ---
 
