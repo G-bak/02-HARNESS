@@ -1,0 +1,58 @@
+{
+  "task_id": "TASK-20260428-001",
+  "created_at": "2026-04-28T10:00:00+09:00",
+  "complexity_tier": "Tier1",
+  "tier_rationale": "Expanded from a Tier1 operational guide task into a harness automation task after user confirmation. Changes remain outside product runtime, but include scripts/run-generator.mjs and therefore require local harness audit before merge.",
+  "status": "ACTIVE",
+  "depends_on": [],
+  "request_summary": "Document Claude Code CLI operation and add a concrete Generator execution pipeline wrapper that can invoke Claude CLI from task-scoped handoff files.",
+  "goal": "Provide operator-oriented Korean guides and a reproducible `scripts/run-generator.mjs` wrapper so harness operators can run Generator with fresh Claude CLI execution, artifact capture, and ledger events.",
+  "constraints": {
+    "positive": [
+      "Source from official Claude Code documentation (code.claude.com/docs).",
+      "Write in Korean prose with English flag/option names preserved verbatim.",
+      "Cover invocation modes, all major flags, subcommands, environment variables, slash commands, headless usage, and practical examples.",
+      "Mark items that could not be verified as 확인 불가 instead of guessing.",
+      "Save the guide as docs/guides/claude-cli-options-ko.md alongside other operational guides (mcp-setup.md, resend-setup.md, etc.).",
+      "Add a Generator wrapper script that validates handoff input, enforces fresh-session Claude CLI flags, captures stdout/stderr/metadata, and appends ledger events.",
+      "Document the wrapper in docs/guides/generator-pipeline-ko.md."
+    ],
+    "negative": [
+      "Do not modify product runtime code (api/, public/, wrangler.toml).",
+      "Do not change authority documents (AGENTS.md, SECURITY.md, ARCHITECTURE.md, docs/agents/*, docs/operations/*, docs/workflows/*, docs/schemas/*).",
+      "Do not include API keys, OAuth tokens, or any secret values; only reference environment variable names.",
+      "Do not invent flags, subcommands, or environment variables that are not documented."
+    ]
+  },
+  "success_criteria": [
+    "docs/guides/claude-cli-options-ko.md exists with sections for 기본 호출, 주요 플래그, 서브커맨드, 환경 변수, 슬래시 커맨드, Headless 모드, 실전 예시.",
+    "scripts/run-generator.mjs exists and supports dry-run validation plus real Claude CLI invocation from a task handoff file.",
+    "package.json exposes the wrapper as npm run run:generator.",
+    "docs/guides/generator-pipeline-ko.md documents wrapper inputs, outputs, ledger events, and Validator handoff steps.",
+    "All flag and environment variable names are written exactly as in the official documentation.",
+    "Korean prose is the primary explanation language; English is reserved for identifiers and short example commands.",
+    "TASK-20260428-001 ledger has TASK_CREATED and TASK_COMPLETED with artifact_refs to the spec, session log, and guide file.",
+    "SESSION-20260428-001.md exists and references the inline reports given to the user.",
+    "CURRENT_STATE.md `마지막 갱신` line and `활성 Task` section reflect the new task.",
+    "npm run audit:harness reports no failures attributable to this task."
+  ],
+  "assigned_agents": ["Analyst", "Researcher"],
+  "context": {
+    "relevant_history": "User asked for a comprehensive Korean reference of all Claude Code CLI options to be stored under a new guides/ directory. The request is operator-facing documentation, not product code.",
+    "reference_docs": [
+      "AGENTS.md",
+      "docs/operations/work-history-policy.md",
+      "docs/workflows/tier-classification.md"
+    ],
+    "external_sources": [
+      "https://code.claude.com/docs/en/cli-reference",
+      "https://code.claude.com/docs/en/env-vars",
+      "https://code.claude.com/docs/en/settings",
+      "https://code.claude.com/docs/en/headless",
+      "https://code.claude.com/docs/en/interactive-mode",
+      "https://code.claude.com/docs/en/commands",
+      "https://code.claude.com/docs/en/mcp"
+    ],
+    "artifact_refs": []
+  }
+}

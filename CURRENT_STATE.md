@@ -3,7 +3,7 @@
 > Analyst가 유지·갱신하는 파일입니다. 새 세션 시작 시 이 파일을 먼저 읽으세요.
 > 새 세션 시작 방법: `/clear` 후 → "CURRENT_STATE.md를 읽고 이어서 진행해줘."
 
-**마지막 갱신:** 2026-04-27 (TASK-20260427-092 완료 — Claude CLI Generator 격리 호출 계약 반영)
+**마지막 갱신:** 2026-04-28 (TASK-20260428-001 완료 — Generator 실행 파이프라인 추가)
 
 ---
 
@@ -90,14 +90,14 @@
 ## 활성 Task
 
 현재 진행 중인 Task 없음.
-마지막 완료 Task: TASK-20260427-092 Claude CLI Generator 격리 호출 계약 반영 (2026-04-27)
+
+마지막 완료 Task: TASK-20260428-001 Claude Code CLI 한국어 옵션 가이드 + Generator 실행 파이프라인 + Researcher 절차 통일 (`docs/guides/`, `scripts/run-generator.mjs`) (2026-04-28)
 
 ---
 
 ## 남은 작업
 
-현재 미완료 작업 없음.
-TASK-20260427-092에서 Analyst → Generator handoff 계약, Claude CLI fresh execution 호출 원칙, 입력 JSON Schema, task-scoped handoff 예시, 권한 제한 규칙 반영을 완료했다.
+- 다음 신규 Task에서 Validator-A 실행 wrapper와 retry handoff 자동 생성 파이프라인 구현 검토.
 
 ---
 
