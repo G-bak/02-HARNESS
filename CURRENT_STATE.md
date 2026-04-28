@@ -3,7 +3,7 @@
 > Analyst가 유지·갱신하는 파일입니다. 새 세션 시작 시 이 파일을 먼저 읽으세요.
 > 새 세션 시작 방법: `/clear` 후 → "CURRENT_STATE.md를 읽고 이어서 진행해줘."
 
-**마지막 갱신:** 2026-04-28 (TASK-20260428-002 완료 — Generator wrapper hardening)
+**마지막 갱신:** 2026-04-28 (TASK-20260428-004 완료 — Generator wrapper safety gates)
 
 ---
 
@@ -91,13 +91,13 @@
 
 현재 진행 중인 Task 없음.
 
-마지막 완료 Task: TASK-20260428-002 Generator wrapper hardening (`scripts/run-generator.mjs`, `docs/guides/generator-pipeline-ko.md`) (2026-04-28)
+마지막 완료 Task: TASK-20260428-004 Generator wrapper safety gates (`scripts/run-generator.mjs`, `docs/guides/generator-pipeline-ko.md`, `docs/agents/generator.md`) (2026-04-28)
 
 ---
 
 ## 남은 작업
 
-- 다음 신규 Task에서 Validator-A 실행 wrapper와 retry handoff 자동 생성 파이프라인 구현 검토.
+- 다음 신규 Task에서 Validator-A 실행 wrapper와 retry handoff 자동 생성 파이프라인 설계 승인 후 구현 검토.
 
 ---
 
