@@ -3,7 +3,7 @@
 > Analyst가 유지·갱신하는 파일입니다. 새 세션 시작 시 이 파일을 먼저 읽으세요.
 > 새 세션 시작 방법: `/clear` 후 → "CURRENT_STATE.md를 읽고 이어서 진행해줘."
 
-**마지막 갱신:** 2026-04-29 (TASK-20260429-009 완료 — Generator 파이프라인 실제 실행 + `--bare`/`--json-schema` 2개 wrapper 버그 격리·기록)
+**마지막 갱신:** 2026-04-29 (TASK-20260429-009 완료 — Generator 파이프라인 실제 실행 + `--bare`/`--json-schema` 2개 wrapper 버그 격리·기록, main 머지 + push 완료)
 
 ---
 
