@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { assertNoSecretLikeContent } from './lib/secret-scan.mjs';
 
 const root = process.cwd();
 const forbiddenFlags = new Set([
@@ -154,6 +155,7 @@ function defaultInputPath(taskId) {
 
 function parseHandoff(inputPath, taskId) {
   const raw = fs.readFileSync(inputPath, 'utf8');
+  assertNoSecretLikeContent(raw, relativePath(inputPath));
 
   if (!inputPath.endsWith('.json')) {
     throw new Error('Markdown Generator handoff is disabled for wrapper execution. Use generator-input.json so refs, context, and output path can be validated.');

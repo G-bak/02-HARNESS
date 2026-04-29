@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { assertNoSecretLikeContent } from './lib/secret-scan.mjs';
 
 const root = process.cwd();
 const forbiddenFlags = new Set([
@@ -99,6 +100,7 @@ function defaultInputPath(taskId) {
 
 function parseHandoff(inputPath, taskId) {
   const raw = fs.readFileSync(inputPath, 'utf8');
+  assertNoSecretLikeContent(raw, relativePath(inputPath));
   const data = JSON.parse(raw);
   const required = [
     'schema_version',

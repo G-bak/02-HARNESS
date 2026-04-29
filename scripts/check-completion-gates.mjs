@@ -164,12 +164,72 @@ const qualityTaskIds = new Set(parseJsonl(qualityPath).map((row) => row.task_id)
 const insightsPath = path.join(root, 'logs', 'insights.jsonl');
 const allInsights = parseJsonl(insightsPath);
 const insightsByTask = new Map();
+const resolversByInsightId = new Map();
 for (const insight of allInsights) {
+  const resolvedId = insight.resolves ?? insight.amends;
+  if (resolvedId) {
+    if (!resolversByInsightId.has(resolvedId)) {
+      resolversByInsightId.set(resolvedId, []);
+    }
+    resolversByInsightId.get(resolvedId).push(insight);
+  }
   if (!insight.source_task) continue;
   if (!insightsByTask.has(insight.source_task)) {
     insightsByTask.set(insight.source_task, []);
   }
   insightsByTask.get(insight.source_task).push(insight);
+}
+
+function isSelfReferentialPlaceholder(value) {
+  return typeof value === 'string' && value.startsWith('SELF_REFERENTIAL');
+}
+
+function effectiveAppliedDoc(insight) {
+  const commit = insight.applied_to_doc?.commit;
+  if (!isSelfReferentialPlaceholder(commit)) {
+    return {
+      applied: insight.applied_to_doc,
+      source: insight,
+      placeholderResolved: true,
+    };
+  }
+
+  const resolvers = resolversByInsightId.get(insight.id) ?? [];
+  const resolver = resolvers.find((candidate) => {
+    const resolverCommit = candidate.applied_to_doc?.commit;
+    return resolverCommit && !isSelfReferentialPlaceholder(resolverCommit);
+  });
+
+  return {
+    applied: resolver?.applied_to_doc ?? insight.applied_to_doc,
+    source: resolver ?? insight,
+    placeholderResolved: Boolean(resolver),
+  };
+}
+
+const commitDocCache = new Map();
+function commitChangesFile(commit, filePath) {
+  const key = `${commit}\0${filePath}`;
+  if (commitDocCache.has(key)) return commitDocCache.get(key);
+
+  try {
+    const output = execFileSync('git', ['show', '--name-only', '--format=', commit], {
+      cwd: root,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    const normalizedTarget = filePath.replaceAll('\\', '/');
+    const changed = output
+      .split(/\r?\n/)
+      .map((line) => line.trim().replaceAll('\\', '/'))
+      .filter(Boolean);
+    const result = changed.includes(normalizedTarget);
+    commitDocCache.set(key, result);
+    return result;
+  } catch {
+    commitDocCache.set(key, null);
+    return null;
+  }
 }
 const dirtyFiles = gitDirtyFiles();
 const latestSessionPath = latestSessionFile();
@@ -245,7 +305,8 @@ for (const file of taskFiles) {
     if (insight.category !== 'actionable_doc_change' && insight.category !== 'gotcha') continue;
 
     const insightId = insight.id ?? '(unknown)';
-    const appliedStatus = insight.applied_to_doc?.status;
+    const effectiveDoc = effectiveAppliedDoc(insight);
+    const appliedStatus = effectiveDoc.applied?.status;
 
     if (appliedStatus !== 'applied') {
       reportError(
@@ -254,13 +315,28 @@ for (const file of taskFiles) {
       continue;
     }
 
-    if (!insight.applied_to_doc?.commit) {
+    if (!effectiveDoc.applied?.commit) {
       reportError(
         `${taskId}: insight ${insightId} category=${insight.category} applied_to_doc.commit is required`,
       );
+    } else if (isSelfReferentialPlaceholder(insight.applied_to_doc?.commit) && !effectiveDoc.placeholderResolved) {
+      reportError(
+        `${taskId}: insight ${insightId} uses ${insight.applied_to_doc.commit}; append a resolver insight with the actual applied_to_doc.commit before completion`,
+      );
+    } else if (!isSelfReferentialPlaceholder(effectiveDoc.applied.commit) && insight.target_doc) {
+      const changedTarget = commitChangesFile(effectiveDoc.applied.commit, insight.target_doc);
+      if (changedTarget === false) {
+        reportError(
+          `${taskId}: insight ${insightId} applied_to_doc.commit ${effectiveDoc.applied.commit} does not change target_doc ${insight.target_doc}`,
+        );
+      } else if (changedTarget === null) {
+        reportError(
+          `${taskId}: insight ${insightId} applied_to_doc.commit ${effectiveDoc.applied.commit} could not be resolved by git`,
+        );
+      }
     }
 
-    if (insight.category === 'gotcha' && !insight.applied_to_doc?.section) {
+    if (insight.category === 'gotcha' && !effectiveDoc.applied?.section) {
       reportError(
         `${taskId}: insight ${insightId} category=gotcha applied_to_doc.section is required (which guide section the warning was added to)`,
       );

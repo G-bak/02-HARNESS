@@ -2,6 +2,7 @@
   "scripts": {
     "audit:harness": "node scripts/audit-harness.mjs",
     "check:encoding": "node scripts/check-encoding.mjs",
+    "validate:handoffs": "node scripts/validate-handoffs.mjs",
     "run:generator": "node scripts/run-generator.mjs",
     "run:validator-a": "node scripts/run-validator-a.mjs",
     "prepare:retry": "node scripts/prepare-generator-retry.mjs",
