@@ -3,7 +3,7 @@
 > Analyst가 유지·갱신하는 파일입니다. 새 세션 시작 시 이 파일을 먼저 읽으세요.
 > 새 세션 시작 방법: `/clear` 후 → "CURRENT_STATE.md를 읽고 이어서 진행해줘."
 
-**마지막 갱신:** 2026-04-29 (TASK-20260429-004 완료 — 잔존 로컬 브랜치 task/TASK-20260427-092 강제 삭제)
+**마지막 갱신:** 2026-04-29 (TASK-20260429-005 완료 — Validator-A wrapper + retry handoff 자동화 설계안 작성)
 
 ---
 
@@ -95,13 +95,13 @@
 
 현재 진행 중인 Task 없음.
 
-마지막 완료 Task: TASK-20260429-004 잔존 로컬 브랜치 task/TASK-20260427-092 강제 삭제 (2026-04-29)
+마지막 완료 Task: TASK-20260429-005 Validator-A wrapper + retry handoff 자동화 설계안 작성 (2026-04-29)
 
 ---
 
 ## 남은 작업
 
-- 다음 신규 Task에서 Validator-A 실행 wrapper와 retry handoff 자동 생성 파이프라인 설계 승인 후 구현 검토.
+- 다음 신규 Task에서 Validator-A 실행 wrapper와 retry handoff 자동 생성 파이프라인 구현.
 - 후속 후보: 인사이트 게이트 강화 — `applied_to_doc.commit`이 실제로 `target_doc`을 수정한 commit인지 git diff로 검증.
 
 ---
