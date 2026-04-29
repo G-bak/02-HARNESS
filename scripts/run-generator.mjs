@@ -454,42 +454,35 @@ export function validateGeneratorResult(parsed, taskId) {
   return parsed;
 }
 
-function gitChangedFiles() {
+export function statusChangedFilesFromPorcelain(porcelain) {
   const files = new Set();
-
-  const diffResult = spawnSync('git', ['diff', '--name-only', 'main...HEAD'], {
-    cwd: root,
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'ignore'],
-  });
-
-  if (diffResult.status === 0) {
-    for (const line of diffResult.stdout.split(/\r?\n/).map((item) => item.trim()).filter(Boolean)) {
-      files.add(line.replaceAll(path.sep, '/'));
-    }
+  for (const line of porcelain.split(/\r?\n/).filter(Boolean)) {
+    const filePath = line.slice(3).trim();
+    if (!filePath) continue;
+    const normalized = filePath.includes(' -> ')
+      ? filePath.split(' -> ').at(-1).trim()
+      : filePath;
+    files.add(normalized.replaceAll('\\', '/'));
   }
-
-  const statusResult = spawnSync('git', ['status', '--porcelain'], {
-    cwd: root,
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'ignore'],
-  });
-
-  if (statusResult.status === 0) {
-    for (const line of statusResult.stdout.split(/\r?\n/).filter(Boolean)) {
-      const filePath = line.slice(3).trim();
-      if (!filePath) continue;
-      const normalized = filePath.includes(' -> ')
-        ? filePath.split(' -> ').at(-1).trim()
-        : filePath;
-      files.add(normalized.replaceAll('\\', '/'));
-    }
-  }
-
   return [...files].sort();
 }
 
-function enforceTargetFiles(handoff, taskId) {
+function gitWorkingTreeFiles() {
+  const result = spawnSync('git', ['status', '--porcelain'], {
+    cwd: root,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'ignore'],
+  });
+
+  return result.status === 0 ? statusChangedFilesFromPorcelain(result.stdout) : [];
+}
+
+export function filesChangedSinceBaseline(beforeFiles, afterFiles) {
+  const before = new Set(beforeFiles);
+  return afterFiles.filter((filePath) => !before.has(filePath)).sort();
+}
+
+function enforceTargetFiles(handoff, taskId, baselineFiles = []) {
   const targetFiles = new Set((handoff.data?.allowed_context?.target_files ?? [])
     .map((item) => item.replaceAll('\\', '/')));
   const allowedOperationalFiles = new Set([
@@ -501,7 +494,8 @@ function enforceTargetFiles(handoff, taskId) {
     `tasks/handoffs/${taskId}/.generator.lock`,
   ]);
 
-  const changed = gitChangedFiles();
+  const afterFiles = gitWorkingTreeFiles();
+  const changed = filesChangedSinceBaseline(baselineFiles, afterFiles);
   const outOfScope = changed.filter((filePath) =>
     !targetFiles.has(filePath)
     && !allowedOperationalFiles.has(filePath)
@@ -513,6 +507,8 @@ function enforceTargetFiles(handoff, taskId) {
 
   return {
     changed_files: changed,
+    baseline_files: baselineFiles,
+    working_tree_files: afterFiles,
     target_files: [...targetFiles].sort(),
     out_of_scope_files: outOfScope,
   };
@@ -699,6 +695,7 @@ function main() {
     next_action: 'Wait for Claude CLI Generator result.',
   });
 
+  const preRunChangedFiles = gitWorkingTreeFiles();
   let result;
   let finishedAt;
   const startedAt = timestamp();
@@ -733,6 +730,7 @@ function main() {
       branch: branchCheck.branch,
       task_branch_enforced: branchCheck.enforced,
       lock_path: relativePath(lock.lockPath),
+      pre_run_changed_files: preRunChangedFiles,
     };
     fs.writeFileSync(metadataPath, `${JSON.stringify(runMetadata, null, 2)}\n`, 'utf8');
 
@@ -775,7 +773,7 @@ function main() {
         rawWrapper = unwrapped.rawWrapper;
         outputKind = unwrapped.kind;
         if (unwrapped.kind === 'natural_language') {
-          targetFileCheck = enforceTargetFiles(handoff, args.taskId);
+          targetFileCheck = enforceTargetFiles(handoff, args.taskId, preRunChangedFiles);
           diffSummary = diffSummaryForFiles(targetFileCheck.changed_files);
           parsedResult = synthesizeGeneratorResult(
             args.taskId,
@@ -789,7 +787,7 @@ function main() {
           }
         } else {
           parsedResult = validateGeneratorResult(unwrapped.generatorResult, args.taskId);
-          targetFileCheck = enforceTargetFiles(handoff, args.taskId);
+          targetFileCheck = enforceTargetFiles(handoff, args.taskId, preRunChangedFiles);
           diffSummary = diffSummaryForFiles(targetFileCheck.changed_files);
         }
         fs.writeFileSync(handoff.outputPath, `${JSON.stringify(parsedResult, null, 2)}\n`, 'utf8');

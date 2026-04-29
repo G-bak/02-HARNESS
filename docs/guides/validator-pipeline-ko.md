@@ -106,6 +106,10 @@ codex exec --json --output-schema docs/schemas/validator-result.schema.json --ou
 
 `--json` stdout은 이벤트 로그로 저장하고, `--output-last-message` 파일을 최종 Validator result로 파싱한다.
 
+Windows에서 Codex가 `codex.cmd` 또는 `.bat` shim으로 설치된 경우 Node의 직접 `spawnSync(codex.cmd, ...)`가 `EINVAL`로 실패할 수 있다. wrapper는 `.cmd`/`.bat` 실행 파일을 감지하면 `cmd.exe /d /s /c` 경유로 호출하고, 실제 호출 형태를 `validator-a-run-{N}.json`의 `actual_spawn_command`에 남긴다.
+
+> ⚠ **Known gotcha (TASK-20260429-015 출처)** — PowerShell에서 `codex`가 보인다고 해서 Node subprocess에서도 같은 방식으로 실행된다는 뜻은 아니다. smoke test에서 기본 `codex`는 `ENOENT`, `codex.cmd` 직접 spawn은 `EINVAL`이었다. Windows에서는 wrapper 메타데이터의 `actual_spawn_command`와 `resource_failure_type`을 먼저 확인한다.
+
 ---
 
 ## 4. 산출물

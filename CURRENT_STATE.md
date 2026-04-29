@@ -3,7 +3,7 @@
 > Analyst가 유지·갱신하는 파일입니다. 새 세션 시작 시 이 파일을 먼저 읽으세요.
 > 새 세션 시작 방법: `/clear` 후 → "CURRENT_STATE.md를 읽고 이어서 진행해줘."
 
-**마지막 갱신:** 2026-04-29 (TASK-20260429-011 완료 예정 — wrapper self-validation caveat 가이드 반영, push 단계)
+**마지막 갱신:** 2026-04-29 (TASK-20260429-016 진행 중 — 가이드 결함 자동 보강 및 wrapper 강제)
 
 ---
 
@@ -28,7 +28,7 @@
 | 머지 조건·승인 주체 (권위) | `docs/operations/git-branch-policy.md` | v1.9 | 2026-04-29 |
 | 도구 권한 | `docs/operations/tool-permissions.md` | v1.9 | 2026-04-29 |
 | 외부 알림 정책 | `docs/operations/notification-policy.md` | v1.6 | 2026-04-26 |
-| 작업 이력 저장 정책 | `docs/operations/work-history-policy.md` | v1.14 | 2026-04-29 |
+| 작업 이력 저장 정책 | `docs/operations/work-history-policy.md` | v1.15 | 2026-04-29 |
 | Tier 분류 기준 | `docs/workflows/tier-classification.md` | v1.3 | 2026-04-26 |
 | Task 수명 주기 | `docs/workflows/task-lifecycle.md` | v1.17 | 2026-04-27 |
 | 실패 처리 | `docs/workflows/failure-handling.md` | v1.3 | 2026-04-25 |
@@ -36,7 +36,7 @@
 | Task Spec 스키마 | `docs/schemas/task-spec.md` | v1.5 | 2026-04-27 |
 | 에이전트 출력 형식 | `docs/schemas/output-formats.md` | v1.18 | 2026-04-27 |
 | 품질 루브릭 | `QUALITY_SCORE.md` | v1.3 | 2026-04-26 |
-| 실행 비용·리소스 관측 | `docs/operations/eval-harness.md` | v1.7 | 2026-04-26 |
+| 실행 비용·리소스 관측 | `docs/operations/eval-harness.md` | v1.8 | 2026-04-29 |
 | 보고서 예시 | `reports/TASK-EXAMPLE.md` | v1.6 | 2026-04-26 |
 
 ---
@@ -85,6 +85,7 @@
 - **대표 보고용 품질 점수 표시**: 보고서에는 JSON 원문보다 `95점 / 100점 (S등급)` 형식의 요약, 구분 표, 좋았던 점, 감점/주의를 먼저 표시. JSON은 내부 원장 또는 부록용.
 - **JSON/JSONL 언어 기준**: `tasks/specs/*.json`과 `logs/tasks/*.jsonl`은 영어 작성 가능·권장. 세션 로그(`logs/sessions/*.md`)와 최종 보고서(`reports/*.md`)만 한국어 작성 필수.
 - **작업 종료 인사이트 캡처**: Task 완료 전 재사용 가능한 운영 인사이트를 확인하고, 있으면 `logs/insights.jsonl`에 기록한다. 없으면 `TASK_COMPLETED.details.insight_capture.status=not_needed`와 사유를 남긴다.
+- **가이드/process 결함 report-only 금지**: 가이드 오류, stale 가이드, wrapper 실제 동작 차이, 반복 가능한 운영 결함은 최종 보고서에만 남기지 않는다. 같은 Task에서 가이드 수정·스크립트 강제·인사이트 기록을 수행하거나 명시적 후속 Task를 연결해야 한다.
 - **인사이트 카테고리 강제**: 모든 신규 인사이트는 `category` 필드 필수(`actionable_doc_change` / `gotcha` / `proposal` / `observation`). 앞 두 가지는 같은 Task에서 가이드 수정 + `applied_to_doc.status=applied` 의무이며 자동 감사가 차단한다.
 - **2-commit squash 표준**: main 머지는 1차(pure squash, validator footer) + 2차(post-completion record) 두 커밋으로 분리한다. 1차 커밋의 tree가 task 브랜치 tip의 tree와 같아야 cleanup 스크립트가 자동 작동한다.
 - **CLI 작업공간 경로 인코딩**: Codex/Claude/Gemini CLI 작업공간 경로와 worktree/alias는 ASCII-only를 권장한다. 한글 등 non-ASCII 경로가 전송 메타데이터 헤더에 포함되면 UTF-8 변환 오류로 세션이 중단될 수 있다.
@@ -100,16 +101,19 @@
 
 ## 활성 Task
 
-현재 진행 중인 Task 없음.
+진행 중:
 
-마지막 완료 Task: TASK-20260429-011 wrapper self-validation caveat 가이드 반영 (2026-04-29)
+- `TASK-20260429-016` — 가이드 결함 자동 보강 및 wrapper 강제. 현재 task 브랜치에서 구현/로컬 검증/보고서 작성 완료, main squash merge와 resolver insight/TASK_COMPLETED 기록 대기.
+
+마지막 완료 Task: TASK-20260429-015 Generator → Validator-A 실제 smoke test PARTIAL (2026-04-29)
 
 ---
 
 ## 남은 작업
 
-- **별도 Codex 세션에서 Validator-A 실제 실행 검증**: 필요 시 `npm run run:validator-a -- TASK-20260429-009`로 외부 Codex Validator-A 실행을 시도하고 TASK-009 ledger에 추가 VALIDATION_RESULT 또는 CORRECTION 이벤트로 append.
-- **후속 후보**: wrapper 자체 수정 Task 뒤에는 별도 smoke test Task로 실제 Generator → Validator-A 경로를 재확인할 수 있음.
+- **TASK-016 마무리**: task 브랜치 커밋 → main squash merge → 실제 commit hash로 insight resolver append → `TASK_COMPLETED` 기록 → push/finalize.
+- **후속 후보**: TASK-016 이후 별도 smoke test Task로 실제 Generator → Validator-A 경로를 재확인할 수 있음.
+- **별도 Codex 세션에서 Validator-A 실제 실행 검증**: 필요 시 `npm run run:validator-a -- TASK-20260429-015`로 외부 Codex Validator-A 실행을 시도하고 새 smoke Task 또는 TASK-015 ledger에 CORRECTION/AUDIT_NOTE로 append.
 - **후속 후보**: `--bare` 제거의 컨텍스트 격리 약화 trade-off 보강 (예: hooks/plugins 명시 비활성화 옵션 조합 탐색).
 
 ---

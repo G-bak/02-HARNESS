@@ -1,0 +1,46 @@
+{
+  "task_id": "TASK-20260429-016",
+  "created_at": "2026-04-29T15:57:35+09:00",
+  "request": "Do not leave newly found guide/process defects as memory-only notes. Update guides and enforce recurring issues with scripts/wrappers, specifically for the smoke-test findings.",
+  "request_original": "야 근데 우리 가이드 문서중에 무슨 오류나 가이드 문서 수정해야하는 결함 찾으면 자동으로 가이드 문서 수정해서 다음 새션에도 까먹지 않고 매끄럽게 진행될수있도록 기재해놓지 않았냐? 전부다 가이드 문서 보강해 계속 까먹을것같으면 아예 스크립트로 강제를 해놓던지 내가 했던말을 몇번을 해야하니?",
+  "complexity_tier": "Tier2",
+  "tier_rationale": "Updates harness wrapper behavior, auditable guides, ledgers, and tests. No product runtime, auth, DB, or production configuration changes.",
+  "scope": {
+    "include": [
+      "scripts/run-generator.mjs",
+      "scripts/run-validator-a.mjs",
+      "scripts/check-generator-output-parsing.mjs",
+      "docs/guides/generator-pipeline-ko.md",
+      "docs/guides/validator-pipeline-ko.md",
+      "docs/operations/work-history-policy.md",
+      "docs/operations/eval-harness.md",
+      "scripts/check-completion-gates.mjs",
+      "logs/insights.jsonl"
+    ],
+    "exclude": [
+      "Product runtime code",
+      "Validator-B automation",
+      "Secrets or environment variable values"
+    ]
+  },
+  "success_criteria": [
+    "Guide/process defects discovered during a task are captured as insights and applied to docs or enforced by scripts in the same or immediate follow-up task.",
+    "run-generator.mjs validates only changes introduced during the current Generator subprocess plus wrapper operational artifacts, not the entire main...HEAD branch diff.",
+    "run-validator-a.mjs can execute Windows .cmd/.bat shims through a safe shell invocation instead of failing with spawnSync EINVAL.",
+    "Generator and Validator pipeline guides document the new behavior and the smoke-test lessons.",
+    "Automated checks cover the Generator baseline diff behavior.",
+    "All local audits pass, then commit and push."
+  ],
+  "constraints": {
+    "positive": [
+      "Use append-only ledger and insight records.",
+      "Prefer script enforcement over relying on memory where feasible.",
+      "Keep changes scoped to harness operations."
+    ],
+    "negative": [
+      "Do not expose token or secret values.",
+      "Do not rewrite historical ledger events in place.",
+      "Do not treat Resource Failure as Validator FAIL."
+    ]
+  }
+}

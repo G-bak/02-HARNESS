@@ -1,6 +1,6 @@
 # Work History Policy
 
-**버전:** 1.14 | **최종 수정:** 2026-04-29
+**버전:** 1.15 | **최종 수정:** 2026-04-29
 
 이 문서는 작업 이력의 저장 위치, 기록 시점, 책임 주체를 정의한다.
 
@@ -254,6 +254,7 @@ commit/merge/push는 항상 세트다. 모든 작업은 push까지 완료해야 
 - 품질 점수 게이트에 따라 `logs/quality-scores.jsonl`에 점수가 기록되어야 한다.
 - 파일 변경이 1건이라도 있으면 `logs/sessions/SESSION-{YYYYMMDD}-{NNN}.md` 갱신이 **commit보다 먼저** 완료되어야 한다.
 - 작업 중 새로 알게 된 재사용 가능한 운영 인사이트가 있으면 `logs/insights.jsonl`에 기록하거나, `TASK_COMPLETED.details.insight_capture`에 `not_needed` 사유를 남겨야 한다.
+- 작업 중 가이드 오류, stale 가이드, wrapper 실제 동작 차이, 반복 가능한 운영 결함을 발견했다면 최종 보고서에만 남기지 않는다. 같은 Task에서 가이드를 고치거나 스크립트로 강제하고, 불가능하면 즉시 후속 Task를 만들며 현재 Task는 그 후속 Task ID를 원장에 남긴다.
 
 **세션 로그 갱신은 git add/commit 이전 마지막 단계다. 순서를 바꾸지 않는다.**
 
@@ -285,9 +286,12 @@ Analyst는 `TASK_COMPLETED` 직전에 아래 질문을 확인한다.
 [ ] 이번 작업에서 다음 세션이나 다른 에이전트가 잊으면 같은 오류를 반복할 지식이 생겼는가?
 [ ] 도구 실제 동작, CLI 옵션, 권한 경계, 감사 실패 원인처럼 문서보다 운영 경험이 중요한 내용이 있었는가?
 [ ] 그 내용이 이미 권위 문서/운영 가이드/세션 로그/보고서 중 한 곳에 충분히 반영됐는가?
+[ ] 보고서에 "가이드 수정 필요", "wrapper 보강 필요", "stale", "반복 가능" 성격의 결함을 적고도 `logs/insights.jsonl`, 가이드 패치, 스크립트 강제, 후속 Task 중 아무 것도 만들지 않은 상태인가?
 ```
 
 재사용 가능한 인사이트가 있으면 `logs/insights.jsonl`에 append 한다. 동시에 `TASK_COMPLETED.details.insight_capture`에는 아래 중 하나를 기록한다.
+
+`actionable_doc_change` 또는 `gotcha`에 해당하는 결함을 보고서에만 적고 `insight_capture.status=not_needed`로 닫는 것은 금지한다. 이미 같은 Task에서 가이드를 수정했더라도 `logs/insights.jsonl`에 근거와 적용 위치를 남겨 다음 세션 재진입 시 검색 가능하게 해야 한다. 반복 가능성이 높은 실수는 문서 보강만으로 끝내지 말고 감사 스크립트 또는 wrapper preflight에서 차단 가능한지 먼저 판단한다.
 
 ```json
 {
@@ -358,7 +362,18 @@ Analyst는 `TASK_COMPLETED` 직전에 아래 질문을 확인한다.
   - category가 actionable_doc_change 또는 gotcha이면서
   - applied_to_doc.status가 applied가 아니면
   → TASK_COMPLETED 차단
+
+  - applied_to_doc.commit이 SELF_REFERENTIAL_* placeholder이면
+  → 실제 커밋 hash로 resolver insight를 append하기 전까지 차단
+
+  - applied_to_doc.commit이 target_doc을 변경하지 않았으면
+  → 완료 차단
+
+  - `insight_capture.status=not_needed` 사유가 보고서만 가리키는데 보고서가 가이드/wrapper/감사 스크립트의 반복 가능한 결함을 언급하고, 인사이트·GUIDE_UPDATED·후속 Task 링크가 없으면
+  → 완료 차단
 ```
+
+감사가 모든 자연어 보고서를 완벽하게 해석하지는 못하므로, Analyst는 보고서에 발견한 운영 결함이 있으면 같은 Task에서 `logs/insights.jsonl`과 가이드/스크립트 변경을 먼저 남겨야 한다. 자동 감사는 마지막 방어선이고, 보고서-only 기록은 완료 조건을 만족하지 못한 것으로 본다.
 
 따라서 운영자가 "이건 actionable이다"라고 분류해 놓고 가이드를 안 고치면 작업 완료 자체가 거부된다. 분류만 솔직하게 해두면 시스템이 자동으로 강제한다.
 

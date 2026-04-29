@@ -7,6 +7,9 @@ const taskDir = path.join(root, 'logs', 'tasks');
 const qualityPath = path.join(root, 'logs', 'quality-scores.jsonl');
 const strictCutoff = 38;
 const staleReportPattern = /(검증|확인|검색|파싱)\s*예정|작성\s*예정|반영\s*예정/;
+const strictTaskStartDate = 20260429;
+const strictTaskStartNumber = 16;
+const reportOnlyProcessDefectPattern = /(가이드|guide|wrapper|스크립트|script|audit|감사).{0,40}(오류|결함|stale|누락|보강|수정 필요|반복|실제 동작 차이)|(오류|결함|stale|누락|보강|반복).{0,40}(가이드|guide|wrapper|스크립트|script|audit|감사)/i;
 const validTiers = new Set(['Tier1', 'Tier2', 'Tier3']);
 
 let errors = 0;
@@ -19,6 +22,16 @@ function reportError(message) {
 function taskNumber(taskId) {
   const match = taskId.match(/TASK-\d{8}-(\d{3})$/);
   return match ? Number(match[1]) : 0;
+}
+
+function isStrictTask(taskId) {
+  const match = taskId.match(/TASK-(\d{8})-(\d{3})$/);
+  if (!match) return false;
+  const taskDate = Number(match[1]);
+  const number = Number(match[2]);
+  return number >= strictCutoff
+    || taskDate > strictTaskStartDate
+    || (taskDate === strictTaskStartDate && number >= strictTaskStartNumber);
 }
 
 function parseJsonl(filePath) {
@@ -249,7 +262,7 @@ const latestCompletedTaskId = taskFiles
 
 for (const file of taskFiles) {
   const taskId = file.replace(/\.jsonl$/, '');
-  if (taskNumber(taskId) < strictCutoff) continue;
+  if (!isStrictTask(taskId)) continue;
 
   const events = parseJsonl(path.join(taskDir, file));
   const completed = events.filter((event) => eventType(event) === 'TASK_COMPLETED');
@@ -272,6 +285,17 @@ for (const file of taskFiles) {
         const report = fs.readFileSync(absoluteReport, 'utf8');
         if (staleReportPattern.test(report)) {
           reportError(`${taskId}: completed report contains stale pending wording (${reportPath})`);
+        }
+        const insightCapture = details.insight_capture;
+        const reportOnlyReason = insightCapture?.status === 'not_needed'
+          && /report|보고서/i.test(insightCapture.reason ?? '');
+        const hasGuideDefectFollowup = (insightsByTask.get(taskId) ?? []).length > 0
+          || hasEvent(events, 'GUIDE_UPDATED')
+          || Boolean(details.followup_task)
+          || Boolean(details.guide_defect_followup_task)
+          || Boolean(details.process_defect_followup_task);
+        if (reportOnlyReason && reportOnlyProcessDefectPattern.test(report) && !hasGuideDefectFollowup) {
+          reportError(`${taskId}: report mentions a reusable guide/wrapper/process defect, but insight_capture=not_needed points only to the report; record an insight, update a guide/script, or link an explicit follow-up task`);
         }
       }
     }

@@ -198,6 +198,27 @@ function commandArgs(args, lastMessagePath) {
   return cliArgs;
 }
 
+function quoteCmdArg(value) {
+  const text = String(value);
+  if (!/[ \t"&|<>^]/.test(text)) return text;
+  return `"${text.replaceAll('"', '\\"')}"`;
+}
+
+function spawnCommand(command, args, options) {
+  if (process.platform === 'win32' && /\.(?:cmd|bat)$/i.test(command)) {
+    const commandLine = [command, ...args].map(quoteCmdArg).join(' ');
+    return {
+      result: spawnSync('cmd.exe', ['/d', '/s', '/c', commandLine], options),
+      actualCommand: ['cmd.exe', '/d', '/s', '/c', commandLine],
+    };
+  }
+
+  return {
+    result: spawnSync(command, args, options),
+    actualCommand: [command, ...args],
+  };
+}
+
 function systemInstruction(handoff) {
   return [
     'You are Validator-A for the 02-HARNESS system.',
@@ -340,12 +361,13 @@ function main() {
   });
 
   const startedAt = timestamp();
-  const result = spawnSync(args.codexBin, cliArgs, {
+  const spawned = spawnCommand(args.codexBin, cliArgs, {
     cwd: root,
     input: systemInstruction(handoff),
     encoding: 'utf8',
     maxBuffer: 50 * 1024 * 1024,
   });
+  const { result } = spawned;
   const finishedAt = timestamp();
 
   fs.writeFileSync(eventsPath, result.stdout ?? '', 'utf8');
@@ -362,6 +384,7 @@ function main() {
     last_message_path: relativePath(lastMessagePath),
     stderr_path: relativePath(stderrPath),
     command_shape: safeCommand,
+    actual_spawn_command: spawned.actualCommand,
     sandbox: args.sandbox,
     approval_policy: 'never',
     model: args.model,

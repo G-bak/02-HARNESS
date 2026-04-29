@@ -1,5 +1,7 @@
 import {
+  filesChangedSinceBaseline,
   synthesizeGeneratorResult,
+  statusChangedFilesFromPorcelain,
   unwrapClaudeJsonOutput,
   validateGeneratorResult,
 } from './run-generator.mjs';
@@ -79,6 +81,19 @@ const noDiffSynthetic = synthesizeGeneratorResult(
 );
 
 assert(noDiffSynthetic.status === 'HOLD', 'natural-language result without target diff must synthesize HOLD');
+
+const before = statusChangedFilesFromPorcelain([
+  ' M logs/tasks/TASK-20260429-015.jsonl',
+  '?? tasks/handoffs/TASK-20260429-015/generator-input.json',
+].join('\n'));
+const after = statusChangedFilesFromPorcelain([
+  ' M logs/tasks/TASK-20260429-015.jsonl',
+  '?? tasks/handoffs/TASK-20260429-015/generator-input.json',
+  '?? tasks/handoffs/TASK-20260429-015/smoke-target.md',
+].join('\n'));
+const delta = filesChangedSinceBaseline(before, after);
+
+assert(delta.length === 1 && delta[0] === 'tasks/handoffs/TASK-20260429-015/smoke-target.md', 'baseline diff must ignore pre-existing task setup files and keep only current-run changes');
 
 if (errors > 0) {
   console.error(`[FAIL] Generator output parsing check failed with ${errors} error(s)`);
