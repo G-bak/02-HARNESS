@@ -3,7 +3,7 @@
 > Analyst가 유지·갱신하는 파일입니다. 새 세션 시작 시 이 파일을 먼저 읽으세요.
 > 새 세션 시작 방법: `/clear` 후 → "CURRENT_STATE.md를 읽고 이어서 진행해줘."
 
-**마지막 갱신:** 2026-04-29 (TASK-20260429-020 완료 — Researcher 외부 CLI 풀 파이프라인 입증 + LandingHub 광고 포스터 실 생성)
+**마지막 갱신:** 2026-04-30 (TASK-20260429-021 완료 — 에이전트 역할 경계 정정: 이미지 생성은 Researcher가 아니라 Analyst 영역)
 
 ---
 
@@ -21,12 +21,12 @@
 | 전체 에이전트 구조·절대규칙 | `AGENTS.md` | v1.7 | 2026-04-26 |
 | 시스템 아키텍처 | `ARCHITECTURE.md` | v1.2 | 2026-04-26 |
 | 보안 규칙 | `SECURITY.md` | v1.3 | 2026-04-26 |
-| Analyst 역할·보고·리셋 | `docs/agents/analyst.md` | v3.0 | 2026-04-28 |
+| Analyst 역할·보고·리셋 | `docs/agents/analyst.md` | v3.1 | 2026-04-30 |
 | Validator 역할·검증 절차 | `docs/agents/validator.md` | v1.4 | 2026-04-26 |
 | Generator 역할 | `docs/agents/generator.md` | v1.5 | 2026-04-27 |
-| Researcher 역할 | `docs/agents/researcher.md` | v1.5 | 2026-04-27 |
+| Researcher 역할 | `docs/agents/researcher.md` | v1.6 | 2026-04-30 |
 | 머지 조건·승인 주체 (권위) | `docs/operations/git-branch-policy.md` | v1.9 | 2026-04-29 |
-| 도구 권한 | `docs/operations/tool-permissions.md` | v1.9 | 2026-04-29 |
+| 도구 권한 | `docs/operations/tool-permissions.md` | v1.10 | 2026-04-30 |
 | 외부 알림 정책 | `docs/operations/notification-policy.md` | v1.6 | 2026-04-26 |
 | 작업 이력 저장 정책 | `docs/operations/work-history-policy.md` | v1.15 | 2026-04-29 |
 | Tier 분류 기준 | `docs/workflows/tier-classification.md` | v1.3 | 2026-04-26 |

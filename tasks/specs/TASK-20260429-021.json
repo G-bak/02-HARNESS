@@ -1,0 +1,50 @@
+{
+  "schema_version": "task-spec.v1",
+  "task_id": "TASK-20260429-021",
+  "created_at": "2026-04-30T09:00:00+09:00",
+  "request": "Correct agent role boundary in authority docs: image generation belongs to Analyst, not Researcher.",
+  "request_original": "근데 이미지 생성을 리서쳐가 왜해? analyst가 해야지 권위 문서 수정해",
+  "complexity_tier": "Tier2",
+  "tier_rationale": "Updates 4 authority documents (researcher.md, analyst.md, tool-permissions.md, researcher-procedure-ko.md) plus CURRENT_STATE pointer. No product runtime impact but operational role surface change. Includes retroactive CORRECTION for TASK-20260429-020 mis-attribution.",
+  "depends_on": ["TASK-20260429-020"],
+  "scope": {
+    "include": [
+      "docs/agents/researcher.md (explicit no-generation rule)",
+      "docs/agents/analyst.md (explicit creative-output authority)",
+      "docs/guides/researcher-procedure-ko.md (boundary clarification)",
+      "docs/operations/tool-permissions.md (image generation tool row + activity-split rule)",
+      "CURRENT_STATE.md (version pointers + last-update line)",
+      "logs/tasks/TASK-20260429-020.jsonl (CORRECTION event noting mis-attribution)",
+      "logs/insights.jsonl (amendment for INS-20260429-020-01 cross-references)",
+      "tasks/specs/TASK-20260429-021.json + ledger + report + quality"
+    ],
+    "exclude": [
+      "Product runtime code",
+      "Wrapper scripts (no behavior change needed)",
+      "TASK-020 deliverables (poster.png etc — they remain valid; only agent attribution corrects)"
+    ]
+  },
+  "success_criteria": [
+    "researcher.md explicitly forbids generation outputs (image, code, doc, copy) and limits Researcher activity to research summary even within shared external CLI invocations.",
+    "analyst.md adds responsibility 7 covering Tier 1/2 creative-output direct generation including external CLI tool invocation.",
+    "researcher-procedure-ko.md section 1 has activity-split rule (search vs generation in shared invocation).",
+    "tool-permissions.md matrix has image generation tool row with Analyst ✅ / Researcher ❌ / Generator ✅ task/* limited.",
+    "CURRENT_STATE.md authority pointer table reflects all 4 version bumps and last-update line points to TASK-20260429-021.",
+    "TASK-20260429-020 ledger has CORRECTION event explicitly noting Researcher → Analyst attribution correction for image generation portion of the prior smoke test.",
+    "logs/insights.jsonl has cross-reference amendment that re-attributes INS-20260429-020-01 image-gen-capability to Analyst-discoverable rather than Researcher-discoverable.",
+    "TASK-20260429-021 own report self-applies new agent-by-agent format and demonstrates correct attribution.",
+    "npm run audit:harness PASS."
+  ],
+  "constraints": {
+    "positive": [
+      "Preserve TASK-020's actual deliverables (poster.png, research-summary.json, poster-prompt.md) — only attribution gets corrected.",
+      "Use append-only ledger pattern.",
+      "Keep wording short and decisive."
+    ],
+    "negative": [
+      "Do not include secrets or env values.",
+      "Do not modify Generator/Validator role docs (this Task is specifically about Researcher↔Analyst boundary).",
+      "Do not retroactively rewrite TASK-020 report (that report stands; only ledger gets a CORRECTION)."
+    ]
+  }
+}

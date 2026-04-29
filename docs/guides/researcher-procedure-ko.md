@@ -1,6 +1,6 @@
 # Researcher 절차 통일 — 한국어 운영 가이드
 
-**버전:** 1.0 | **최종 수정:** 2026-04-28  
+**버전:** 1.1 | **최종 수정:** 2026-04-30  
 **대상:** 02-HARNESS Analyst·운영자  
 **용도:** 외부 검색·최신 사실 확인·공식 문서 검증을 수행할 때, 실행 방식과 무관하게 동일한 Research Summary를 남기기 위한 절차를 정의한다.
 
@@ -19,6 +19,8 @@ Researcher 절차는 하나다.
 ```text
 조사 질문 → scope/exclude → 공식/1차 출처 확인 → snippet/근거 요약 → confidence → Research Summary 기록
 ```
+
+> ⚠ **Researcher의 산출물은 Research Summary뿐.** 이미지 생성, 광고 카피 작성, 코드 생성, 문서 작성 같은 어떤 새 산출물도 Researcher가 만들지 않는다. 같은 Codex CLI invocation에서 검색과 이미지 생성을 함께 시키면 Codex가 한 번에 처리할 수는 있지만, **운영 기록에서는 검색·요약은 Researcher 활동, 이미지·코드·문서 산출은 Analyst(또는 Tier 2/3 코드 작업이면 Generator) 활동으로 분리해 적는다**. 보고서의 에이전트별 활동 이력 섹션도 같은 분리를 따른다.
 
 실행 방식은 세 가지 중 하나를 고른다.
 
