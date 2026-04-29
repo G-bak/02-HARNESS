@@ -3,7 +3,7 @@
 > Analyst가 유지·갱신하는 파일입니다. 새 세션 시작 시 이 파일을 먼저 읽으세요.
 > 새 세션 시작 방법: `/clear` 후 → "CURRENT_STATE.md를 읽고 이어서 진행해줘."
 
-**마지막 갱신:** 2026-04-29 (TASK-20260429-017 진행 중 — Validator-A 실제 smoke 재검증)
+**마지막 갱신:** 2026-04-29 (TASK-20260429-017 완료 — Validator-A 실제 smoke 재검증 PASS)
 
 ---
 
@@ -101,18 +101,15 @@
 
 ## 활성 Task
 
-진행 중:
+현재 진행 중인 Task 없음.
 
-- `TASK-20260429-017` — Validator-A 실제 smoke 재검증. 실제 Codex Validator-A 호출 PASS 확인, 보고/커밋/머지 마무리 대기.
-
-마지막 완료 Task: TASK-20260429-016 가이드 결함 자동 보강 및 wrapper 강제 (2026-04-29)
+마지막 완료 Task: TASK-20260429-017 Validator-A 실제 smoke 재검증 PASS (2026-04-29)
 
 ---
 
 ## 남은 작업
 
-- **후속 후보**: TASK-016 이후 별도 smoke test Task로 실제 Generator → Validator-A 경로를 재확인할 수 있음.
-- **별도 Codex 세션에서 Validator-A 실제 실행 검증**: 필요 시 `npm run run:validator-a -- TASK-20260429-015`로 외부 Codex Validator-A 실행을 시도하고 새 smoke Task 또는 TASK-015 ledger에 CORRECTION/AUDIT_NOTE로 append.
+- **완료됨**: TASK-017에서 실제 Codex Validator-A smoke 재검증 PASS 확인.
 - **후속 후보**: `--bare` 제거의 컨텍스트 격리 약화 trade-off 보강 (예: hooks/plugins 명시 비활성화 옵션 조합 탐색).
 
 ---
