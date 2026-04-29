@@ -1,0 +1,51 @@
+{
+  "schema_version": "task-spec.v1",
+  "task_id": "TASK-20260429-001",
+  "title": "Adopt 2-commit squash pattern + insight categorization with auto-enforced doc updates",
+  "task_tier": "Tier2",
+  "task_type": "harness-policy-doc-update + harness-automation",
+  "created_at": "2026-04-29T09:00:00+09:00",
+  "goal": "Solve two coupled problems: (1) post-merge metadata in single squash commit prevents auto-cleanup of own task branch — fixed by splitting into pure-squash + post-completion 2-commit pattern; (2) insights captured in logs/insights.jsonl are easy to forget — fixed by classifying each insight and forcing doc updates for high-impact categories before TASK_COMPLETED is allowed. Apply both retroactively by classifying INS-20260428-006-03 as a gotcha and embedding the warning into git-branch-policy.md as the first living example.",
+  "scope": {
+    "include": [
+      "docs/operations/git-branch-policy.md (2-commit pattern + gotcha line)",
+      "docs/operations/work-history-policy.md (insight categories + applied_to_doc + enforcement rules)",
+      "scripts/check-completion-gates.mjs (new gate: actionable_doc_change/gotcha must have applied_to_doc.status=applied)",
+      "logs/insights.jsonl (amendment entry for INS-20260428-006-03 with category=gotcha + applied_to_doc reference)",
+      "CURRENT_STATE.md (authority doc versions, last update, active task)",
+      "task ledger, session log, report, quality score"
+    ],
+    "exclude": [
+      "Product runtime code (api/, public/, wrangler.toml)",
+      "Generator/Validator runtime behavior",
+      "Other authority documents not directly related"
+    ]
+  },
+  "success_criteria": [
+    "git-branch-policy.md Squash Merge 운영 순서 절이 2-commit pattern을 표준으로 명시 (pure squash commit + separate post-completion record commit). Legacy 1-commit pattern은 deprecated 표기.",
+    "git-branch-policy.md에 INS-20260428-006-03 기반 ⚠ Known gotcha 줄이 추가됨 (살아있는 예시).",
+    "work-history-policy.md insight_capture 절이 4개 category(actionable_doc_change, gotcha, proposal, observation)와 각각의 처리 규칙, applied_to_doc 필드를 정의함.",
+    "scripts/check-completion-gates.mjs가 actionable_doc_change/gotcha 분류된 인사이트에 applied_to_doc.status=applied가 없으면 TASK_COMPLETED를 차단함.",
+    "logs/insights.jsonl에 INS-20260428-006-03을 category=gotcha + applied_to_doc=applied로 보강한 amendment 엔트리가 append됨.",
+    "이 Task에서 새로 추가하는 INS 엔트리 1건 이상이 새 schema(category + applied_to_doc)를 따르며 자기-검증함.",
+    "CURRENT_STATE.md 권위 문서 표가 git-branch-policy.md v1.9, work-history-policy.md v1.x로 갱신됨.",
+    "TASK-20260429-001 ledger에 TASK_CREATED, GENERATION_COMPLETED, VALIDATION_RESULT, MERGE_COMPLETED, REPORT_WRITTEN, TASK_COMPLETED with insight_capture 기록.",
+    "reports/TASK-20260429-001.md (Tier 2 형식, Executive Summary 포함) 작성.",
+    "logs/quality-scores.jsonl에 점수 1행 추가.",
+    "npm run audit:harness PASS (새 게이트 포함).",
+    "task/TASK-20260429-001 자체가 새 2-commit 패턴 적용 후 npm run clean:branches -- --force로 자동 정리됨 (검증)."
+  ],
+  "constraints": {
+    "positive": [
+      "Use Node.js built-ins only.",
+      "Categories must be enumerable: actionable_doc_change, gotcha, proposal, observation.",
+      "Amendment entry for INS-20260428-006-03 must reference the original id explicitly.",
+      "New gate must apply only to insights captured in the same Task (matched by source_task field)."
+    ],
+    "negative": [
+      "Do not include secrets, credentials, PII, or environment variable values.",
+      "Do not modify the original INS-20260428-006-03 entry in place (append-only ledger principle).",
+      "Do not make the new gate so strict that it blocks legitimate Tasks with no insights."
+    ]
+  }
+}

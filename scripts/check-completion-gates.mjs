@@ -161,6 +161,16 @@ function activeTaskIdsFromLedgers(files) {
 }
 
 const qualityTaskIds = new Set(parseJsonl(qualityPath).map((row) => row.task_id).filter(Boolean));
+const insightsPath = path.join(root, 'logs', 'insights.jsonl');
+const allInsights = parseJsonl(insightsPath);
+const insightsByTask = new Map();
+for (const insight of allInsights) {
+  if (!insight.source_task) continue;
+  if (!insightsByTask.has(insight.source_task)) {
+    insightsByTask.set(insight.source_task, []);
+  }
+  insightsByTask.get(insight.source_task).push(insight);
+}
 const dirtyFiles = gitDirtyFiles();
 const latestSessionPath = latestSessionFile();
 const taskFiles = fs.readdirSync(taskDir)
@@ -223,6 +233,38 @@ for (const file of taskFiles) {
 
   if (details.branch_required === false && !details.branch_omission_reason) {
     reportError(`${taskId}: branch_required=false requires branch_omission_reason`);
+  }
+
+  // Insight category enforcement gate (per work-history-policy v1.14)
+  // For each insight whose source_task matches this Task and which carries a `category` field,
+  // require that actionable_doc_change and gotcha categories have applied_to_doc.status === 'applied'.
+  // Legacy insights without `category` are exempt.
+  const insightsForTask = insightsByTask.get(taskId) ?? [];
+  for (const insight of insightsForTask) {
+    if (!insight.category) continue;
+    if (insight.category !== 'actionable_doc_change' && insight.category !== 'gotcha') continue;
+
+    const insightId = insight.id ?? '(unknown)';
+    const appliedStatus = insight.applied_to_doc?.status;
+
+    if (appliedStatus !== 'applied') {
+      reportError(
+        `${taskId}: insight ${insightId} category=${insight.category} requires applied_to_doc.status=applied (got ${appliedStatus ?? 'missing'})`,
+      );
+      continue;
+    }
+
+    if (!insight.applied_to_doc?.commit) {
+      reportError(
+        `${taskId}: insight ${insightId} category=${insight.category} applied_to_doc.commit is required`,
+      );
+    }
+
+    if (insight.category === 'gotcha' && !insight.applied_to_doc?.section) {
+      reportError(
+        `${taskId}: insight ${insightId} category=gotcha applied_to_doc.section is required (which guide section the warning was added to)`,
+      );
+    }
   }
 
   if (

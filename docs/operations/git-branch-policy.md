@@ -1,6 +1,6 @@
 # Git Branch Policy — 브랜치 격리 정책
 
-**버전:** 1.8 | **최종 수정:** 2026-04-28  
+**버전:** 1.9 | **최종 수정:** 2026-04-29  
 **원칙:** 모든 생성 작업은 전용 브랜치에서 수행한다. Generator는 main에 직접 접근하지 않는다.  
 **권위 문서:** 머지 조건·승인 주체에 관한 규칙은 이 문서가 단일 기준(Single Source of Truth)이다. SECURITY.md와 각 에이전트 문서는 이 문서를 참조하며 독자적인 규칙을 정의하지 않는다.
 
@@ -145,26 +145,72 @@ git add . && git commit -m "..."
 - 실패한 첫 명령 이후의 작업이 실행됐는지 헷갈리기 쉽다.
 - 원장과 세션 로그에 어느 단계까지 완료됐는지 기록하기 어렵다.
 
-### Squash Merge 운영 순서
+### Squash Merge 운영 순서 — 2-commit 패턴 (표준)
 
-Squash merge 시 아래 순서를 따른다.
+Squash merge 시 main에 두 커밋을 만든다. 첫 번째는 task 브랜치의 작업 결과만, 두 번째는 후속 metadata만 담는다.
 
-1. `task/{TASK-ID}` 브랜치에서 모든 변경을 커밋한다.
+```
+main:    ... ──── [1차] pure squash ──── [2차] post-completion record ────►
+                  │                       │
+                  │                       └─ CURRENT_STATE / 세션 로그 / MERGE_COMPLETED 등
+                  └─ 이 커밋의 tree = task 브랜치 tip의 tree
+                     → cleanup 스크립트의 트리 동등성 검사 통과 → 자기 브랜치 자동 정리 가능
+```
+
+#### 단계별 실행
+
+1. `task/{TASK-ID}` 브랜치에서 모든 작업 변경을 커밋한다.
 2. `main`으로 전환한다.
-3. `git merge --squash task/{TASK-ID}`를 실행한다.
-4. squash 결과가 staged 상태가 되면 `MERGE_COMPLETED`, `TASK_COMPLETED`, `CURRENT_STATE.md`, 최신 세션 로그의 `## 다음 단계`를 최종 상태로 갱신한다.
-5. 갱신한 기록 파일을 다시 `git add` 한다.
-6. Validator 결과와 Tier가 포함된 squash commit을 생성한다.
-7. 최종 감사 스크립트 3종을 실행한다.
-8. `git status --short --branch`로 `main` 상태와 `origin/main` ahead 여부를 확인해 사용자에게 보고한다.
-9. `git branch --merged main`으로 머지된 작업 브랜치를 확인하고, 완료된 `task/{TASK-ID}` 브랜치를 삭제한다.
-10. 삭제 후 `git branch --list` 결과를 원장 또는 보고서에 요약한다.
+3. `git merge --squash task/{TASK-ID}`를 실행한다 (변경이 staged 상태가 됨).
+4. **여기서 staged 상태를 그대로 1차 커밋한다** — Validator 결과와 Tier가 포함된 squash commit. post-merge metadata는 아직 추가하지 않는다.
+   - 이 시점 1차 커밋의 tree == task 브랜치 tip의 tree여야 한다.
+5. 1차 커밋 직후 `MERGE_COMPLETED` 이벤트와 `CURRENT_STATE.md`, 최신 세션 로그의 `## 다음 단계`, 필요한 `CORRECTION` 이벤트를 갱신한다.
+6. 갱신한 기록 파일들을 `git add`하고 **2차 커밋**으로 분리한다 — `[TASK-ID] Record ... completion` 형식.
+7. 두 커밋을 `git push origin main`으로 한 번에 push한다.
+8. `git status --short --branch`로 main 상태와 `origin/main` 동기화를 확인한다.
+9. `npm run clean:branches -- --force`로 자기 task 브랜치를 정리한다 (1차 커밋의 tree 동등성으로 자동 통과).
+10. `git branch --list` 결과를 원장 또는 보고서에 요약한다.
 
-커밋 해시 기록 주의:
+#### 왜 2단계인가
 
-- merge 커밋 안에 자기 자신의 최종 해시를 고정 문자열로 넣으려고 amend를 반복하지 않는다.
-- 같은 squash commit 안의 원장에는 `SELF_REFERENTIAL_MAIN_SQUASH_COMMIT`처럼 self-reference 표기를 사용할 수 있다.
-- 실제 최종 HEAD 해시는 커밋 후 사용자 보고와 필요 시 후속 `CORRECTION` 이벤트에 기록한다.
+1-commit 패턴(post-merge metadata를 squash commit에 함께 넣기)은 squash commit의 tree가 task 브랜치 tip의 tree보다 metadata만큼 더 커진다. 그러면 cleanup 스크립트의 squash 트리 동등성 검사가 차이를 감지해서 자기 브랜치를 보존해 버린다 (정상 동작이지만 운영자가 매번 수동으로 `git branch -D`를 해야 함). 1차/2차로 분리하면 1차 커밋의 tree가 정확히 task 브랜치 tip의 tree와 같아지므로 자기 브랜치도 자동 정리된다.
+
+#### 1차 / 2차 커밋 메시지 형식
+
+**1차 (pure squash):**
+```
+[{TASK-ID}] {작업 요약}
+
+Validator: Validator-A PASS (Codex CLI)
+Tier: Tier2
+```
+
+**2차 (post-completion record):**
+```
+[{TASK-ID}] Record {요약} completion
+
+- Append MERGE_COMPLETED with main commit hash and PUSHED
+- Update CURRENT_STATE.md and session log
+- Final cleanup metadata (insights, etc.)
+
+Tier: Tier2
+```
+
+#### 커밋 해시 기록 주의
+
+- 1차 커밋의 해시는 `MERGE_COMPLETED`에 들어가야 하지만 1차 커밋 시점엔 아직 모른다. 1차 커밋 직후 hash를 읽어 2차 커밋의 ledger 업데이트에 반영한다.
+- 1차 커밋을 amend로 수정해서 자기 hash를 박는 시도는 하지 않는다 (amend는 hash를 다시 바꾼다).
+- 자기 참조가 필요한 곳에서는 `SELF_REFERENTIAL_MAIN_SQUASH_COMMIT` placeholder를 1차 커밋에 두고, 2차 커밋에서 실제 hash로 보정하는 `CORRECTION` 이벤트를 append한다.
+
+#### Legacy 1-commit 패턴 (deprecated)
+
+이전 정책의 단일 커밋 방식은 더 이상 표준이 아니다. 단, 다음 조건이 모두 충족될 때만 예외적으로 허용된다.
+
+- 운영자가 자기 task 브랜치를 수동 `git branch -D`로 정리할 의지와 검증 책임을 명시
+- 사유를 `MERGE_COMPLETED.details.legacy_one_commit_reason`에 기록
+- 다음 작업 직전에 잔존 브랜치를 0으로 회수
+
+위 예외 없이 1-commit 패턴을 쓰면 이 절의 표준 위반이며 감사에서 향후 게이트로 차단될 수 있다.
 
 ### Push / Origin 인수인계
 
@@ -218,6 +264,8 @@ squash_tree=$(git rev-parse "${squash_commit}^{tree}")
 - main의 **첫 번째** `[TASK-ID]` 커밋이 squash merge 그 자체다. 이후 main에 추가된 후속 작업(다른 task)이 같은 파일을 건드려도 squash 커밋의 트리는 그대로 남아 있다.
 - 브랜치 tip의 트리가 squash 커밋의 트리와 **완전히 같다면**, 그 브랜치의 모든 기여가 main에 반영됐다는 결정적 증거다.
 - 트리가 다르면 두 가지 의미: (a) squash 후 브랜치에 추가 커밋이 있음, 또는 (b) main에 머지된 적이 없음. 둘 다 보존이 안전.
+
+> ⚠ **Known gotcha (INS-20260428-006-03 출처)** — Legacy 1-commit 패턴(post-merge metadata를 squash commit에 포함)을 쓰면 squash commit의 tree가 task 브랜치 tip의 tree보다 metadata만큼 더 크다. 따라서 cleanup 스크립트의 squash 트리 동등성 검사가 차이를 감지해 자기 task 브랜치를 보존해 버린다. 위 "Squash Merge 운영 순서 — 2-commit 패턴"을 사용하면 1차 (pure squash) 커밋의 tree가 task 브랜치 tip의 tree와 정확히 일치하므로 자기 브랜치도 자동 정리된다. 부득이 1-commit 패턴을 쓴 경우엔 수동 `git branch -D`로 정리하고 사유를 기록한다.
 
 #### 권장 명령
 

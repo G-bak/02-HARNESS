@@ -3,7 +3,7 @@
 > Analyst가 유지·갱신하는 파일입니다. 새 세션 시작 시 이 파일을 먼저 읽으세요.
 > 새 세션 시작 방법: `/clear` 후 → "CURRENT_STATE.md를 읽고 이어서 진행해줘."
 
-**마지막 갱신:** 2026-04-28 (TASK-20260428-006 완료 — Branch cleanup 정책 트리 동등성 격상 + 자동 정리 스크립트 + 잔존 4건 정리)
+**마지막 갱신:** 2026-04-29 (TASK-20260429-001 완료 — 2-commit squash 패턴 + 인사이트 분류 시스템 + 자동 차단 게이트 + INS-006-03 소급 적용)
 
 ---
 
@@ -25,10 +25,10 @@
 | Validator 역할·검증 절차 | `docs/agents/validator.md` | v1.4 | 2026-04-26 |
 | Generator 역할 | `docs/agents/generator.md` | v1.5 | 2026-04-27 |
 | Researcher 역할 | `docs/agents/researcher.md` | v1.5 | 2026-04-27 |
-| 머지 조건·승인 주체 (권위) | `docs/operations/git-branch-policy.md` | v1.8 | 2026-04-28 |
+| 머지 조건·승인 주체 (권위) | `docs/operations/git-branch-policy.md` | v1.9 | 2026-04-29 |
 | 도구 권한 | `docs/operations/tool-permissions.md` | v1.8 | 2026-04-27 |
 | 외부 알림 정책 | `docs/operations/notification-policy.md` | v1.6 | 2026-04-26 |
-| 작업 이력 저장 정책 | `docs/operations/work-history-policy.md` | v1.13 | 2026-04-28 |
+| 작업 이력 저장 정책 | `docs/operations/work-history-policy.md` | v1.14 | 2026-04-29 |
 | Tier 분류 기준 | `docs/workflows/tier-classification.md` | v1.3 | 2026-04-26 |
 | Task 수명 주기 | `docs/workflows/task-lifecycle.md` | v1.17 | 2026-04-27 |
 | 실패 처리 | `docs/workflows/failure-handling.md` | v1.3 | 2026-04-25 |
@@ -85,22 +85,24 @@
 - **대표 보고용 품질 점수 표시**: 보고서에는 JSON 원문보다 `95점 / 100점 (S등급)` 형식의 요약, 구분 표, 좋았던 점, 감점/주의를 먼저 표시. JSON은 내부 원장 또는 부록용.
 - **JSON/JSONL 언어 기준**: `tasks/specs/*.json`과 `logs/tasks/*.jsonl`은 영어 작성 가능·권장. 세션 로그(`logs/sessions/*.md`)와 최종 보고서(`reports/*.md`)만 한국어 작성 필수.
 - **작업 종료 인사이트 캡처**: Task 완료 전 재사용 가능한 운영 인사이트를 확인하고, 있으면 `logs/insights.jsonl`에 기록한다. 없으면 `TASK_COMPLETED.details.insight_capture.status=not_needed`와 사유를 남긴다.
+- **인사이트 카테고리 강제**: 모든 신규 인사이트는 `category` 필드 필수(`actionable_doc_change` / `gotcha` / `proposal` / `observation`). 앞 두 가지는 같은 Task에서 가이드 수정 + `applied_to_doc.status=applied` 의무이며 자동 감사가 차단한다.
+- **2-commit squash 표준**: main 머지는 1차(pure squash, validator footer) + 2차(post-completion record) 두 커밋으로 분리한다. 1차 커밋의 tree가 task 브랜치 tip의 tree와 같아야 cleanup 스크립트가 자동 작동한다.
 
 ---
 
 ## 활성 Task
 
-현재 진행 중인 Task 없음.
+- TASK-20260429-001: 2-commit squash 패턴 + 인사이트 분류 시스템 + 자동 차단 게이트 + INS-006-03 소급 적용. 작업 완료, `task/TASK-20260429-001` 브랜치에서 2-commit squash 패턴 회귀 검증 직전 단계.
 
-마지막 완료 Task: TASK-20260428-006 Branch cleanup 정책 트리 동등성 격상 + `scripts/clean-merged-task-branches.mjs` + 잔존 4건 정리 (2026-04-28)
+마지막 완료 Task: TASK-20260428-006 Branch cleanup 정책 트리 동등성 격상 (2026-04-28)
 
 ---
 
 ## 남은 작업
 
-- `task/TASK-20260427-092` 잔존 1건은 트리 동등성 검사에서 보존됨 (브랜치 tip이 main의 squash와 트리 차이). 별도 수동 검토 필요.
+- TASK-20260429-001 commit → main 2-commit squash → push → `npm run clean:branches -- --force`로 자기 브랜치 자동 정리 검증.
+- `task/TASK-20260427-092` 잔존 1건은 트리 동등성 검사에서 보존됨. 별도 수동 검토 필요.
 - 다음 신규 Task에서 Validator-A 실행 wrapper와 retry handoff 자동 생성 파이프라인 설계 승인 후 구현 검토.
-- 후속 후보: `TASK_COMPLETED.details.insight_capture` 자동 감사 스크립트 연결.
 
 ---
 

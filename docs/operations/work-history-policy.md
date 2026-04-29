@@ -1,6 +1,6 @@
 # Work History Policy
 
-**버전:** 1.13 | **최종 수정:** 2026-04-28
+**버전:** 1.14 | **최종 수정:** 2026-04-29
 
 이 문서는 작업 이력의 저장 위치, 기록 시점, 책임 주체를 정의한다.
 
@@ -310,7 +310,105 @@ Analyst는 `TASK_COMPLETED` 직전에 아래 질문을 확인한다.
 }
 ```
 
-인사이트가 권위 규칙 변경을 요구하면 별도 Task로 문서 개정한다. 단순 발견이나 운영 팁이면 `logs/insights.jsonl`과 관련 운영 가이드에만 기록한다.
+#### 인사이트 분류 (category)
+
+인사이트는 단순히 로그에 적기만 하면 다음 세션에서 잊히기 쉽다. 따라서 **모든 신규 인사이트 엔트리는 `category` 필드를 포함**해야 하며, category에 따라 후속 처리 의무가 달라진다. 자동 감사가 아래 의무를 강제한다.
+
+| category | 의미 | 같은 Task에서의 의무 |
+|---|---|---|
+| `actionable_doc_change` | 권위 문서나 운영 가이드의 명백한 누락·오류 — 즉시 문서를 고쳐야 함 | **같은 Task에서 `target_doc`을 수정**하고, `applied_to_doc.status=applied`와 `commit` 정보를 기록 |
+| `gotcha` | 정책은 옳지만 운영 중 만나는 함정 — 가이드에 ⚠ 경고 줄 추가 | **같은 Task에서 해당 가이드의 관련 절에 ⚠ 한 줄 추가**하고, `applied_to_doc.status=applied`와 `section` 정보를 기록 |
+| `proposal` | 정책 변경 제안 — 즉시 결정 어려움 | 로그에만 append. 같은 Task에서는 별도 조치 없음. 별도 "policy review" Task로 큐잉 |
+| `observation` | 단순 발견 — 패턴 누적 후 판단 | 로그에만 append. 같은 topic이 누적되면 그때 가이드 정비 |
+
+#### `applied_to_doc` 필드
+
+`actionable_doc_change`와 `gotcha` 카테고리는 다음 형식의 `applied_to_doc`을 반드시 포함한다.
+
+```json
+{
+  "id": "INS-YYYYMMDD-NNN-MM",
+  "captured_at": "...",
+  "captured_by": "Analyst",
+  "source_task": "TASK-YYYYMMDD-NNN",
+  "topic": "...",
+  "insight": "...",
+  "category": "actionable_doc_change | gotcha",
+  "target_doc": "docs/operations/git-branch-policy.md",
+  "applied_to_doc": {
+    "status": "applied",
+    "commit": "abc1234",
+    "section": "Squash Merge 운영 순서"
+  }
+}
+```
+
+`status` 값:
+
+- `applied`: 같은 Task에서 실제로 가이드를 수정함. `commit` (실제 hash 또는 placeholder) + `section` (수정한 절 제목) 필수.
+- `deferred`: 즉시 적용이 어려워 후속 Task로 미룸. `deferred_reason` 필수. **이 값은 `actionable_doc_change`와 `gotcha`에 사용하면 자동 감사에서 차단된다** — 본질이 즉시 적용이기 때문. `proposal`로 재분류하거나, 같은 Task에서 적용해야 한다.
+- `not_applicable`: `proposal`/`observation`에만 허용.
+
+#### 자동 감사 게이트
+
+`scripts/check-completion-gates.mjs`는 다음을 검사한다.
+
+```
+이 Task의 source_task=TASK-{ID}로 captured된 인사이트 중에서:
+  - category가 actionable_doc_change 또는 gotcha이면서
+  - applied_to_doc.status가 applied가 아니면
+  → TASK_COMPLETED 차단
+```
+
+따라서 운영자가 "이건 actionable이다"라고 분류해 놓고 가이드를 안 고치면 작업 완료 자체가 거부된다. 분류만 솔직하게 해두면 시스템이 자동으로 강제한다.
+
+#### 기존 인사이트 보강 (append-only)
+
+기존 인사이트 엔트리는 in-place 수정 금지(append-only 원칙). 분류·target_doc·applied_to_doc을 사후 보강하려면 **새 amendment 엔트리를 append**한다.
+
+```json
+{
+  "id": "INS-YYYYMMDD-NNN-amend-1",
+  "amends": "INS-YYYYMMDD-NNN-OLD",
+  "captured_at": "...",
+  "captured_by": "Analyst",
+  "source_task": "TASK-YYYYMMDD-NNN",
+  "amendment_reason": "Backfill category and applied_to_doc per work-history-policy v1.14",
+  "category": "gotcha",
+  "target_doc": "docs/operations/git-branch-policy.md",
+  "applied_to_doc": {
+    "status": "applied",
+    "commit": "abc1234",
+    "section": "Post-merge Branch Cleanup"
+  }
+}
+```
+
+amendment 엔트리도 자동 감사의 대상이다. 즉 amendment를 append하면서 가이드 수정을 하지 않으면 동일하게 차단된다.
+
+#### 카테고리 결정 가이드
+
+판단이 모호하면 아래 결정 트리를 사용한다.
+
+```
+인사이트가 가이드/정책 문장과 직접 모순되거나 누락이 명백한가?
+  YES → actionable_doc_change
+  NO → 다음 질문
+
+운영 중 만나는 함정·엣지 케이스인가? (정책은 옳지만 주의 필요)
+  YES → gotcha
+  NO → 다음 질문
+
+정책 변경 제안인가? (옳고 그름 결정에 토론 필요)
+  YES → proposal
+  NO → observation
+```
+
+확신이 없으면 `proposal`로 분류한다 — `actionable_doc_change`/`gotcha`는 가이드 수정을 요구하므로 잘못 분류하면 의도치 않은 정책 변경이 들어간다.
+
+#### Legacy 처리
+
+`category` 필드 도입 이전에 작성된 인사이트(2026-04-29 이전 INS 엔트리)는 자동 감사 대상에서 제외된다. 자동 감사는 `category` 필드가 존재하는 엔트리에만 적용한다. legacy 엔트리도 필요하면 amendment로 보강할 수 있다.
 
 ### 보고서 게이트
 
