@@ -1,0 +1,42 @@
+{
+  "task_id": "TASK-20260429-015",
+  "created_at": "2026-04-29T15:46:20+09:00",
+  "request": "Run a separate Tier 2 smoke test for the real Generator -> Validator-A wrapper path.",
+  "request_original": "별도 Tier 2 smoke test Task를 하나 만들어 실제 Generator -> Validator-A를 끝까지 한 번 더 태워야 합니다.",
+  "complexity_tier": "Tier2",
+  "tier_rationale": "Exercises external model wrappers and creates smoke artifacts. No product runtime or authority document behavior changes.",
+  "scope": {
+    "include": [
+      "tasks/handoffs/TASK-20260429-015/generator-input.json",
+      "tasks/handoffs/TASK-20260429-015/smoke-target.md",
+      "tasks/handoffs/TASK-20260429-015/generator-result.json",
+      "tasks/handoffs/TASK-20260429-015/validator-a-input.json",
+      "tasks/handoffs/TASK-20260429-015/validator-a-result-1.json",
+      "logs/tasks/TASK-20260429-015.jsonl"
+    ],
+    "exclude": [
+      "Product runtime code",
+      "Authority policy changes",
+      "Secrets or environment variable values"
+    ]
+  },
+  "success_criteria": [
+    "Create a minimal Generator handoff that asks Generator to create or update only tasks/handoffs/TASK-20260429-015/smoke-target.md.",
+    "Run scripts/run-generator.mjs as a real execution on task/TASK-20260429-015, not dry-run.",
+    "If Generator succeeds, create Validator-A handoff and run scripts/run-validator-a.mjs as a real execution, not dry-run.",
+    "Record generator and validator artifacts, or Resource Failure artifacts if an external CLI cannot complete.",
+    "Do not treat Resource Failure as Validator FAIL."
+  ],
+  "constraints": {
+    "positive": [
+      "Keep the smoke target harmless and task-scoped.",
+      "Use append-only ledger events.",
+      "Commit and push final records."
+    ],
+    "negative": [
+      "Do not include secrets in handoff payloads.",
+      "Do not modify files outside the smoke target and task operational artifacts.",
+      "Do not run web search."
+    ]
+  }
+}

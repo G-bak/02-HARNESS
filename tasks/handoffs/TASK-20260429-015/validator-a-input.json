@@ -1,0 +1,43 @@
+{
+  "schema_version": "validator-handoff.v1",
+  "task_id": "TASK-20260429-015",
+  "agent": "Validator-A",
+  "invocation": {
+    "runtime": "Codex CLI",
+    "fresh_session_required": true,
+    "sandbox": "read-only",
+    "approval_policy": "never"
+  },
+  "refs": {
+    "spec": "tasks/specs/TASK-20260429-015.json",
+    "ledger": "logs/tasks/TASK-20260429-015.jsonl",
+    "session": "logs/sessions/SESSION-20260429-002.md",
+    "generator_result": "tasks/handoffs/TASK-20260429-015/generator-result.json",
+    "generator_run": "tasks/handoffs/TASK-20260429-015/generator-run.json"
+  },
+  "changed_files": [
+    "tasks/handoffs/TASK-20260429-015/smoke-target.md",
+    "tasks/handoffs/TASK-20260429-015/generator-result.json",
+    "tasks/handoffs/TASK-20260429-015/generator-run.json",
+    "tasks/handoffs/TASK-20260429-015/generator-stdout.raw.json",
+    "logs/tasks/TASK-20260429-015.jsonl"
+  ],
+  "success_criteria": [
+    "smoke-target.md exists and contains the exact line: Generator smoke target created for TASK-20260429-015.",
+    "Generator result status is PENDING_VALIDATION.",
+    "Generator result artifact list includes tasks/handoffs/TASK-20260429-015/smoke-target.md.",
+    "No secrets, credentials, PII, or environment variable values are present in the smoke target or Generator result.",
+    "Resource Failure, if any, must not be treated as Validator FAIL."
+  ],
+  "known_risks": [
+    "This is a smoke test of wrapper plumbing, not a product behavior change.",
+    "Generator target_files were expanded to account for run-generator.mjs branch-diff validation behavior; Validator should focus on whether the actual smoke target and Generator result satisfy the smoke criteria."
+  ],
+  "forbidden_context": [
+    "Full Analyst conversation",
+    "Secrets, credentials, PII, or environment variable values",
+    "Unrelated Validator results"
+  ],
+  "expected_output_path": "tasks/handoffs/TASK-20260429-015/validator-a-result-1.json",
+  "expected_output_schema": "docs/schemas/validator-result.schema.json"
+}

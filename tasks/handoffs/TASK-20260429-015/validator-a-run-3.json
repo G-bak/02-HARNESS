@@ -1,0 +1,33 @@
+{
+  "task_id": "TASK-20260429-015",
+  "started_at": "2026-04-29T06:51:42.561Z",
+  "finished_at": "2026-04-29T06:51:42.563Z",
+  "exit_status": null,
+  "signal": null,
+  "input_path": "tasks/handoffs/TASK-20260429-015/validator-a-input.json",
+  "output_path": "tasks/handoffs/TASK-20260429-015/validator-a-result-1.json",
+  "events_path": "tasks/handoffs/TASK-20260429-015/validator-a-events-3.jsonl",
+  "last_message_path": "tasks/handoffs/TASK-20260429-015/validator-a-last-message-3.json",
+  "stderr_path": "tasks/handoffs/TASK-20260429-015/validator-a-stderr-3.log",
+  "command_shape": [
+    "C:\\Users\\admin\\AppData\\Roaming\\npm\\codex",
+    "exec",
+    "--json",
+    "--output-schema",
+    "docs/schemas/validator-result.schema.json",
+    "--output-last-message",
+    "tasks/handoffs/TASK-20260429-015/validator-a-last-message-3.json",
+    "--ephemeral",
+    "-s",
+    "read-only",
+    "-a",
+    "never",
+    "-C",
+    ".",
+    "-"
+  ],
+  "sandbox": "read-only",
+  "approval_policy": "never",
+  "model": null,
+  "attempt": 3
+}

@@ -1,0 +1,70 @@
+{
+  "schema_version": "generator-handoff.v1",
+  "task_id": "TASK-20260429-015",
+  "agent": "Generator",
+  "invocation": {
+    "runtime": "Claude CLI",
+    "fresh_session_required": true,
+    "forbid_resume_or_continue": true,
+    "recommended_flags": [
+      "--print",
+      "--input-format text",
+      "--output-format json",
+      "--json-schema",
+      "--no-session-persistence",
+      "--permission-mode auto"
+    ]
+  },
+  "refs": {
+    "spec": "tasks/specs/TASK-20260429-015.json",
+    "ledger": "logs/tasks/TASK-20260429-015.jsonl",
+    "session": "logs/sessions/SESSION-20260429-002.md"
+  },
+  "allowed_context": {
+    "goal": "Create a harmless task-scoped smoke target proving the real Generator wrapper can perform a file edit.",
+    "target_files": [
+      "logs/sessions/SESSION-20260429-002.md",
+      "tasks/handoffs/TASK-20260429-015/generator-input.json",
+      "tasks/specs/TASK-20260429-015.json",
+      "tasks/handoffs/TASK-20260429-015/smoke-target.md"
+    ],
+    "success_criteria": [
+      "Create tasks/handoffs/TASK-20260429-015/smoke-target.md if it does not exist.",
+      "The file must contain the exact line: Generator smoke target created for TASK-20260429-015.",
+      "Do not modify any files outside allowed_context.target_files.",
+      "Only the smoke-target.md file should receive content changes during the Generator run; the setup files are listed only because the current wrapper compares main...HEAD branch diff rather than pre-run/post-run diff."
+    ],
+    "constraints": {
+      "positive": [
+        "Keep the file short.",
+        "Return Generator result JSON matching the expected schema."
+      ],
+      "negative": [
+        "Do not include secrets, credentials, tokens, or environment variable values.",
+        "Do not run web search.",
+        "Do not edit logs, reports, specs, scripts, or docs even though setup files are listed in target_files for wrapper diff accounting."
+      ]
+    },
+    "research_summary": {
+      "summary": "No external research is needed.",
+      "confidence": "HIGH",
+      "snippets": [],
+      "unverified_claims": []
+    },
+    "ledger_events": [
+      "TASK_CREATED recorded in logs/tasks/TASK-20260429-015.jsonl.",
+      "Generator retry uses expanded target_files because run-generator.mjs currently validates main...HEAD branch diff, not only changes made by the current subprocess."
+    ],
+    "session_excerpts": [
+      "User requested a separate Tier 2 smoke test for real Generator -> Validator-A wrapper execution."
+    ]
+  },
+  "forbidden_context": [
+    "Full Analyst conversation",
+    "Full CURRENT_STATE.md",
+    "Unrelated ledgers or sessions",
+    "Secrets, credentials, PII, or environment variable values"
+  ],
+  "expected_output_path": "tasks/handoffs/TASK-20260429-015/generator-result.json",
+  "expected_output_schema": "Generator result JSON with task_id, agent, status, artifacts, change_summary, self_review, tier_reclassification_needed, and log"
+}
