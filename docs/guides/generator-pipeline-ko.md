@@ -274,19 +274,20 @@ Generator-Validator 반복 전략은 `docs/workflows/failure-handling.md`가 권
 [x] CLI 실행 실패/비정상 종료를 HOLD/RESOURCE_FAILURE로 기록
 [x] retry input 파일을 지정해 fresh 재실행 가능
 [x] 원장에 INSTRUCTION_SENT, AGENT_RESULT_RECEIVED, RESOURCE_FAILURE 기록
+[x] Validator-A 실제 호출 wrapper 실행과 결과 artifact 저장
+[x] Validator errors[] 기반 generator-input-retry-{N}.json 생성
+[x] 동일 오류 반복 감지 후 Conflict Report 생성
 ```
 
 아직 운영자/Analyst가 수행하는 부분:
 
 ```text
-[ ] Validator-A/B 실제 호출
-[ ] Validator errors[]를 generator-input-retry-{N}.json에 반영
-[ ] 동일 오류 2회 반복 여부 판정
-[ ] Conflict Report 작성
+[ ] Validator-A wrapper의 실제 모델 smoke test 결과 관찰
+[ ] Tier 3 Validator-B 독립 팬아웃 준비와 결과 취합
 [ ] Adjudication 판정과 Task Spec 보완
 ```
 
-즉 현재 파이프라인은 **Generator 실행·기록 파이프라인**은 자동화되어 있고, **Validator 반복·중재 파이프라인**은 문서 규칙에 따라 운영자가 수행하는 상태다. 다음 자동화 대상은 `scripts/run-validator-a.mjs` 또는 `scripts/prepare-generator-retry.mjs`처럼 Validator 결과를 읽어 retry handoff를 만드는 단계다.
+즉 현재 파이프라인은 **Generator 실행·기록 파이프라인**과 **Validator-A 실행·retry·Conflict Report 생성 파이프라인**이 자동화되어 있다. 남은 핵심 검증은 실제 모델을 사용하는 Generator → Validator-A smoke test와 Tier 3의 Validator-B 독립 팬아웃이다.
 
 ---
 

@@ -6,6 +6,7 @@
     "run:generator": "node scripts/run-generator.mjs",
     "run:validator-a": "node scripts/run-validator-a.mjs",
     "prepare:retry": "node scripts/prepare-generator-retry.mjs",
-    "clean:branches": "node scripts/clean-merged-task-branches.mjs"
+    "clean:branches": "node scripts/clean-merged-task-branches.mjs",
+    "audit:finalize": "node scripts/check-final-git-state.mjs --finalize"
   }
 }

@@ -6,6 +6,7 @@ const checks = [
   ['node', ['scripts/validate-handoffs.mjs']],
   ['node', ['scripts/check-generator-output-parsing.mjs']],
   ['node', ['scripts/check-completion-gates.mjs']],
+  ['node', ['scripts/check-final-git-state.mjs']],
   ['node', ['scripts/check-quality-scores.mjs']],
 ];
 

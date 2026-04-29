@@ -1,0 +1,45 @@
+{
+  "task_id": "TASK-20260429-014",
+  "created_at": "2026-04-29T15:41:27+09:00",
+  "request": "Apply the pipeline follow-ups: fix stale Generator guide automation status, append push-status corrections for TASK-010/011, add final git-state enforcement script, and run a separate Tier 2 Generator -> Validator-A smoke test task.",
+  "request_original": "docs/guides/generator-pipeline-ko.md stale 목록 수정, TASK-20260429-010/011 PENDING_PUSH CORRECTION, 별도 Tier 2 smoke test Task로 실제 Generator -> Validator-A 실행, 그리고 문서 보강 + scripts/check-final-git-state.mjs 추가 및 audit 연결 진행",
+  "complexity_tier": "Tier2",
+  "tier_rationale": "Multiple harness operational files and audit automation are changed. No product runtime, auth, DB, or production configuration changes.",
+  "scope": {
+    "include": [
+      "docs/guides/generator-pipeline-ko.md",
+      "logs/tasks/TASK-20260429-010.jsonl",
+      "logs/tasks/TASK-20260429-011.jsonl",
+      "scripts/check-final-git-state.mjs",
+      "scripts/audit-harness.mjs",
+      "package.json",
+      "a separate smoke-test Task ledger/spec/handoff artifacts"
+    ],
+    "exclude": [
+      "Validator-B automation",
+      "Main merge automation beyond existing repository policy",
+      "Changing historical ledger events in-place"
+    ]
+  },
+  "success_criteria": [
+    "Generator pipeline guide no longer says Validator-A invocation, retry generation, and Conflict Report creation are manual-only.",
+    "TASK-20260429-010 and TASK-20260429-011 ledgers receive append-only CORRECTION events clarifying origin/main push completion.",
+    "A final git-state audit script exists and fails completed git-mode tasks with stale pending push metadata unless later corrected.",
+    "The audit script checks current working tree cleanliness and main/origin sync when run in finalize mode.",
+    "audit:harness or a documented npm command runs the new stale push metadata check.",
+    "A separate Tier 2 smoke Task attempts the real Generator -> Validator-A path and records artifacts or Resource Failure honestly.",
+    "All local audits pass before commit/merge/push."
+  ],
+  "constraints": {
+    "positive": [
+      "Use append-only ledger corrections.",
+      "Keep smoke-test handoff minimal and free of secrets.",
+      "Commit and push after validation."
+    ],
+    "negative": [
+      "Do not modify existing ledger events in place.",
+      "Do not expose environment variable values or tokens.",
+      "Do not treat Resource Failure as Validator FAIL."
+    ]
+  }
+}
