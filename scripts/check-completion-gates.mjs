@@ -328,6 +328,14 @@ for (const file of taskFiles) {
     if (!insight.category) continue;
     if (insight.category !== 'actionable_doc_change' && insight.category !== 'gotcha') continue;
 
+    // Honor amendment-based category supersession (per work-history-policy v1.14):
+    // if an amendment for this insight reclassifies it to observation/proposal, skip the gate.
+    const amendments = resolversByInsightId.get(insight.id) ?? [];
+    const supersedingCategory = amendments
+      .map((a) => a.category)
+      .find((c) => c === 'observation' || c === 'proposal');
+    if (supersedingCategory) continue;
+
     const insightId = insight.id ?? '(unknown)';
     const effectiveDoc = effectiveAppliedDoc(insight);
     const appliedStatus = effectiveDoc.applied?.status;
