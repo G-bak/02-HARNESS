@@ -208,10 +208,12 @@ function effectiveAppliedDoc(insight) {
   }
 
   const resolvers = resolversByInsightId.get(insight.id) ?? [];
-  const resolver = resolvers.find((candidate) => {
+  // Prefer the latest valid resolver (resolvers are appended in time order; later ones supersede earlier ones)
+  const validResolvers = resolvers.filter((candidate) => {
     const resolverCommit = candidate.applied_to_doc?.commit;
     return resolverCommit && !isSelfReferentialPlaceholder(resolverCommit);
   });
+  const resolver = validResolvers.at(-1);
 
   return {
     applied: resolver?.applied_to_doc ?? insight.applied_to_doc,
