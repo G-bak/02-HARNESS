@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { pathToFileURL } from 'node:url';
 import { assertNoSecretLikeContent } from './lib/secret-scan.mjs';
 
 const root = process.cwd();
@@ -364,24 +365,54 @@ function parseJsonText(text, label) {
   }
 }
 
-function unwrapClaudeJsonOutput(rawStdout) {
+function tryParseJsonText(text) {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
+function looksLikeGeneratorResult(value) {
+  return Boolean(value && value.task_id && value.agent === 'Generator');
+}
+
+export function unwrapClaudeJsonOutput(rawStdout) {
   const parsed = parseJsonText(rawStdout, 'Claude stdout');
-  if (parsed && parsed.task_id && parsed.agent === 'Generator') {
-    return { generatorResult: parsed, rawWrapper: null };
+  if (looksLikeGeneratorResult(parsed)) {
+    return { kind: 'json', generatorResult: parsed, rawWrapper: null };
   }
 
-  const resultText = typeof parsed?.result === 'string' ? parsed.result.trim() : null;
-  if (resultText) {
+  if (looksLikeGeneratorResult(parsed?.structured_output)) {
     return {
-      generatorResult: parseJsonText(resultText, 'Claude stdout result field'),
+      kind: 'structured_output',
+      generatorResult: parsed.structured_output,
       rawWrapper: parsed,
     };
   }
 
-  throw new Error('Claude stdout JSON does not contain a direct Generator result or a string result field.');
+  const resultText = typeof parsed?.result === 'string' ? parsed.result.trim() : null;
+  if (resultText) {
+    const resultJson = tryParseJsonText(resultText);
+    if (looksLikeGeneratorResult(resultJson)) {
+      return {
+        kind: 'json_result_field',
+        generatorResult: resultJson,
+        rawWrapper: parsed,
+      };
+    }
+
+    return {
+      kind: 'natural_language',
+      naturalLanguageReport: resultText,
+      rawWrapper: parsed,
+    };
+  }
+
+  throw new Error('Claude stdout JSON does not contain a direct Generator result, structured_output, or a string result field.');
 }
 
-function validateGeneratorResult(parsed, taskId) {
+export function validateGeneratorResult(parsed, taskId) {
 
   const required = [
     'task_id',
@@ -484,6 +515,67 @@ function enforceTargetFiles(handoff, taskId) {
     changed_files: changed,
     target_files: [...targetFiles].sort(),
     out_of_scope_files: outOfScope,
+  };
+}
+
+function diffSummaryForFiles(files) {
+  if (files.length === 0) {
+    return {
+      stat: '',
+      numstat: '',
+    };
+  }
+
+  const result = spawnSync('git', ['diff', '--stat', '--', ...files], {
+    cwd: root,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'ignore'],
+  });
+  const numstatResult = spawnSync('git', ['diff', '--numstat', '--', ...files], {
+    cwd: root,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'ignore'],
+  });
+
+  return {
+    stat: result.status === 0 ? result.stdout.trim() : '',
+    numstat: numstatResult.status === 0 ? numstatResult.stdout.trim() : '',
+  };
+}
+
+export function synthesizeGeneratorResult(taskId, report, targetFileCheck, diffSummary) {
+  const targetFiles = new Set(targetFileCheck.target_files);
+  const changedTargetFiles = targetFileCheck.changed_files.filter((filePath) => targetFiles.has(filePath));
+  const hasTargetDiff = changedTargetFiles.length > 0;
+
+  return {
+    task_id: taskId,
+    agent: 'Generator',
+    status: hasTargetDiff ? 'PENDING_VALIDATION' : 'HOLD',
+    artifacts: changedTargetFiles.map((filePath) => ({
+      path: filePath,
+      change_type: 'modified',
+      summary: 'Detected by wrapper git diff verification after natural-language Generator report.',
+    })),
+    change_summary: report,
+    self_review: hasTargetDiff
+      ? 'Wrapper accepted a natural-language Generator report because git diff showed changes limited to allowed target files.'
+      : 'Wrapper could not confirm a deliverable because git diff showed no changed target files.',
+    tier_reclassification_needed: false,
+    log: [
+      {
+        event: 'natural_language_report_recovered',
+        detail: hasTargetDiff
+          ? 'Generated synthetic Generator result from natural-language report and git diff verification.'
+          : 'Generated HOLD result from natural-language report because no target-file diff was present.',
+        changed_files: targetFileCheck.changed_files,
+        diff_summary: diffSummary,
+      },
+    ],
+    recovery: {
+      type: 'synthetic_from_natural_language_report',
+      provenance: 'Claude CLI stdout result field was natural language, not Generator JSON.',
+    },
   };
 }
 
@@ -622,7 +714,7 @@ function main() {
 
     fs.writeFileSync(rawStdoutPath, result.stdout ?? '', 'utf8');
     fs.writeFileSync(stderrPath, result.stderr ?? '', 'utf8');
-    fs.writeFileSync(metadataPath, `${JSON.stringify({
+    const runMetadata = {
       task_id: args.taskId,
       started_at: startedAt,
       finished_at: finishedAt,
@@ -641,7 +733,8 @@ function main() {
       branch: branchCheck.branch,
       task_branch_enforced: branchCheck.enforced,
       lock_path: relativePath(lock.lockPath),
-    }, null, 2)}\n`, 'utf8');
+    };
+    fs.writeFileSync(metadataPath, `${JSON.stringify(runMetadata, null, 2)}\n`, 'utf8');
 
     if (result.error) {
       appendLedger(handoff.ledgerPath, {
@@ -674,13 +767,39 @@ function main() {
     let parsedResult = null;
     let rawWrapper = null;
     let targetFileCheck = null;
+    let outputKind = null;
+    let diffSummary = null;
     if (result.status === 0) {
       try {
         const unwrapped = unwrapClaudeJsonOutput(result.stdout ?? '');
-        parsedResult = validateGeneratorResult(unwrapped.generatorResult, args.taskId);
         rawWrapper = unwrapped.rawWrapper;
+        outputKind = unwrapped.kind;
+        if (unwrapped.kind === 'natural_language') {
+          targetFileCheck = enforceTargetFiles(handoff, args.taskId);
+          diffSummary = diffSummaryForFiles(targetFileCheck.changed_files);
+          parsedResult = synthesizeGeneratorResult(
+            args.taskId,
+            unwrapped.naturalLanguageReport,
+            targetFileCheck,
+            diffSummary,
+          );
+          if (parsedResult.status !== 'PENDING_VALIDATION') {
+            fs.writeFileSync(handoff.outputPath, `${JSON.stringify(parsedResult, null, 2)}\n`, 'utf8');
+            throw new Error('Claude stdout result field was natural language and no target-file diff was detected.');
+          }
+        } else {
+          parsedResult = validateGeneratorResult(unwrapped.generatorResult, args.taskId);
+          targetFileCheck = enforceTargetFiles(handoff, args.taskId);
+          diffSummary = diffSummaryForFiles(targetFileCheck.changed_files);
+        }
         fs.writeFileSync(handoff.outputPath, `${JSON.stringify(parsedResult, null, 2)}\n`, 'utf8');
-        targetFileCheck = enforceTargetFiles(handoff, args.taskId);
+        runMetadata.output_processing = {
+          kind: outputKind,
+          synthetic_result: unwrapped.kind === 'natural_language',
+          changed_files: targetFileCheck.changed_files,
+          diff_summary: diffSummary,
+        };
+        fs.writeFileSync(metadataPath, `${JSON.stringify(runMetadata, null, 2)}\n`, 'utf8');
       } catch (error) {
         appendLedger(handoff.ledgerPath, {
           schema_version: 'work-history.v1',
@@ -699,6 +818,9 @@ function main() {
             stderr_path: relativePath(stderrPath),
             metadata_path: relativePath(metadataPath),
             validation_error: error.message,
+            output_processing_kind: outputKind,
+            target_file_check: targetFileCheck,
+            diff_summary: diffSummary,
           },
           artifact_refs: [
             { type: 'generator_stdout_raw', path: relativePath(rawStdoutPath) },
@@ -731,8 +853,11 @@ function main() {
         metadata_path: relativePath(metadataPath),
         result_schema_validated: result.status === 0,
         claude_output_wrapped: Boolean(rawWrapper),
+        output_processing_kind: outputKind,
+        synthetic_result: outputKind === 'natural_language',
         artifact_count: parsedResult?.artifacts?.length ?? null,
         target_file_check: targetFileCheck,
+        diff_summary: diffSummary,
       },
       artifact_refs: [
         ...(result.status === 0 ? [{ type: 'generator_result', path: relativePath(handoff.outputPath) }] : []),
@@ -752,9 +877,11 @@ function main() {
   }
 }
 
-try {
-  main();
-} catch (error) {
-  console.error(`[generator] ${error.message}`);
-  process.exit(1);
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  try {
+    main();
+  } catch (error) {
+    console.error(`[generator] ${error.message}`);
+    process.exit(1);
+  }
 }

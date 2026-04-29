@@ -1,0 +1,28 @@
+{
+  "task_id": "TASK-20260429-009",
+  "agent": "Generator",
+  "status": "PENDING_VALIDATION",
+  "artifacts": [
+    {
+      "path": "docs/guides/validator-pipeline-ko.md",
+      "change_type": "modified",
+      "summary": "Added a one-sentence preflight note at the end of section 2 stating that wrappers block secret-like values in handoff payloads before any model CLI invocation."
+    }
+  ],
+  "change_summary": "Added a concise operational note in docs/guides/validator-pipeline-ko.md (section 2, 입력 파일) stating that the wrapper performs a preflight check on the handoff payload and blocks execution when secret-like values (credentials, API keys, environment variable values) are detected before invoking the model CLI. Documentation-only edit; no schemas, wrappers, ledgers, or other files were touched, and no real or dummy secret-looking values were introduced.",
+  "self_review": "Verified the note is short (one sentence), placed near the validator handoff input description as the constraints request, and contains no secret-looking dummy values. The change is minimal and documentation-only. No web search was used. Allowed target file (docs/guides/validator-pipeline-ko.md) was the only file modified.",
+  "tier_reclassification_needed": false,
+  "log": [
+    {
+      "event": "edit_applied",
+      "file": "docs/guides/validator-pipeline-ko.md",
+      "detail": "Inserted a single-sentence preflight note about wrapper-level secret-like value blocking at the end of section 2."
+    }
+  ],
+  "recovery": {
+    "type": "reconstructed_from_claude_structured_output",
+    "provenance": "tasks/handoffs/TASK-20260429-009/generator-stdout.raw.json",
+    "reconstructed_by_task": "TASK-20260429-010",
+    "reason": "Original wrapper failed after attempting to parse the natural-language result field as JSON even though structured_output contained the valid Generator result."
+  }
+}

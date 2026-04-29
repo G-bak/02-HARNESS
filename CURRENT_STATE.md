@@ -3,7 +3,7 @@
 > Analyst가 유지·갱신하는 파일입니다. 새 세션 시작 시 이 파일을 먼저 읽으세요.
 > 새 세션 시작 방법: `/clear` 후 → "CURRENT_STATE.md를 읽고 이어서 진행해줘."
 
-**마지막 갱신:** 2026-04-29 (TASK-20260429-009 완료 — Generator 파이프라인 실제 실행 + `--bare`/`--json-schema` 2개 wrapper 버그 격리·기록, main 머지 + push 완료)
+**마지막 갱신:** 2026-04-29 (TASK-20260429-010 진행 — Generator wrapper output parsing fix 구현·검증 완료, merge/push 단계)
 
 ---
 
@@ -100,7 +100,7 @@
 
 ## 활성 Task
 
-현재 진행 중인 Task 없음.
+현재 진행 중인 Task: TASK-20260429-010 (merge/push 단계)
 
 마지막 완료 Task: TASK-20260429-009 Generator 파이프라인 실제 실행 + 2개 wrapper 버그 격리·기록 (2026-04-29)
 
@@ -108,8 +108,8 @@
 
 ## 남은 작업
 
-- **별도 Codex 세션에서 Validator-A 실제 실행 검증**: 사용자가 다른 세션에서 `npm run run:validator-a -- TASK-20260429-009`로 실제 외부 Codex Validator-A 실행을 시도. TASK-009 ledger에 추가 VALIDATION_RESULT 또는 CORRECTION 이벤트로 append.
-- **TASK-20260429-010 (PENDING)**: Generator wrapper output parsing fix — 자연어 응답 + git diff 검증 경로 추가. spec 작성 완료, 구현은 사용자 승인 후 진입.
+- **TASK-20260429-010**: Generator wrapper output parsing fix 구현 완료. `structured_output` 우선 처리, 자연어 fallback + target-file diff 검증, TASK-009 `generator-result.json` 복구 산출물, parser audit fixture 추가. 남은 단계는 2-commit squash merge, push, 브랜치 정리.
+- **별도 Codex 세션에서 Validator-A 실제 실행 검증**: 필요 시 `npm run run:validator-a -- TASK-20260429-009`로 외부 Codex Validator-A 실행을 시도하고 TASK-009 ledger에 추가 VALIDATION_RESULT 또는 CORRECTION 이벤트로 append.
 - **후속 후보**: `--bare` 제거의 컨텍스트 격리 약화 trade-off 보강 (예: hooks/plugins 명시 비활성화 옵션 조합 탐색).
 
 ---
