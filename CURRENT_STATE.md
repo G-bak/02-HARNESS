@@ -3,7 +3,7 @@
 > Analyst가 유지·갱신하는 파일입니다. 새 세션 시작 시 이 파일을 먼저 읽으세요.
 > 새 세션 시작 방법: `/clear` 후 → "CURRENT_STATE.md를 읽고 이어서 진행해줘."
 
-**마지막 갱신:** 2026-04-29 (TASK-20260429-001 완료 — 2-commit squash 패턴 + 인사이트 분류 시스템 + 자동 차단 게이트 + INS-006-03 소급 적용)
+**마지막 갱신:** 2026-04-29 (TASK-20260429-002 완료 — CLI 전송 메타데이터 UTF-8 헤더 오류 재발 방지 가이드 반영)
 
 ---
 
@@ -26,7 +26,7 @@
 | Generator 역할 | `docs/agents/generator.md` | v1.5 | 2026-04-27 |
 | Researcher 역할 | `docs/agents/researcher.md` | v1.5 | 2026-04-27 |
 | 머지 조건·승인 주체 (권위) | `docs/operations/git-branch-policy.md` | v1.9 | 2026-04-29 |
-| 도구 권한 | `docs/operations/tool-permissions.md` | v1.8 | 2026-04-27 |
+| 도구 권한 | `docs/operations/tool-permissions.md` | v1.9 | 2026-04-29 |
 | 외부 알림 정책 | `docs/operations/notification-policy.md` | v1.6 | 2026-04-26 |
 | 작업 이력 저장 정책 | `docs/operations/work-history-policy.md` | v1.14 | 2026-04-29 |
 | Tier 분류 기준 | `docs/workflows/tier-classification.md` | v1.3 | 2026-04-26 |
@@ -87,6 +87,7 @@
 - **작업 종료 인사이트 캡처**: Task 완료 전 재사용 가능한 운영 인사이트를 확인하고, 있으면 `logs/insights.jsonl`에 기록한다. 없으면 `TASK_COMPLETED.details.insight_capture.status=not_needed`와 사유를 남긴다.
 - **인사이트 카테고리 강제**: 모든 신규 인사이트는 `category` 필드 필수(`actionable_doc_change` / `gotcha` / `proposal` / `observation`). 앞 두 가지는 같은 Task에서 가이드 수정 + `applied_to_doc.status=applied` 의무이며 자동 감사가 차단한다.
 - **2-commit squash 표준**: main 머지는 1차(pure squash, validator footer) + 2차(post-completion record) 두 커밋으로 분리한다. 1차 커밋의 tree가 task 브랜치 tip의 tree와 같아야 cleanup 스크립트가 자동 작동한다.
+- **CLI 작업공간 경로 인코딩**: Codex/Claude/Gemini CLI 작업공간 경로와 worktree/alias는 ASCII-only를 권장한다. 한글 등 non-ASCII 경로가 전송 메타데이터 헤더에 포함되면 UTF-8 변환 오류로 세션이 중단될 수 있다.
 
 ---
 
@@ -94,7 +95,7 @@
 
 현재 진행 중인 Task 없음.
 
-마지막 완료 Task: TASK-20260429-001 2-commit squash 패턴 + 인사이트 분류 자동 게이트 + INS-006-03 소급 적용 (2026-04-29)
+마지막 완료 Task: TASK-20260429-002 CLI 전송 메타데이터 UTF-8 헤더 오류 재발 방지 가이드 반영 (2026-04-29)
 
 ---
 

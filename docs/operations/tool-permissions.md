@@ -1,6 +1,6 @@
 # Tool Permissions — 도구 권한 정책
 
-**버전:** 1.8 | **최종 수정:** 2026-04-27
+**버전:** 1.9 | **최종 수정:** 2026-04-29
 **원칙:** 각 에이전트는 해당 작업에 필요한 최소 권한만 보유한다.
 
 ---
@@ -188,6 +188,38 @@ claude --allow-dangerously-skip-permissions
 Slack 알림 Webhook 전송은 `docs/operations/notification-policy.md`에 정의된 이벤트만 허용한다. Webhook URL 원문은 출력·로그·보고서에 포함하지 않는다.
 
 **Shell 실행과의 관계:** Analyst의 Shell 실행은 위 "감사·기록 전용 제한 명령"에 한한다. `scripts/notify-slack.mjs` 실행은 "알림 Webhook 전송" 권한에 포함된 승인된 예외다.
+
+---
+
+## CLI 전송 메타데이터 인코딩 규칙
+
+Codex/Claude/Gemini CLI 또는 원격 세션 도구가 작업공간 경로, 세션 ID, 커밋 해시 같은 메타데이터를 HTTP/WebSocket 헤더에 실어 보낼 수 있다. HTTP 헤더는 구현에 따라 ASCII 또는 Latin-1 범위 문자열만 안전하게 처리되므로, 작업공간 경로에 한글·이모지·특수 유니코드 문자가 포함되면 전송 계층에서 UTF-8 변환 오류가 발생할 수 있다.
+
+대표 증상:
+
+```text
+Falling back from WebSockets to HTTPS transport.
+stream disconnected before completion: UTF-8 encoding error:
+failed to convert header to a str for header name 'x-codex-turn-metadata'
+```
+
+예방:
+
+```text
+[ ] Codex/Claude/Gemini CLI 작업공간 경로는 ASCII만 사용한다.
+    권장: C:\work\LandingHub, C:\repos\02-HARNESS
+    비권장: C:\Users\admin\Desktop\LandingHub - Git편
+[ ] 세션 도구가 전송 헤더에 포함할 수 있는 workspace 이름, worktree 이름, 추가 디렉터리 별칭도 ASCII로 둔다.
+[ ] 기존 한글 경로에서 오류가 반복되면 저장소를 ASCII 경로로 복제하거나 이동한 뒤 새 세션을 시작한다.
+[ ] 오류 로그를 원장·보고서에 남길 때 세션 ID, 로컬 사용자명, 원격 URL 등 불필요한 메타데이터는 최소화하거나 마스킹한다.
+```
+
+복구 절차:
+
+1. 현재 변경사항이 있으면 `git status --short`로 확인하고 커밋 또는 안전한 백업을 먼저 만든다.
+2. ASCII 경로에 저장소를 복제하거나 기존 작업공간을 이동한다.
+3. 새 경로에서 세션을 재시작하고 `CURRENT_STATE.md` 재진입 체크를 다시 수행한다.
+4. 같은 오류가 재발하면 전송 방식(WebSocket/HTTPS) 문제가 아니라 CLI 런타임 버그 가능성이 있으므로 Resource Failure로 기록하고 수동 재시도를 중단한다.
 
 ---
 
