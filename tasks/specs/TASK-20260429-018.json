@@ -1,0 +1,44 @@
+{
+  "schema_version": "task-spec.v1",
+  "task_id": "TASK-20260429-018",
+  "title": "Promote agent-by-agent activity log to standard report format",
+  "task_tier": "Tier2",
+  "task_type": "harness-policy-doc-update",
+  "created_at": "2026-04-29T17:30:00+09:00",
+  "depends_on": ["TASK-20260429-017"],
+  "goal": "User reviewed the post-TASK-017 multi-agent report and wants the agent-by-agent activity log style to become the standard reports/TASK-{ID}.md content. Authority docs must be updated so that future Tier 2/3 reports replace the legacy 수행 결과/수행 과정 trio with a central 에이전트별 활동 이력 section that captures each agent's actual work substance, decisions, tool usage, deliverable narrative, and per-attempt journey.",
+  "scope": {
+    "include": [
+      "docs/schemas/output-formats.md (최종 보고서 작성 기준 section + add 에이전트별 활동 이력 spec)",
+      "reports/TASK-EXAMPLE.md (replace example body with new agent-activity-log template based on TASK-017 real run)",
+      "CURRENT_STATE.md (version pointers for the two updated authority docs)"
+    ],
+    "exclude": [
+      "Existing legacy reports (TASK-001 through TASK-017) stay as-is",
+      "logs/sessions/*.md format unchanged (these remain log files, not reports)",
+      "Wrapper code, Generator/Validator behavior"
+    ]
+  },
+  "success_criteria": [
+    "docs/schemas/output-formats.md 최종 보고서 작성 기준 section requires 에이전트별 활동 이력 as the central technical section for Tier 2/3 reports.",
+    "docs/schemas/output-formats.md defines per-agent template fields (호출 여부, 런타임 메타, 실제 한 일, 시도 여정) explicitly.",
+    "reports/TASK-EXAMPLE.md uses TASK-20260429-017 real Validator-A run as a concrete in-document example demonstrating the new format.",
+    "Both authority docs have bumped versions and matching CURRENT_STATE pointers.",
+    "TASK-20260429-018 ledger has TASK_CREATED, GENERATION_COMPLETED, VALIDATION_RESULT, MERGE_COMPLETED, REPORT_WRITTEN, TASK_COMPLETED with insight_capture.",
+    "reports/TASK-20260429-018.md is itself written in the new agent-activity-log format (self-applying the new standard).",
+    "logs/quality-scores.jsonl has a row for TASK-20260429-018.",
+    "npm run audit:harness PASS."
+  ],
+  "constraints": {
+    "positive": [
+      "Keep the existing executive summary section first (decision-makers still read it first).",
+      "Show real numbers (cost, duration, turns, exit_status) when known.",
+      "Use one short paragraph per agent describing substance, not bullet checklists of file paths."
+    ],
+    "negative": [
+      "Do not delete legacy report examples in TASK-EXAMPLE.md if they document distinct scenarios (Resource Failure, Adjudication) that are not yet covered by new examples.",
+      "Do not include secrets, credentials, or PII.",
+      "Do not retroactively rewrite TASK-001 through TASK-017 reports."
+    ]
+  }
+}

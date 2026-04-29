@@ -3,7 +3,7 @@
 > Analyst가 유지·갱신하는 파일입니다. 새 세션 시작 시 이 파일을 먼저 읽으세요.
 > 새 세션 시작 방법: `/clear` 후 → "CURRENT_STATE.md를 읽고 이어서 진행해줘."
 
-**마지막 갱신:** 2026-04-29 (TASK-20260429-017 완료 — Validator-A 실제 smoke 재검증 PASS)
+**마지막 갱신:** 2026-04-29 (TASK-20260429-018 완료 — 보고서 포맷 에이전트별 활동 이력 형식으로 격상)
 
 ---
 
@@ -34,10 +34,10 @@
 | 실패 처리 | `docs/workflows/failure-handling.md` | v1.3 | 2026-04-25 |
 | 컨텍스트 관리 | `docs/workflows/context-management.md` | v1.1 | 2026-04-28 |
 | Task Spec 스키마 | `docs/schemas/task-spec.md` | v1.5 | 2026-04-27 |
-| 에이전트 출력 형식 | `docs/schemas/output-formats.md` | v1.18 | 2026-04-27 |
+| 에이전트 출력 형식 | `docs/schemas/output-formats.md` | v1.19 | 2026-04-29 |
 | 품질 루브릭 | `QUALITY_SCORE.md` | v1.3 | 2026-04-26 |
 | 실행 비용·리소스 관측 | `docs/operations/eval-harness.md` | v1.8 | 2026-04-29 |
-| 보고서 예시 | `reports/TASK-EXAMPLE.md` | v1.6 | 2026-04-26 |
+| 보고서 예시 | `reports/TASK-EXAMPLE.md` | v1.7 | 2026-04-29 |
 
 ---
 
