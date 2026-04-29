@@ -1,0 +1,38 @@
+{
+  "schema_version": "task-spec.v1",
+  "task_id": "TASK-20260429-019",
+  "title": "Record and correct missed task logging before answering operational fix proposal",
+  "task_tier": "Tier2",
+  "task_type": "harness-process-correction",
+  "created_at": "2026-04-29T17:24:26+09:00",
+  "goal": "User identified that the assistant answered a new operational fix proposal without first creating a task ledger as required by AGENTS.md absolute rule 7. Record the protocol miss, preserve the omitted answer context, and correct the state without rewriting historical events.",
+  "scope": {
+    "include": [
+      "logs/tasks/TASK-20260429-019.jsonl",
+      "logs/sessions/SESSION-20260429-002.md",
+      "reports/TASK-20260429-019.md"
+    ],
+    "exclude": [
+      "Changing completed TASK-018 events",
+      "Implementing the model/report-section enforcement proposal itself",
+      "Product runtime code"
+    ]
+  },
+  "success_criteria": [
+    "TASK_CREATED records the user's logging violation report.",
+    "The omitted assistant answer is captured as an AUDIT_NOTE or report summary.",
+    "The final response acknowledges the violation directly and explains the correction.",
+    "No historical TASK events are rewritten."
+  ],
+  "constraints": {
+    "positive": [
+      "Use append-only correction records.",
+      "Keep the response direct and accountable."
+    ],
+    "negative": [
+      "Do not claim the missed log was acceptable.",
+      "Do not overwrite prior ledgers.",
+      "Do not expose secrets."
+    ]
+  }
+}
