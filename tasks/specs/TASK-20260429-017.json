@@ -1,0 +1,41 @@
+{
+  "task_id": "TASK-20260429-017",
+  "created_at": "2026-04-29T16:16:30+09:00",
+  "request": "Run the real Validator-A smoke check directly after TASK-016 wrapper fixes.",
+  "request_original": "너가 직접 해보라고",
+  "complexity_tier": "Tier2",
+  "tier_rationale": "Exercises external Validator-A wrapper/model path and records smoke artifacts; no product runtime, auth, DB, or production configuration changes.",
+  "scope": {
+    "include": [
+      "tasks/handoffs/TASK-20260429-017/validator-a-input.json",
+      "tasks/handoffs/TASK-20260429-017/validator-a-result-*.json",
+      "tasks/handoffs/TASK-20260429-017/validator-a-run-*.json",
+      "logs/tasks/TASK-20260429-017.jsonl",
+      "reports/TASK-20260429-017.md"
+    ],
+    "exclude": [
+      "Product runtime code",
+      "Authority document changes unless a new repeatable defect is found",
+      "Secrets or environment variable values"
+    ]
+  },
+  "success_criteria": [
+    "Invoke scripts/run-validator-a.mjs against a TASK-017 Validator-A handoff that references the TASK-015 Generator smoke result.",
+    "Confirm whether the TASK-016 Windows shim fix reaches a real Codex Validator-A result.",
+    "If Validator-A returns PASS or FAIL, record the normalized Validator result and evidence.",
+    "If Validator-A cannot run, classify it as Resource Failure and preserve metadata/stderr without treating it as Validator FAIL.",
+    "Write a concise report and commit/push the smoke result."
+  ],
+  "constraints": {
+    "positive": [
+      "Use append-only ledger records.",
+      "Do not append normal execution events to the already completed TASK-015 ledger.",
+      "Keep all model stdout/stderr as local artifacts and summarize only non-sensitive facts."
+    ],
+    "negative": [
+      "Do not expose token or secret values.",
+      "Do not rewrite historical TASK-015 events.",
+      "Do not merge product code changes as part of this smoke test."
+    ]
+  }
+}

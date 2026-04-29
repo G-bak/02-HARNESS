@@ -1,0 +1,4 @@
+2026-04-29T07:19:25.595491Z ERROR codex_core::exec: exec error: windows sandbox: CreateProcessWithLogonW failed: 1056
+2026-04-29T07:19:25.595491Z ERROR codex_core::exec: exec error: windows sandbox: CreateProcessWithLogonW failed: 1056
+2026-04-29T07:19:25.597650Z ERROR codex_core::tools::router: error=execution error: Io(Custom { kind: Other, error: "windows sandbox: CreateProcessWithLogonW failed: 1056" })
+2026-04-29T07:19:25.598802Z ERROR codex_core::tools::router: error=execution error: Io(Custom { kind: Other, error: "windows sandbox: CreateProcessWithLogonW failed: 1056" })

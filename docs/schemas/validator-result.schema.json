@@ -4,7 +4,7 @@
   "title": "Validator Result",
   "description": "Structured Validator-A/B result consumed by 02-HARNESS automation.",
   "type": "object",
-  "additionalProperties": true,
+  "additionalProperties": false,
   "required": [
     "task_id",
     "agent",
@@ -13,7 +13,9 @@
     "verdict",
     "criteria_results",
     "errors",
+    "github_commit",
     "tier_reclassification_needed",
+    "tier_reclassification_reason",
     "log"
   ],
   "properties": {
@@ -37,7 +39,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "additionalProperties": true,
+        "additionalProperties": false,
         "required": ["criterion", "result", "detail"],
         "properties": {
           "criterion": {
@@ -56,7 +58,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "additionalProperties": true,
+        "additionalProperties": false,
         "required": [
           "severity",
           "evidence_type",
@@ -94,16 +96,32 @@
       }
     },
     "github_commit": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "tier_reclassification_needed": {
       "type": "boolean"
     },
     "tier_reclassification_reason": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "log": {
-      "type": "array"
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["timestamp", "action", "result"],
+        "properties": {
+          "timestamp": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string"
+          }
+        }
+      }
     }
   }
 }

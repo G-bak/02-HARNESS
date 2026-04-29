@@ -170,6 +170,8 @@ function commandArgs(args, lastMessagePath) {
   }
 
   const cliArgs = [
+    '-a',
+    'never',
     'exec',
     '--json',
     '--output-schema',
@@ -179,8 +181,6 @@ function commandArgs(args, lastMessagePath) {
     '--ephemeral',
     '-s',
     args.sandbox,
-    '-a',
-    'never',
     '-C',
     '.',
   ];

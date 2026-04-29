@@ -1,0 +1,40 @@
+{
+  "task_id": "TASK-20260429-017",
+  "started_at": "2026-04-29T07:18:11.611Z",
+  "finished_at": "2026-04-29T07:18:12.515Z",
+  "exit_status": 1,
+  "signal": null,
+  "input_path": "tasks/handoffs/TASK-20260429-017/validator-a-input.json",
+  "output_path": "tasks/handoffs/TASK-20260429-017/validator-a-result-1.json",
+  "events_path": "tasks/handoffs/TASK-20260429-017/validator-a-events-2.jsonl",
+  "last_message_path": "tasks/handoffs/TASK-20260429-017/validator-a-last-message-2.json",
+  "stderr_path": "tasks/handoffs/TASK-20260429-017/validator-a-stderr-2.log",
+  "command_shape": [
+    "codex.cmd",
+    "-a",
+    "never",
+    "exec",
+    "--json",
+    "--output-schema",
+    "docs/schemas/validator-result.schema.json",
+    "--output-last-message",
+    "tasks/handoffs/TASK-20260429-017/validator-a-last-message-2.json",
+    "--ephemeral",
+    "-s",
+    "read-only",
+    "-C",
+    ".",
+    "-"
+  ],
+  "actual_spawn_command": [
+    "cmd.exe",
+    "/d",
+    "/s",
+    "/c",
+    "codex.cmd -a never exec --json --output-schema docs/schemas/validator-result.schema.json --output-last-message tasks/handoffs/TASK-20260429-017/validator-a-last-message-2.json --ephemeral -s read-only -C . -"
+  ],
+  "sandbox": "read-only",
+  "approval_policy": "never",
+  "model": null,
+  "attempt": 2
+}
