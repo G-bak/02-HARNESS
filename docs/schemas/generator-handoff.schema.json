@@ -179,6 +179,10 @@
     },
     "expected_output_schema": {
       "type": "string"
+    },
+    "retry": {
+      "type": "object",
+      "additionalProperties": true
     }
   }
 }

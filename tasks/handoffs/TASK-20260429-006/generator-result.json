@@ -1,0 +1,30 @@
+{
+  "task_id": "TASK-20260429-006",
+  "agent": "Generator",
+  "status": "PENDING_VALIDATION",
+  "branch": "task/TASK-20260429-006",
+  "artifacts": [
+    {
+      "type": "script",
+      "path": "scripts/run-validator-a.mjs",
+      "description": "Validator-A Codex CLI wrapper",
+      "change_type": "CREATE"
+    },
+    {
+      "type": "script",
+      "path": "scripts/prepare-generator-retry.mjs",
+      "description": "Generator retry handoff preparation",
+      "change_type": "CREATE"
+    }
+  ],
+  "change_summary": "Added Validator-A wrapper and retry handoff automation scaffolding.",
+  "self_review": "Fixture result used for local wrapper validation only; no external Generator execution occurred.",
+  "tier_reclassification_needed": false,
+  "log": [
+    {
+      "timestamp": "2026-04-29T12:46:41+09:00",
+      "action": "local fixture",
+      "result": "prepared for wrapper validation"
+    }
+  ]
+}

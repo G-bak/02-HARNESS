@@ -3,7 +3,7 @@
 > Analyst가 유지·갱신하는 파일입니다. 새 세션 시작 시 이 파일을 먼저 읽으세요.
 > 새 세션 시작 방법: `/clear` 후 → "CURRENT_STATE.md를 읽고 이어서 진행해줘."
 
-**마지막 갱신:** 2026-04-29 (TASK-20260429-005 완료 — Validator-A wrapper + retry handoff 자동화 설계안 작성)
+**마지막 갱신:** 2026-04-29 (TASK-20260429-006 완료 — Validator-A wrapper + retry handoff 자동화 구현)
 
 ---
 
@@ -88,6 +88,7 @@
 - **인사이트 카테고리 강제**: 모든 신규 인사이트는 `category` 필드 필수(`actionable_doc_change` / `gotcha` / `proposal` / `observation`). 앞 두 가지는 같은 Task에서 가이드 수정 + `applied_to_doc.status=applied` 의무이며 자동 감사가 차단한다.
 - **2-commit squash 표준**: main 머지는 1차(pure squash, validator footer) + 2차(post-completion record) 두 커밋으로 분리한다. 1차 커밋의 tree가 task 브랜치 tip의 tree와 같아야 cleanup 스크립트가 자동 작동한다.
 - **CLI 작업공간 경로 인코딩**: Codex/Claude/Gemini CLI 작업공간 경로와 worktree/alias는 ASCII-only를 권장한다. 한글 등 non-ASCII 경로가 전송 메타데이터 헤더에 포함되면 UTF-8 변환 오류로 세션이 중단될 수 있다.
+- **Validator-A 자동화 경계**: `run-validator-a`는 검증 실행·결과 정규화·원장 기록까지만 담당한다. main merge는 별도 절차이며, Validator Resource Failure는 FAIL이 아니라 HOLD로 처리한다.
 
 ---
 
@@ -95,13 +96,13 @@
 
 현재 진행 중인 Task 없음.
 
-마지막 완료 Task: TASK-20260429-005 Validator-A wrapper + retry handoff 자동화 설계안 작성 (2026-04-29)
+마지막 완료 Task: TASK-20260429-006 Validator-A wrapper + retry handoff 자동화 구현 (2026-04-29)
 
 ---
 
 ## 남은 작업
 
-- 다음 신규 Task에서 Validator-A 실행 wrapper와 retry handoff 자동 생성 파이프라인 구현.
+- 다음 실제 Generator 산출물 Task에서 `run:validator-a` 실제 실행을 관찰하고 `output-last-message` 포맷과 schema 강제 동작을 확인.
 - 후속 후보: 인사이트 게이트 강화 — `applied_to_doc.commit`이 실제로 `target_doc`을 수정한 commit인지 git diff로 검증.
 
 ---

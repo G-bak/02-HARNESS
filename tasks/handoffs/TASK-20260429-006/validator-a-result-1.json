@@ -1,0 +1,32 @@
+{
+  "task_id": "TASK-20260429-006",
+  "agent": "Validator-A",
+  "tool": "Codex CLI",
+  "tier": "Tier2",
+  "verdict": "FAIL",
+  "criteria_results": [
+    {
+      "criterion": "Retry handoff generation works",
+      "result": "FAIL",
+      "detail": "Fixture failure used to validate retry handoff generation."
+    }
+  ],
+  "errors": [
+    {
+      "severity": "MEDIUM",
+      "evidence_type": "SPEC_MISMATCH",
+      "location": "scripts/prepare-generator-retry.mjs:1",
+      "description": "Fixture failure: retry handoff has not yet been generated.",
+      "suggestion": "Run prepare-generator-retry.mjs to generate generator-input-retry-2.json.",
+      "evidence": "Test fixture intentionally starts without generator-input-retry-2.json."
+    }
+  ],
+  "tier_reclassification_needed": false,
+  "log": [
+    {
+      "timestamp": "2026-04-29T12:46:41+09:00",
+      "action": "fixture validation",
+      "result": "FAIL fixture for retry script"
+    }
+  ]
+}

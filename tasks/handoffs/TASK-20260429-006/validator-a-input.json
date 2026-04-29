@@ -1,0 +1,43 @@
+{
+  "schema_version": "validator-handoff.v1",
+  "task_id": "TASK-20260429-006",
+  "agent": "Validator-A",
+  "invocation": {
+    "runtime": "Codex CLI",
+    "fresh_session_required": true,
+    "sandbox": "read-only",
+    "approval_policy": "never"
+  },
+  "refs": {
+    "spec": "tasks/specs/TASK-20260429-006.json",
+    "ledger": "logs/tasks/TASK-20260429-006.jsonl",
+    "session": "logs/sessions/SESSION-20260429-001.md",
+    "generator_result": "tasks/handoffs/TASK-20260429-006/generator-result.json"
+  },
+  "changed_files": [
+    "docs/schemas/validator-handoff.schema.json",
+    "docs/schemas/validator-result.schema.json",
+    "docs/schemas/generator-retry-handoff.schema.json",
+    "scripts/run-validator-a.mjs",
+    "scripts/prepare-generator-retry.mjs",
+    "docs/guides/validator-pipeline-ko.md",
+    "package.json"
+  ],
+  "success_criteria": [
+    "Schemas exist",
+    "Validator dry-run works",
+    "Retry handoff generation works",
+    "Conflict Report generation works"
+  ],
+  "known_risks": [
+    "Wrapper must not merge automatically",
+    "Resource Failure must not be treated as Validator FAIL"
+  ],
+  "forbidden_context": [
+    "Full Analyst conversation",
+    "Tier 3 other Validator result",
+    "Secrets or environment variable values"
+  ],
+  "expected_output_path": "tasks/handoffs/TASK-20260429-006/validator-a-result-1.json",
+  "expected_output_schema": "docs/schemas/validator-result.schema.json"
+}

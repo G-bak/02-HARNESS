@@ -1,0 +1,58 @@
+{
+  "schema_version": "generator-handoff.v1",
+  "task_id": "TASK-20260429-006",
+  "agent": "Generator",
+  "invocation": {
+    "runtime": "Claude CLI",
+    "fresh_session_required": true,
+    "forbid_resume_or_continue": true,
+    "recommended_flags": [
+      "--bare",
+      "--print",
+      "--input-format text",
+      "--output-format json",
+      "--no-session-persistence"
+    ]
+  },
+  "refs": {
+    "spec": "tasks/specs/TASK-20260429-006.json",
+    "ledger": "logs/tasks/TASK-20260429-006.jsonl",
+    "session": "logs/sessions/SESSION-20260429-001.md"
+  },
+  "allowed_context": {
+    "goal": "Implement Validator-A wrapper and retry handoff automation.",
+    "target_files": [
+      "docs/schemas/validator-handoff.schema.json",
+      "docs/schemas/validator-result.schema.json",
+      "docs/schemas/generator-retry-handoff.schema.json",
+      "docs/schemas/generator-handoff.schema.json",
+      "scripts/run-validator-a.mjs",
+      "scripts/prepare-generator-retry.mjs",
+      "docs/guides/validator-pipeline-ko.md",
+      "package.json"
+    ],
+    "success_criteria": [
+      "Schemas exist",
+      "Validator dry-run works",
+      "Retry handoff generation works",
+      "Conflict Report generation works"
+    ],
+    "constraints": {
+      "positive": [
+        "Use existing run-generator.mjs patterns"
+      ],
+      "negative": [
+        "Do not run real external Validator-A execution beyond dry-run",
+        "Do not implement merge automation"
+      ]
+    },
+    "ledger_events": [],
+    "session_excerpts": []
+  },
+  "forbidden_context": [
+    "Full Analyst conversation",
+    "Secrets, credentials, PII, or environment variable values"
+  ],
+  "expected_output_path": "tasks/handoffs/TASK-20260429-006/generator-result.json",
+  "expected_output_schema": "Generator output format"
+}

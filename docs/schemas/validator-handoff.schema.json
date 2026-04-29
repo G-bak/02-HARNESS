@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://landinghub.local/schemas/validator-handoff.schema.json",
+  "title": "Validator Handoff",
+  "description": "Task-scoped handoff payload for isolated Validator-A Codex CLI execution.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "task_id",
+    "agent",
+    "invocation",
+    "refs",
+    "changed_files",
+    "success_criteria",
+    "known_risks",
+    "forbidden_context",
+    "expected_output_path",
+    "expected_output_schema"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "validator-handoff.v1"
+    },
+    "task_id": {
+      "type": "string",
+      "pattern": "^TASK-[0-9]{8}-[0-9]{3}$"
+    },
+    "agent": {
+      "enum": ["Validator-A", "Validator-B"]
+    },
+    "invocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runtime",
+        "fresh_session_required",
+        "sandbox",
+        "approval_policy"
+      ],
+      "properties": {
+        "runtime": {
+          "enum": ["Codex CLI", "Gemini CLI"]
+        },
+        "fresh_session_required": {
+          "const": true
+        },
+        "sandbox": {
+          "enum": ["read-only", "workspace-write"]
+        },
+        "approval_policy": {
+          "enum": ["never"]
+        }
+      }
+    },
+    "refs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["spec", "ledger", "generator_result"],
+      "properties": {
+        "spec": {
+          "type": "string"
+        },
+        "ledger": {
+          "type": "string"
+        },
+        "session": {
+          "type": "string"
+        },
+        "generator_result": {
+          "type": "string"
+        },
+        "generator_run": {
+          "type": "string"
+        }
+      }
+    },
+    "changed_files": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "success_criteria": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "known_risks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "previous_failures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "forbidden_context": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "expected_output_path": {
+      "type": "string"
+    },
+    "expected_output_schema": {
+      "type": "string"
+    }
+  }
+}

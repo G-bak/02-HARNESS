@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://landinghub.local/schemas/validator-result.schema.json",
+  "title": "Validator Result",
+  "description": "Structured Validator-A/B result consumed by 02-HARNESS automation.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "task_id",
+    "agent",
+    "tool",
+    "tier",
+    "verdict",
+    "criteria_results",
+    "errors",
+    "tier_reclassification_needed",
+    "log"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "pattern": "^TASK-[0-9]{8}-[0-9]{3}$"
+    },
+    "agent": {
+      "enum": ["Validator-A", "Validator-B"]
+    },
+    "tool": {
+      "enum": ["Codex CLI", "Gemini CLI"]
+    },
+    "tier": {
+      "enum": ["Tier2", "Tier3"]
+    },
+    "verdict": {
+      "enum": ["PASS", "FAIL"]
+    },
+    "criteria_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["criterion", "result", "detail"],
+        "properties": {
+          "criterion": {
+            "type": "string"
+          },
+          "result": {
+            "enum": ["PASS", "FAIL"]
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "severity",
+          "evidence_type",
+          "location",
+          "description",
+          "suggestion",
+          "evidence"
+        ],
+        "properties": {
+          "severity": {
+            "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"]
+          },
+          "evidence_type": {
+            "enum": [
+              "EXECUTION_PROVEN",
+              "STATIC_PROVEN",
+              "SPEC_MISMATCH",
+              "INFERRED_RISK",
+              "SPEC_INTERPRETATION"
+            ]
+          },
+          "location": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "suggestion": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "github_commit": {
+      "type": "string"
+    },
+    "tier_reclassification_needed": {
+      "type": "boolean"
+    },
+    "tier_reclassification_reason": {
+      "type": "string"
+    },
+    "log": {
+      "type": "array"
+    }
+  }
+}

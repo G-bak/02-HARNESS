@@ -1,0 +1,14 @@
+{
+  "task_id": "TASK-20260429-006",
+  "agent": "Validator-A",
+  "type": "CONFLICT_REPORT",
+  "loop_count": 2,
+  "recurring_error": "SPEC_MISMATCH scripts/prepare-generator-retry.mjs:1: Fixture failure: retry handoff has not yet been generated.",
+  "root_cause_hypothesis": "Validator-A reported the same failure fingerprint across retry attempts; this may indicate a repeated implementation approach, ambiguous success criterion, or structural mismatch.",
+  "blocking_criterion": "Retry handoff generation works",
+  "escalation_options": [
+    "Run Analyst adjudication against Validator evidence and Task Spec.",
+    "Refine success criteria if the criterion is ambiguous or structurally impossible.",
+    "Re-enter Generator only after Analyst defines a materially different approach."
+  ]
+}

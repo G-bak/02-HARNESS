@@ -1,0 +1,40 @@
+{
+  "task_id": "TASK-20260429-006",
+  "created_at": "2026-04-29T12:46:41+09:00",
+  "complexity_tier": "Tier2",
+  "tier_rationale": "Adds multiple harness schemas, scripts, and operational guide files; no product runtime behavior changes.",
+  "status": "ACTIVE",
+  "depends_on": [],
+  "request_summary": "Implement Validator-A wrapper and retry handoff automation.",
+  "goal": "Provide safe local automation for Validator-A execution and Generator retry handoff preparation.",
+  "constraints": {
+    "positive": [
+      "Keep Validator execution separate from merge execution",
+      "Treat Codex CLI resource failures separately from Validator FAIL",
+      "Preserve Validator evidence fields in retry handoff"
+    ],
+    "negative": [
+      "Do not run real external Validator-A model execution in this task beyond dry-run",
+      "Do not implement automatic main merge in the Validator wrapper",
+      "Do not expose secrets or environment variable values"
+    ]
+  },
+  "success_criteria": [
+    "Validator-A handoff, Validator result, and Generator retry handoff schemas exist",
+    "run-validator-a.mjs validates handoff input and prints a safe Codex command on dry-run",
+    "prepare-generator-retry.mjs generates generator-input-retry-N.json from Validator FAIL",
+    "Repeated Validator FAIL fingerprints produce a Conflict Report instead of another retry",
+    "Operational guide and package scripts document the workflow",
+    "Harness audit and script syntax checks pass"
+  ],
+  "assigned_agents": ["Generator", "Validator-A"],
+  "context": {
+    "relevant_history": "TASK-20260429-005 selected a thin Validator controller, separate retry preparation, and no automatic merge execution.",
+    "reference_docs": [
+      "AGENTS.md",
+      "docs/agents/validator.md",
+      "docs/workflows/failure-handling.md",
+      "docs/guides/generator-pipeline-ko.md"
+    ]
+  }
+}

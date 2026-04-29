@@ -1,0 +1,81 @@
+{
+  "schema_version": "generator-handoff.v1",
+  "task_id": "TASK-20260429-006",
+  "agent": "Generator",
+  "invocation": {
+    "runtime": "Claude CLI",
+    "fresh_session_required": true,
+    "forbid_resume_or_continue": true,
+    "recommended_flags": [
+      "--bare",
+      "--print",
+      "--input-format text",
+      "--output-format json",
+      "--no-session-persistence"
+    ]
+  },
+  "refs": {
+    "spec": "tasks/specs/TASK-20260429-006.json",
+    "ledger": "logs/tasks/TASK-20260429-006.jsonl",
+    "session": "logs/sessions/SESSION-20260429-001.md"
+  },
+  "allowed_context": {
+    "goal": "Implement Validator-A wrapper and retry handoff automation.",
+    "target_files": [
+      "docs/schemas/validator-handoff.schema.json",
+      "docs/schemas/validator-result.schema.json",
+      "docs/schemas/generator-retry-handoff.schema.json",
+      "docs/schemas/generator-handoff.schema.json",
+      "scripts/run-validator-a.mjs",
+      "scripts/prepare-generator-retry.mjs",
+      "docs/guides/validator-pipeline-ko.md",
+      "package.json"
+    ],
+    "success_criteria": [
+      "Schemas exist",
+      "Validator dry-run works",
+      "Retry handoff generation works",
+      "Conflict Report generation works"
+    ],
+    "constraints": {
+      "positive": [
+        "Use existing run-generator.mjs patterns"
+      ],
+      "negative": [
+        "Do not run real external Validator-A execution beyond dry-run",
+        "Do not implement merge automation"
+      ]
+    },
+    "ledger_events": [],
+    "session_excerpts": []
+  },
+  "forbidden_context": [
+    "Full Analyst conversation",
+    "Secrets, credentials, PII, or environment variable values"
+  ],
+  "expected_output_path": "tasks/handoffs/TASK-20260429-006/generator-result-2.json",
+  "expected_output_schema": "Generator output format",
+  "retry": {
+    "attempt_no": 2,
+    "previous_attempts": [
+      {
+        "attempt_no": 1,
+        "generator_result_path": "tasks/handoffs/TASK-20260429-006/generator-result.json",
+        "validator_result_path": "tasks/handoffs/TASK-20260429-006/validator-a-result-1.json",
+        "generator_result_summary": "Added Validator-A wrapper and retry handoff automation scaffolding.",
+        "validator_feedback": [
+          {
+            "severity": "MEDIUM",
+            "evidence_type": "SPEC_MISMATCH",
+            "location": "scripts/prepare-generator-retry.mjs:1",
+            "description": "Fixture failure: retry handoff has not yet been generated.",
+            "suggestion": "Run prepare-generator-retry.mjs to generate generator-input-retry-2.json.",
+            "evidence": "Test fixture intentionally starts without generator-input-retry-2.json."
+          }
+        ]
+      }
+    ],
+    "retry_instruction": "Address the Validator-A FAIL items below with a changed approach. Do not repeat the previous implementation strategy.\n1. SPEC_MISMATCH at scripts/prepare-generator-retry.mjs:1: Fixture failure: retry handoff has not yet been generated. Suggestion: Run prepare-generator-retry.mjs to generate generator-input-retry-2.json.",
+    "same_error_repeat_count": 1
+  }
+}
