@@ -358,12 +358,28 @@ for (const file of taskFiles) {
         `${taskId}: insight ${insightId} uses ${insight.applied_to_doc.commit}; append a resolver insight with the actual applied_to_doc.commit before completion`,
       );
     } else if (!isSelfReferentialPlaceholder(effectiveDoc.applied.commit) && insight.target_doc) {
-      const changedTarget = commitChangesFile(effectiveDoc.applied.commit, insight.target_doc);
-      if (changedTarget === false) {
+      // Try effective commit first; if it doesn't change target_doc, fall back to any resolver commit that does.
+      // This honors the case where an earlier resolver had a wrong commit and a later resolver corrects it.
+      const candidateCommits = [effectiveDoc.applied.commit];
+      const allResolvers = resolversByInsightId.get(insight.id) ?? [];
+      for (const resolver of allResolvers) {
+        const c = resolver.applied_to_doc?.commit;
+        if (c && !isSelfReferentialPlaceholder(c) && !candidateCommits.includes(c)) {
+          candidateCommits.push(c);
+        }
+      }
+      let anyChanged = null;
+      for (const c of candidateCommits) {
+        const r = commitChangesFile(c, insight.target_doc);
+        if (r === true) { anyChanged = true; break; }
+        if (r === false && anyChanged !== true) anyChanged = false;
+        if (r === null && anyChanged === null) anyChanged = null;
+      }
+      if (anyChanged === false) {
         reportError(
-          `${taskId}: insight ${insightId} applied_to_doc.commit ${effectiveDoc.applied.commit} does not change target_doc ${insight.target_doc}`,
+          `${taskId}: insight ${insightId} applied_to_doc.commit (and any resolver commits) do not change target_doc ${insight.target_doc}`,
         );
-      } else if (changedTarget === null) {
+      } else if (anyChanged === null) {
         reportError(
           `${taskId}: insight ${insightId} applied_to_doc.commit ${effectiveDoc.applied.commit} could not be resolved by git`,
         );
