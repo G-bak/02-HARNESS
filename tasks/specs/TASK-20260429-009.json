@@ -1,0 +1,29 @@
+{
+  "schema_version": "task-spec.v1",
+  "task_id": "TASK-20260429-009",
+  "title": "Validator pipeline guide secret-scan note",
+  "complexity_tier": "Tier2",
+  "objective": "Add one operational note to docs/guides/validator-pipeline-ko.md stating that secret-like values in handoff payloads are blocked by wrappers before model CLI invocation.",
+  "target_files": [
+    "docs/guides/validator-pipeline-ko.md"
+  ],
+  "success_criteria": [
+    "The guide contains a concise operational note that handoff secret-like values are blocked before model CLI invocation.",
+    "No wrapper, schema, or unrelated document behavior is changed.",
+    "The change is produced through scripts/run-generator.mjs actual execution.",
+    "The Generator result is validated through scripts/run-validator-a.mjs actual execution.",
+    "Pipeline artifacts and logs are preserved under tasks/handoffs/TASK-20260429-009/."
+  ],
+  "constraints": {
+    "positive": [
+      "Keep the documentation edit minimal.",
+      "Use the existing Korean guide style where practical.",
+      "Record command outputs, metadata, and pipeline artifacts for later improvement analysis."
+    ],
+    "negative": [
+      "Do not include real secrets, credentials, PII, or environment variable values.",
+      "Do not change wrapper code or schema files.",
+      "Do not use web search."
+    ]
+  }
+}

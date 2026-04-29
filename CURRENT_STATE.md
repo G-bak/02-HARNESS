@@ -3,7 +3,7 @@
 > Analyst가 유지·갱신하는 파일입니다. 새 세션 시작 시 이 파일을 먼저 읽으세요.
 > 새 세션 시작 방법: `/clear` 후 → "CURRENT_STATE.md를 읽고 이어서 진행해줘."
 
-**마지막 갱신:** 2026-04-29 (TASK-20260429-008 완료 — 리뷰 후속 하드닝)
+**마지막 갱신:** 2026-04-29 (TASK-20260429-009 HOLD — Generator auth/setup failure during pipeline smoke test)
 
 ---
 
@@ -97,7 +97,7 @@
 
 ## 활성 Task
 
-현재 진행 중인 Task 없음.
+현재 진행 중인 Task: TASK-20260429-009 (HOLD)
 
 마지막 완료 Task: TASK-20260429-008 리뷰 후속 하드닝 (2026-04-29)
 
@@ -105,8 +105,9 @@
 
 ## 남은 작업
 
-- 다음 실제 Generator 산출물 Task에서 `run:validator-a` 실제 실행을 관찰하고 `output-last-message` 포맷과 schema 강제 동작을 확인.
-- handoff secret-scan pattern은 실제 false positive/false negative가 관측될 때만 근거 기반으로 조정한다.
+- TASK-20260429-009 재개 전 Claude Code 로컬 로그인이 필요하다. 직접 실행 가능한 경로는 `C:\Users\admin\AppData\Roaming\npm\node_modules\@anthropic-ai\claude-code\bin\claude.exe`로 확인됨.
+- 로그인 후 `npm run run:generator -- TASK-20260429-009 --claude-bin C:\Users\admin\AppData\Roaming\npm\node_modules\@anthropic-ai\claude-code\bin\claude.exe`를 재실행한다.
+- Generator 성공 후에만 `run:validator-a` 실제 실행으로 넘어간다.
 
 ---
 

@@ -1,0 +1,56 @@
+{
+  "schema_version": "generator-handoff.v1",
+  "task_id": "TASK-20260429-009",
+  "agent": "Generator",
+  "invocation": {
+    "runtime": "Claude CLI",
+    "fresh_session_required": true,
+    "forbid_resume_or_continue": true,
+    "recommended_flags": [
+      "--bare",
+      "--print",
+      "--input-format text",
+      "--output-format json",
+      "--no-session-persistence"
+    ]
+  },
+  "refs": {
+    "spec": "tasks/specs/TASK-20260429-009.json",
+    "ledger": "logs/tasks/TASK-20260429-009.jsonl",
+    "session": "logs/sessions/SESSION-20260429-001.md"
+  },
+  "allowed_context": {
+    "goal": "Add one concise operational note to docs/guides/validator-pipeline-ko.md stating that secret-like values in handoff payloads are blocked by wrappers before any model CLI invocation.",
+    "target_files": [
+      "docs/guides/validator-pipeline-ko.md"
+    ],
+    "success_criteria": [
+      "The guide contains the requested secret-like handoff preflight note.",
+      "The edit is minimal and documentation-only.",
+      "No real secrets, credentials, PII, or environment variable values are introduced."
+    ],
+    "constraints": {
+      "positive": [
+        "Prefer adding the note near the validator handoff input or execution section.",
+        "Keep the wording short."
+      ],
+      "negative": [
+        "Do not modify wrapper scripts, schemas, reports, ledgers, or unrelated docs.",
+        "Do not include any secret-looking dummy value.",
+        "Do not use web search."
+      ]
+    },
+    "ledger_events": [
+      "TASK_CREATED for TASK-20260429-009"
+    ],
+    "session_excerpts": [
+      "User requested this small documentation task be processed through the actual Generator -> Validator-A flow and logged for later pipeline improvement analysis."
+    ]
+  },
+  "forbidden_context": [
+    "Full Analyst conversation",
+    "Secrets, credentials, PII, or environment variable values"
+  ],
+  "expected_output_path": "tasks/handoffs/TASK-20260429-009/generator-result.json",
+  "expected_output_schema": "Generator output format"
+}
