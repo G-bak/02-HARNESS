@@ -1,0 +1,51 @@
+{
+  "schema_version": "task-spec.v1",
+  "task_id": "TASK-20260429-020",
+  "created_at": "2026-04-29T18:30:00+09:00",
+  "request": "Test Researcher external CLI invocation with web search and image generation; produce a LandingHub ad poster.",
+  "request_original": "리서쳐 외부 cli 별도로 호출해서 웹검색 시켜봐 ... 실제 웹사이트를 확인하고 그 웹서비스에 맞는 광고 포스터를 만드는거야 ... download 폴더 생성 후 작업 내용에 맞는 폴더를 또 생성 후 거기다가 이미지를 넣어놨으면 좋겠어",
+  "complexity_tier": "Tier2",
+  "tier_rationale": "Real external Codex CLI Researcher invocation with web search + image generation attempt + filesystem deliverable. Exercises the external_cli_fallback Researcher pathway end-to-end. No product runtime impact.",
+  "scope": {
+    "include": [
+      "tasks/handoffs/TASK-20260429-020/researcher-input.json",
+      "tasks/handoffs/TASK-20260429-020/researcher-result.json",
+      "tasks/handoffs/TASK-20260429-020/researcher-events-*.jsonl",
+      "tasks/handoffs/TASK-20260429-020/researcher-last-message-*.json",
+      "tasks/handoffs/TASK-20260429-020/researcher-stderr-*.log",
+      "tasks/handoffs/TASK-20260429-020/researcher-run-*.json",
+      "download/TASK-20260429-020-landinghub-poster/ (created folder + research summary + ad poster prompt + image if generation capability exists)",
+      "logs/tasks/TASK-20260429-020.jsonl",
+      "reports/TASK-20260429-020.md"
+    ],
+    "exclude": [
+      "Product runtime code",
+      "Authority document changes (this is a procedural test, not a policy change)",
+      "Secrets, credentials, or environment variable values"
+    ]
+  },
+  "success_criteria": [
+    "Step 1: Probe whether Codex CLI exposes an image_generation tool by invoking it with a test image-gen request; record tool availability outcome.",
+    "Step 2: Run real Researcher external CLI (Codex) for web search on (a) latest ChatGPT Image enhancement news and (b) the LandingHub deployed website https://landinghub-api.lanfinghub-kr.workers.dev so the ad poster can match the actual service.",
+    "Step 3: Synthesize Research Summary per docs/guides/researcher-procedure-ko.md (research_question, scope, sources with snippets, confidence, log).",
+    "Step 4: Craft a complete ad-poster prompt based on real research findings (visual concept, copy, style, dimensions, target audience).",
+    "Step 5: If Codex image gen is available, generate the poster image and save to download/TASK-20260429-020-landinghub-poster/poster.png. If not, save the prompt as a text file with ChatGPT-Image-ready instructions and document the limitation honestly.",
+    "Step 6: Write Tier 2 report in the new agent-by-agent activity format (output-formats v1.19), with Researcher section as the central narrative.",
+    "Step 7: All Researcher outputs (events, last_message, run metadata) preserved as audit artifacts.",
+    "Step 8: Insight capture: at least one observation about external Codex Researcher pathway behavior."
+  ],
+  "constraints": {
+    "positive": [
+      "Use real external Codex CLI invocation (not in-session WebSearch/WebFetch) per user explicit request for external cli fallback.",
+      "Honor secret-preflight guard; researcher input must not contain secret values.",
+      "Use append-only ledger with full event chain.",
+      "If image generation fails, document the failure mode (which tool was/wasn't available) as an insight."
+    ],
+    "negative": [
+      "Do not include OAuth token or any secret values in researcher handoff or any committed file.",
+      "Do not modify product runtime code or authority documents.",
+      "Do not commit the generated image if it would exceed reasonable repo size; downloads/ folder is acceptable but if image is large, document and exclude.",
+      "Do not silently fail on image generation; explicit honesty about whether it worked is a success criterion."
+    ]
+  }
+}
