@@ -231,8 +231,14 @@ function commandArgs(args) {
     throw new Error('permission-mode bypassPermissions requires --allow-bypass-permissions and an isolated test environment.');
   }
 
+  // NOTE: --bare flag removed because Claude Code v2.1.x silently skips OAuth
+  // auto-load in --bare mode, breaking CLAUDE_CODE_OAUTH_TOKEN env auth in
+  // headless invocation. Empirically verified across 6 failed attempts on
+  // 2026-04-29 (Codex sandbox, Claude Code subprocess, plain PowerShell).
+  // Trade-off: hooks / plugins / MCP / auto-memory / CLAUDE.md auto-discovery
+  // are now loaded. Context isolation is reduced; relies on prompt + permission
+  // policy + allowed/disallowed tools for boundary enforcement.
   const cliArgs = [
-    '--bare',
     '--print',
     '--model',
     args.model,

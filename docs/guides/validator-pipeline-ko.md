@@ -67,6 +67,8 @@ docs/schemas/validator-handoff.schema.json
 
 Tier 3에서는 Validator-B에게 Validator-A 입력·결과를 넘기지 않는다. Validator-A/B 독립성은 Analyst가 입력 파일 단계에서 보장한다.
 
+wrapper는 모델 CLI를 호출하기 전에 handoff payload를 preflight 검사하여 secret 형태 값(자격 증명·API 키·환경 변수 값 등)이 감지되면 실행을 차단한다.
+
 ---
 
 ## 3. Validator-A 실행

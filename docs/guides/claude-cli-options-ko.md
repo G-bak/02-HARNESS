@@ -132,7 +132,7 @@ claude -p "린트 오류 수정" \
 | `--print`, `-p` | 비대화형 모드 (응답 후 종료) |
 | `--output-format <fmt>` | `text` (기본) / `json` / `stream-json` |
 | `--input-format <fmt>` | Print 모드 입력 형식. `text` (기본) / `stream-json` |
-| `--json-schema "<schema>"` | 응답이 따라야 하는 JSON Schema (Print 모드에서 구조화 출력) |
+| `--json-schema "<schema>"` | 응답이 따라야 하는 JSON Schema (Print 모드에서 구조화 출력). **⚠ Known gotcha (INS-20260429-009-02)**: 이 플래그는 응답 wrapper(`{type, result, usage,...}`)를 JSON으로 감싸는 것을 보장하지만, **`result` 필드 안의 텍스트가 그 schema를 따른다고 강제하지 않는다**. Claude는 schema를 "참고 가이드"로 해석할 수 있어, 자연어로 자기 작업을 보고하고 끝낼 수 있음. 자동화 wrapper에서는 `result` 필드를 JSON으로 단순 파싱하지 말고, file change(git diff)나 다른 부수 효과로 결과를 검증해야 안전. |
 | `--include-partial-messages` | 부분 스트리밍 이벤트 포함 (`stream-json` 필수) |
 | `--include-hook-events` | 훅 라이프사이클 이벤트 포함 (`stream-json` 필수) |
 | `--replay-user-messages` | stdin의 사용자 메시지를 stdout에 재발행 (`stream-json`) |
@@ -161,7 +161,7 @@ claude -p "린트 오류 수정" \
 |---|---|
 | `--settings <path or json>` | 추가 설정 파일/문자열 로드 |
 | `--setting-sources <list>` | 로드할 설정 소스 (`user,project,local` 기본) |
-| `--bare` | 최소 모드. hooks·skills·plugins·MCP·자동 메모리·CLAUDE.md 자동 발견 모두 스킵 → 시작 빠름 |
+| `--bare` | 최소 모드. hooks·skills·plugins·MCP·자동 메모리·CLAUDE.md 자동 발견 모두 스킵 → 시작 빠름. **⚠ Known gotcha (INS-20260429-009-01)**: 공식 문서엔 안 적혀 있지만, 경험적으로 **OAuth 자동 로드도 같이 skip**한다. `CLAUDE_CODE_OAUTH_TOKEN` env var를 명시 전달해도 `--bare` 동시 사용 시 "Not logged in" 으로 차단됨. headless 자동화에서는 `--bare` 사용 금지 또는 명시적 토큰 주입 메커니즘이 별도로 필요. |
 | `--init` | 초기화 훅 실행 후 대화형 모드 시작 |
 | `--init-only` | 초기화 훅만 실행하고 종료 |
 | `--maintenance` | 유지보수 훅 실행 후 대화형 모드 |

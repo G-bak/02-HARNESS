@@ -3,7 +3,7 @@
 > Analyst가 유지·갱신하는 파일입니다. 새 세션 시작 시 이 파일을 먼저 읽으세요.
 > 새 세션 시작 방법: `/clear` 후 → "CURRENT_STATE.md를 읽고 이어서 진행해줘."
 
-**마지막 갱신:** 2026-04-29 (TASK-20260429-008 완료 — 리뷰 후속 하드닝)
+**마지막 갱신:** 2026-04-29 (TASK-20260429-009 완료 — Generator 파이프라인 실제 실행 + `--bare`/`--json-schema` 2개 wrapper 버그 격리·기록)
 
 ---
 
@@ -92,6 +92,9 @@
 - **Insight placeholder resolver gate**: 신규 `actionable_doc_change`/`gotcha` insight가 `SELF_REFERENTIAL*` commit placeholder를 쓰면 append-only resolver insight로 실제 `applied_to_doc.commit`을 보정해야 한다. `target_doc`이 있으면 completion gate가 해당 commit의 문서 변경 여부를 git으로 검증한다.
 - **Handoff secret preflight**: `run-generator.mjs`와 `run-validator-a.mjs`는 raw handoff payload를 모델 CLI로 보내기 전에 common secret-like pattern을 검사한다.
 - **Handoff regression audit**: `npm run audit:harness`는 `scripts/validate-handoffs.mjs`를 포함하며, Generator retry fixture가 base Generator handoff schema와 계속 호환되는지 확인한다.
+- **Claude Code `--bare` 사용 금지 (headless)**: `--bare` 플래그는 OAuth 자동 로드도 silently skip한다 (공식 문서 미기재, INS-20260429-009-01 참조). headless wrapper 호출에서는 `--bare`를 사용하지 않는다. 컨텍스트 격리는 `--permission-mode auto` + `--allowedTools`/`--disallowedTools`로 보장한다.
+- **Claude Code `--json-schema` 응답 강제 한계**: `--json-schema`는 응답 wrapper를 JSON으로 만들지만 `result` 필드 안의 텍스트가 schema를 따른다고 보장하지 않는다 (INS-20260429-009-02 참조). 자동화 wrapper는 `result` JSON 파싱 외에 git diff 또는 다른 부수효과로 결과를 검증해야 한다.
+- **Claude Code OAuth 토큰 운영**: 자동화 호출용 OAuth 토큰은 `claude setup-token`(claude.ai 구독)으로 발급한다 (API 키 아님, 추가 과금 없음). `.dev.vars`에만 저장하고 어떤 커밋·로그·보고서에도 평문 포함 금지. wrapper는 `CLAUDE_CODE_OAUTH_TOKEN` env var로 자식 프로세스에 전달한다.
 
 ---
 
@@ -99,14 +102,15 @@
 
 현재 진행 중인 Task 없음.
 
-마지막 완료 Task: TASK-20260429-008 리뷰 후속 하드닝 (2026-04-29)
+마지막 완료 Task: TASK-20260429-009 Generator 파이프라인 실제 실행 + 2개 wrapper 버그 격리·기록 (2026-04-29)
 
 ---
 
 ## 남은 작업
 
-- 다음 실제 Generator 산출물 Task에서 `run:validator-a` 실제 실행을 관찰하고 `output-last-message` 포맷과 schema 강제 동작을 확인.
-- handoff secret-scan pattern은 실제 false positive/false negative가 관측될 때만 근거 기반으로 조정한다.
+- **별도 Codex 세션에서 Validator-A 실제 실행 검증**: 사용자가 다른 세션에서 `npm run run:validator-a -- TASK-20260429-009`로 실제 외부 Codex Validator-A 실행을 시도. TASK-009 ledger에 추가 VALIDATION_RESULT 또는 CORRECTION 이벤트로 append.
+- **TASK-20260429-010 (PENDING)**: Generator wrapper output parsing fix — 자연어 응답 + git diff 검증 경로 추가. spec 작성 완료, 구현은 사용자 승인 후 진입.
+- **후속 후보**: `--bare` 제거의 컨텍스트 격리 약화 trade-off 보강 (예: hooks/plugins 명시 비활성화 옵션 조합 탐색).
 
 ---
 

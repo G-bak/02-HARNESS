@@ -1,0 +1,53 @@
+{
+  "schema_version": "task-spec.v1",
+  "task_id": "TASK-20260429-010",
+  "title": "Generator wrapper output parsing fix — accept natural-language reports + git diff verification",
+  "task_tier": "Tier2",
+  "task_type": "harness-automation-fix",
+  "created_at": "2026-04-29T15:00:00+09:00",
+  "depends_on": ["TASK-20260429-009"],
+  "goal": "Fix scripts/run-generator.mjs output parsing layer so the wrapper accepts both (a) structured JSON results matching the generator-handoff output schema and (b) natural-language reports where the model returned the file change directly without a JSON envelope. In case (b), wrapper must verify the deliverable via git diff against the handoff target_files and surface the result text as a recorded artifact rather than failing.",
+  "scope": {
+    "include": [
+      "scripts/run-generator.mjs (output parsing function)",
+      "scripts/run-validator-a.mjs (parallel readLastMessage logic, if affected)",
+      "docs/guides/generator-pipeline-ko.md (operating procedure for natural-language fallback)",
+      "tasks/handoffs/TASK-20260429-009/generator-result.json (recovery artifact reconstruction from existing generator-stdout.raw.json)",
+      "test fixtures: add a fixture demonstrating natural-language response acceptance"
+    ],
+    "exclude": [
+      "Authority documents not directly related (AGENTS.md, SECURITY.md, etc.)",
+      "Codex CLI behavior — only Claude side parsing addressed",
+      "--bare flag re-introduction (TASK-009 fix is final)"
+    ]
+  },
+  "success_criteria": [
+    "scripts/run-generator.mjs distinguishes JSON-shaped result from natural-language result and handles both without throwing.",
+    "On natural-language path, wrapper runs git diff against handoff allowed_context.target_files and records (changed_files, diff_summary) in generator-run.json.",
+    "Wrapper writes a synthetic generator-result.json with task_id/agent/status/change_summary/self_review/log fields populated from the natural-language report and git diff outcome (status: PENDING_VALIDATION on success, HOLD on no diff).",
+    "TASK-20260429-009's missing generator-result.json is reconstructed retroactively as a recovery artifact (with provenance note) for audit trail completeness.",
+    "Ledger event AGENT_RESULT_RECEIVED reflects PENDING_VALIDATION when file changes match target_files, HOLD with reason otherwise.",
+    "TASK-20260429-010 ledger has TASK_CREATED, GENERATION_COMPLETED, VALIDATION_RESULT, MERGE_COMPLETED, REPORT_WRITTEN, TASK_COMPLETED with insight_capture.",
+    "reports/TASK-20260429-010.md exists with 2-commit squash pattern observance.",
+    "logs/quality-scores.jsonl has a row for TASK-20260429-010.",
+    "npm run audit:harness PASS."
+  ],
+  "constraints": {
+    "positive": [
+      "Use Node.js built-ins only (no new npm dependencies).",
+      "Preserve append-only ledger discipline.",
+      "Match the existing wrapper code style (same import/error handling patterns).",
+      "Document the fallback path clearly in generator-pipeline-ko.md."
+    ],
+    "negative": [
+      "Do not include secrets or environment variable values in code or fixtures.",
+      "Do not loosen the existing forbidden_flags or secret-scan guards.",
+      "Do not bypass schema validation for the JSON path; only the natural-language path uses git-diff verification.",
+      "Do not silently swallow real Generator errors — only specific 'unparseable JSON but file changes are valid' case is the new accepted path."
+    ]
+  },
+  "open_questions": [
+    "Should --output-format be switched from json to stream-json to capture tool-use events for additional verification? Defer to implementation phase.",
+    "Should the wrapper synthesize the generator-result.json even on JSON-success path so format is uniform? Probably yes for consistency."
+  ]
+}

@@ -118,8 +118,12 @@ npm run run:generator -- TASK-20260428-001 --permission-mode auto
 `scripts/run-generator.mjs`는 다음 호출 형태를 사용한다.
 
 ```text
-claude --bare --print --model opus --effort xhigh --append-system-prompt "<02-HARNESS Generator system guidance>" --input-format text --output-format json --json-schema "<Generator output schema>" --no-session-persistence --permission-mode auto
+claude --print --model opus --effort xhigh --append-system-prompt "<02-HARNESS Generator system guidance>" --input-format text --output-format json --json-schema "<Generator output schema>" --no-session-persistence --permission-mode auto
 ```
+
+> ⚠ **Known gotcha (INS-20260429-009-01 출처)** — `--bare` 플래그는 hooks·plugins·MCP·자동 메모리·CLAUDE.md 자동 발견뿐 아니라 **OAuth 자동 로드도 silently skip**한다 (Claude Code v2.1.x에서 경험적으로 확인). headless 모드에서는 `CLAUDE_CODE_OAUTH_TOKEN` env var를 명시 전달해도 `--bare` 동시 사용 시 "Not logged in" 에러가 나며, 실제 호출이 차단된다. wrapper는 `--bare`를 의도적으로 제외한다. 부작용: hooks·plugins·CLAUDE.md가 로드되어 컨텍스트 격리는 **권한 모드(`--permission-mode auto`)와 도구 allowlist에 의존**하게 된다. 이것이 다음 강화 후보(TASK-010+).
+
+> ⚠ **Known gotcha (INS-20260429-009-02 출처)** — `--output-format json` + `--json-schema` 플래그는 Claude의 **응답 메타데이터를 JSON으로 감싸지만**, `result` 필드 안의 **실제 응답 텍스트가 그 schema를 따른다고 보장하지 않는다**. Claude는 schema를 "참고 가이드"로 해석할 수 있어, Generator가 자연어로 자기 작업을 보고하고 끝낼 수 있다 (file edit은 정상 수행하면서). wrapper는 현재 `result` 필드를 JSON 객체로 파싱하려 시도해서 자연어 응답에 실패한다. 검증은 git diff로 file change를 직접 확인하는 방식이 더 견고하다 (TASK-010에서 wrapper 보강 예정).
 
 기본 도구 allowlist:
 
