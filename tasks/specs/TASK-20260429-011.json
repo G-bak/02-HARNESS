@@ -1,0 +1,36 @@
+{
+  "schema_version": "task-spec.v1",
+  "task_id": "TASK-20260429-011",
+  "title": "Document wrapper self-validation caveat",
+  "task_tier": "Tier1",
+  "task_type": "operational-guide-note",
+  "created_at": "2026-04-29T16:45:00+09:00",
+  "goal": "Add a concise guide note that when modifying run-generator.mjs or run-validator-a.mjs themselves, operators should avoid relying only on the same wrapper as its own validator and should use fixture/local checks first, with a follow-up real pipeline smoke test when needed.",
+  "scope": {
+    "include": [
+      "docs/guides/generator-pipeline-ko.md",
+      "docs/guides/validator-pipeline-ko.md"
+    ],
+    "exclude": [
+      "wrapper code changes",
+      "schema changes",
+      "authority document changes"
+    ]
+  },
+  "success_criteria": [
+    "Generator guide documents the self-validation caveat for run-generator.mjs changes.",
+    "Validator guide documents the self-validation caveat for run-validator-a.mjs changes.",
+    "No code or schema behavior changes are made.",
+    "npm run audit:harness passes."
+  ],
+  "constraints": {
+    "positive": [
+      "Keep wording concise and operator-oriented.",
+      "Use existing Korean guide style."
+    ],
+    "negative": [
+      "Do not include secrets, credentials, or environment variable values.",
+      "Do not change wrapper implementation."
+    ]
+  }
+}

@@ -211,6 +211,8 @@ tasks/handoffs/TASK-{ID}/conflict-report-{N}.json
 [ ] PASS이면 별도 merge 단계에서 git-branch-policy.md의 2-commit squash 절차 수행
 ```
 
+`scripts/run-validator-a.mjs` 자체를 수정하는 Task에서는 같은 wrapper 실행만으로 자기 자신을 검증했다고 보지 않는다. 먼저 fixture, `node --check`, `audit:harness` 같은 로컬 검증으로 수정 계층을 확인하고, 필요하면 별도 후속 smoke test Task에서 실제 Generator → Validator-A 파이프라인을 다시 실행한다.
+
 ---
 
 ## 9. 변경 이력

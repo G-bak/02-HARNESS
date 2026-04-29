@@ -316,6 +316,8 @@ Generator-Validator 반복 전략은 `docs/workflows/failure-handling.md`가 권
 
 `generator-result.json`의 JSON 파싱과 필수 필드 확인은 wrapper가 1차로 수행한다. 운영자는 그 다음 실제 변경 범위와 self-review 내용이 Task Spec에 맞는지 확인한다.
 
+`scripts/run-generator.mjs` 자체를 수정하는 Task에서는 같은 wrapper 실행만으로 자기 자신을 검증했다고 보지 않는다. 먼저 parser fixture, `node --check`, `audit:harness` 같은 로컬 검증으로 수정 계층을 확인하고, 필요하면 별도 후속 smoke test Task에서 실제 Generator → Validator-A 파이프라인을 다시 실행한다.
+
 ---
 
 ## 10. 변경 이력
