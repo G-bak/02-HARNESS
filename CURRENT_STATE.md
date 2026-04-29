@@ -92,17 +92,17 @@
 
 ## 활성 Task
 
-- TASK-20260429-001: 2-commit squash 패턴 + 인사이트 분류 시스템 + 자동 차단 게이트 + INS-006-03 소급 적용. 작업 완료, `task/TASK-20260429-001` 브랜치에서 2-commit squash 패턴 회귀 검증 직전 단계.
+현재 진행 중인 Task 없음.
 
-마지막 완료 Task: TASK-20260428-006 Branch cleanup 정책 트리 동등성 격상 (2026-04-28)
+마지막 완료 Task: TASK-20260429-001 2-commit squash 패턴 + 인사이트 분류 자동 게이트 + INS-006-03 소급 적용 (2026-04-29)
 
 ---
 
 ## 남은 작업
 
-- TASK-20260429-001 commit → main 2-commit squash → push → `npm run clean:branches -- --force`로 자기 브랜치 자동 정리 검증.
 - `task/TASK-20260427-092` 잔존 1건은 트리 동등성 검사에서 보존됨. 별도 수동 검토 필요.
 - 다음 신규 Task에서 Validator-A 실행 wrapper와 retry handoff 자동 생성 파이프라인 설계 승인 후 구현 검토.
+- 후속 후보: 인사이트 게이트 강화 — `applied_to_doc.commit`이 실제로 `target_doc`을 수정한 commit인지 git diff로 검증.
 
 ---
 
