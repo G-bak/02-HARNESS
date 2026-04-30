@@ -3,7 +3,7 @@
 > Analyst가 유지·갱신하는 파일입니다. 새 세션 시작 시 이 파일을 먼저 읽으세요.
 > 새 세션 시작 방법: `/clear` 후 → "CURRENT_STATE.md를 읽고 이어서 진행해줘."
 
-**마지막 갱신:** 2026-04-30 (TASK-20260430-004 완료 — Validator-B 파이프라인 설계 검토)
+**마지막 갱신:** 2026-04-30 (TASK-20260430-005 완료 — Validator-B 파이프라인 하드닝)
 
 ---
 
@@ -105,14 +105,14 @@
 
 현재 진행 중인 Task 없음.
 
-마지막 완료 Task: TASK-20260430-004 Validator-B 파이프라인 설계 검토 (2026-04-30)
+마지막 완료 Task: TASK-20260430-005 Validator-B 파이프라인 하드닝 (2026-04-30)
 
 ---
 
 ## 남은 작업
 
-- **완료됨**: TASK-20260430-004에서 Validator-B 파이프라인 설계를 권위 문서와 구현 기준으로 검토하고 개선 지점을 식별.
-- **후속 후보**: Tier 3 completion gate 강화, Validator-B malformed-output Resource Failure 기록, Gemini sandbox/approval-mode 권위 문서 정합화, 독립성 guard 확장.
+- **완료됨**: TASK-20260430-005에서 Validator-B negative smoke, malformed-output Resource Failure, event_id 충돌 방지, 독립성 guard, approval-mode 정합화, Tier 2 smoke 예외, audit gate를 구현하고 검증.
+- **후속 후보**: Validator-A read-only 검증 명령 allowlist 또는 execution-blocked 케이스의 Resource Failure 분류 정비.
 
 ---
 
