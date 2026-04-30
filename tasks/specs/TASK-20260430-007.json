@@ -1,0 +1,30 @@
+{
+  "schema_version": "task-spec.v1",
+  "task_id": "TASK-20260430-007",
+  "title": "Create harness starter archive",
+  "tier": "Tier1",
+  "request": "Package the completed harness engineering initial files into a separate zip for future project setup, excluding existing LandinHub web service files.",
+  "success_criteria": [
+    "A zip archive is created in a clear archive/download location.",
+    "The archive includes harness initialization files and operational documents needed to bootstrap a new harness project.",
+    "The archive excludes LandinHub web service implementation files.",
+    "The archive excludes secrets and environment files such as .env and .dev.vars.",
+    "The archive contents are verified after creation."
+  ],
+  "constraints": {
+    "positive": [
+      "Prefer existing repository structure and files.",
+      "Keep the task scoped to archive creation and required work-history records."
+    ],
+    "negative": [
+      "Do not include LandinHub application files.",
+      "Do not include secrets, credentials, or local runtime state.",
+      "Do not modify unrelated source files."
+    ]
+  },
+  "expected_artifacts": [
+    "archive/harness-starter-20260430.zip",
+    "logs/tasks/TASK-20260430-007.jsonl",
+    "logs/sessions/SESSION-20260430-007.md"
+  ]
+}

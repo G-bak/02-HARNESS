@@ -1,0 +1,32 @@
+{
+  "schema_version": "task-spec.v1",
+  "task_id": "TASK-20260501-001",
+  "title": "Rebrand landing showcase to DOI AI platform",
+  "tier": "Tier2",
+  "request": "Rename showcase.html to index.html and update the first landing section from LandingHub showcase copy to DOI AI spatial information platform copy, including logo sizing, hero search messaging, platform metrics, and a white-default dark mode toggle. Do not modify sections below the requested first-screen/metrics area.",
+  "success_criteria": [
+    "public/showcase.html is replaced by public/index.html.",
+    "The visible brand changes from LandingHub to DOI AI in the requested header/logo area.",
+    "The SHOWCASE PLATFORM subtitle is removed and the logo image uses logo.svg with alt text updated for DOI AI and smaller height.",
+    "The hero headline and search prompt communicate address search for drone aerial imagery and 3D modeled buildings.",
+    "The first metric row is changed to platform-appropriate values such as registered addresses, 3D modeled buildings, free cost, and first data area.",
+    "A top-right dark mode toggle is available, defaults to the white theme, and only affects the index.html page.",
+    "Sections below the requested first-screen/metrics area are not intentionally changed."
+  ],
+  "constraints": {
+    "positive": [
+      "Follow the existing single-file HTML/CSS/JS style where practical.",
+      "Keep the change scoped to public/index.html and public/logo.svg if the logo asset itself needs rebranding."
+    ],
+    "negative": [
+      "Do not include secrets or environment values.",
+      "Do not refactor unrelated sections below the requested area.",
+      "Do not modify backend or deployment settings unless required for the rename."
+    ]
+  },
+  "expected_artifacts": [
+    "public/index.html",
+    "public/logo.svg",
+    "logs/tasks/TASK-20260501-001.jsonl"
+  ]
+}

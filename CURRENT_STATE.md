@@ -3,7 +3,7 @@
 > Analyst가 유지·갱신하는 파일입니다. 새 세션 시작 시 이 파일을 먼저 읽으세요.
 > 새 세션 시작 방법: `/clear` 후 → "CURRENT_STATE.md를 읽고 이어서 진행해줘."
 
-**마지막 갱신:** 2026-04-30 (TASK-20260430-006 완료 — Analyst 하네스 엔지니어링 권한 명확화)
+**마지막 갱신:** 2026-05-01 (TASK-20260501-001 완료 — DOI AI 변경 원복 및 재배포)
 
 ---
 
@@ -105,13 +105,13 @@
 
 현재 진행 중인 Task 없음.
 
-마지막 완료 Task: TASK-20260430-006 Analyst 하네스 엔지니어링 권한 명확화 (2026-04-30)
+마지막 완료 Task: TASK-20260501-001 DOI AI 랜딩 변경 원복 및 재배포 (2026-05-01)
 
 ---
 
 ## 남은 작업
 
-- **완료됨**: TASK-20260430-006에서 Analyst가 하네스 엔지니어링 문서와 runner/audit/validation/tooling 스크립트를 직접 수정할 수 있음을 권위 문서에 명확히 반영.
+- **완료됨**: TASK-20260501-001에서 DOI AI `index.html` 변경을 원복하고 기존 LandingHub `showcase.html`/`logo.svg` 상태를 재배포 완료.
 - **후속 후보**: Validator-A read-only 검증 명령 allowlist 또는 execution-blocked 케이스의 Resource Failure 분류 정비.
 
 ---
