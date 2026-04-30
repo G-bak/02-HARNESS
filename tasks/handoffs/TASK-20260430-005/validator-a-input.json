@@ -1,0 +1,65 @@
+{
+  "schema_version": "validator-handoff.v1",
+  "task_id": "TASK-20260430-005",
+  "agent": "Validator-A",
+  "invocation": {
+    "runtime": "Codex CLI",
+    "fresh_session_required": true,
+    "sandbox": "read-only",
+    "approval_policy": "never"
+  },
+  "refs": {
+    "spec": "tasks/specs/TASK-20260430-005.json",
+    "ledger": "logs/tasks/TASK-20260430-005.jsonl",
+    "generator_result": "tasks/handoffs/TASK-20260430-005/generator-result.json"
+  },
+  "changed_files": [
+    ".gitignore",
+    "CURRENT_STATE.md",
+    "SECURITY.md",
+    "docs/agents/validator.md",
+    "docs/guides/validator-pipeline-ko.md",
+    "docs/operations/tool-permissions.md",
+    "docs/schemas/validator-handoff.schema.json",
+    "logs/tasks/TASK-20260429-015.jsonl",
+    "logs/tasks/TASK-20260430-003.jsonl",
+    "logs/tasks/TASK-20260430-005.jsonl",
+    "logs/quality-scores.jsonl",
+    "logs/sessions/SESSION-20260430-005.md",
+    "reports/TASK-20260430-005.md",
+    "scripts/audit-harness.mjs",
+    "scripts/check-validator-b-regressions.mjs",
+    "scripts/lib/ledger-events.mjs",
+    "scripts/run-validator-a.mjs",
+    "scripts/run-validator-b.mjs",
+    "scripts/validate-ledger.mjs",
+    "tasks/handoffs/TASK-20260430-005/generator-result.json",
+    "tasks/handoffs/TASK-20260430-005/negative-generator-result.json",
+    "tasks/handoffs/TASK-20260430-005/negative-smoke-spec.json",
+    "tasks/handoffs/TASK-20260430-005/negative-smoke-target.md",
+    "tasks/handoffs/TASK-20260430-005/validation-evidence.json",
+    "tasks/handoffs/TASK-20260430-005/validator-b-negative-input.json",
+    "tasks/handoffs/TASK-20260430-005/validator-b-result-negative-1.json",
+    "tasks/handoffs/TASK-20260430-005/validator-b-run-1.json",
+    "tasks/handoffs/TASK-20260430-005/validator-b-stderr-1.log",
+    "tasks/handoffs/TASK-20260430-005/validator-b-stdout-1.json",
+    "tasks/specs/TASK-20260430-005.json"
+  ],
+  "success_criteria": [
+    "node --check passes for changed scripts.",
+    "npm run audit:harness passes.",
+    "Regression coverage detects duplicate ledger event_id and malformed Validator-B output handling.",
+    "Validator-A PASS is recorded before main merge.",
+    "reports/TASK-20260430-005.md and quality score are written."
+  ],
+  "known_risks": [
+    "Validator-B prompt artifacts are ignored for future runs; existing committed prompt artifacts remain preserved.",
+    "Validator-A may be unable to execute node/npm inside its sandbox; if so, linked local validation evidence should be reviewed as supporting evidence, not a replacement for the handoff review."
+  ],
+  "forbidden_context": [
+    "Do not include secrets, credentials, API keys, tokens, or PII.",
+    "Do not modify files or merge branches during validation."
+  ],
+  "expected_output_path": "tasks/handoffs/TASK-20260430-005/validator-a-result-1.json",
+  "expected_output_schema": "docs/schemas/validator-result.schema.json"
+}

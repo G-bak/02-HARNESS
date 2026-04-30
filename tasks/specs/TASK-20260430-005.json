@@ -1,0 +1,54 @@
+{
+  "task_id": "TASK-20260430-005",
+  "title": "Harden Validator-B pipeline after combined review",
+  "tier": "Tier2",
+  "requested_by": "user",
+  "created_at": "2026-04-30T14:50:00+09:00",
+  "objective": "Fix Validator-B pipeline design gaps identified by Codex and Claude reviews, add regression tests/audit gates, run validation, and write a formal report.",
+  "scope": [
+    "Replace line-count event id generation with max-suffix generation in Validator runners and add ledger duplicate event_id detection.",
+    "Record malformed Gemini output as RESOURCE_FAILURE instead of unlogged process failure.",
+    "Strengthen Validator-B independence prompt and guard rails against Validator-A/Codex artifact references in embedded context.",
+    "Correct Validator-B approval metadata from approval_policy=never to approval_mode=plan and remove dead code.",
+    "Add behavior-based audit coverage for Validator-B command shape and runner invariants.",
+    "Add negative Validator-B smoke fixture or parser-level test to prove FAIL output path and errors[] validation.",
+    "Update authority/guide docs where actual Gemini plan-mode behavior differs from prior sandbox wording.",
+    "Write final report and quality score, then run Validator-A before merge."
+  ],
+  "success_criteria": [
+    "node --check passes for changed scripts.",
+    "npm run audit:harness passes.",
+    "Regression coverage detects duplicate ledger event_id and malformed Validator-B output handling.",
+    "Validator-A PASS is recorded before main merge.",
+    "reports/TASK-20260430-005.md and quality score are written."
+  ],
+  "constraints": [
+    "Do not record secrets, tokens, credentials, PII, or environment variable values.",
+    "Do not browse external content.",
+    "Keep changes scoped to harness pipeline, docs, tests, logs, and reports."
+  ],
+  "target_files": [
+    "scripts/run-validator-a.mjs",
+    "scripts/run-validator-b.mjs",
+    "scripts/validate-ledger.mjs",
+    "scripts/audit-harness.mjs",
+    "scripts/*validator-b*",
+    "docs/agents/validator.md",
+    "SECURITY.md",
+    "docs/operations/tool-permissions.md",
+    "docs/guides/validator-pipeline-ko.md",
+    "reports/TASK-20260430-005.md",
+    "logs/tasks/TASK-20260430-005.jsonl",
+    "logs/quality-scores.jsonl",
+    "logs/sessions/SESSION-20260430-005.md"
+  ],
+  "validation_plan": [
+    "node --check scripts/run-validator-a.mjs",
+    "node --check scripts/run-validator-b.mjs",
+    "node --check scripts/validate-ledger.mjs",
+    "node --check scripts/audit-harness.mjs",
+    "npm run audit:harness",
+    "git diff --check",
+    "npm run run:validator-a -- TASK-20260430-005 --input tasks/handoffs/TASK-20260430-005/validator-a-input.json --codex-bin codex.cmd --attempt 1"
+  ]
+}

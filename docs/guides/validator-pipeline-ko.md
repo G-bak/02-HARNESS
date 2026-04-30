@@ -1,6 +1,6 @@
 # Validator 실행 파이프라인 — 한국어 운영 가이드
 
-**버전:** 1.1 | **최종 수정:** 2026-04-30
+**버전:** 1.2 | **최종 수정:** 2026-04-30
 **대상:** 02-HARNESS Analyst·운영자  
 **용도:** `scripts/run-validator-a.mjs`, `scripts/run-validator-b.mjs`, `scripts/prepare-generator-retry.mjs`로 Validator 실행, FAIL 회복 입력 생성, Conflict Report 전환을 운영하는 방법을 설명한다.
 
@@ -251,15 +251,21 @@ gemini --prompt "Use read-only file access to read the Validator-B payload at ta
 
 Validator-B handoff는 반드시 `agent: "Validator-B"`, `invocation.runtime: "Gemini CLI"`, `invocation.sandbox: "read-only"`여야 한다. Validator-B는 파일을 수정하지 않는 독립 검토자이므로 `workspace-write`는 허용하지 않는다.
 
-Gemini CLI 0.40.0의 `--approval-mode plan`은 read-only mode로 제공된다. `read-only`는 02-HARNESS handoff의 권한 라벨이며 wrapper가 `read-only` 외 라벨을 거부한 뒤 Gemini 실행에는 `--approval-mode plan`을 전달한다. Docker/Podman 기반 `--sandbox`는 로컬 환경에서 장시간 block될 수 있어 Validator-B 기본 경로로 쓰지 않는다.
+Gemini CLI 0.40.0의 `--approval-mode plan`은 현재 검증된 read-only 실행 경로다. `read-only`는 02_HARNESS handoff의 권한 라벨이며 wrapper가 `read-only` 외 라벨을 거부한 뒤 Gemini 실행에는 `--approval-mode plan`을 전달한다. Docker/Podman 기반 `--sandbox`는 로컬 환경에서 장시간 block될 수 있어 Validator-B 기본 경로로 쓰지 않는다. plan mode에서도 모델이 shell tool을 시도할 수 있으므로, runner는 쓰기·머지 권한을 주지 않고 stderr/stdout/metadata를 보존해 실제 거부 여부를 검토한다.
 
-wrapper는 refs, changed_files, previous_failures에 다른 validator 또는 Codex 실행 artifact가 섞이면 실행을 거부한다. Tier 3 독립성은 Analyst가 Validator-A/B 입력 파일을 따로 만들고, Validator-B 입력에 다른 validator 결과를 넣지 않는 방식으로 보장한다.
+wrapper는 refs, changed_files, previous_failures에 다른 validator 또는 Codex 실행 artifact가 섞이면 실행을 거부한다. 또한 prompt에 임베드되는 파일 내용에 validator-a/codex artifact 참조가 있으면 실행을 차단한다. Tier 3 독립성은 Analyst가 Validator-A/B 입력 파일을 따로 만들고, Validator-B 입력에 다른 validator 결과를 넣지 않는 방식으로 보장한다. Validator-B prompt는 validator-a-* 파일이나 Codex 산출물을 읽지 말라고 명시한다.
 
 Validator-B prompt에는 `docs/schemas/validator-result.schema.json` 원문을 포함한다. Gemini CLI가 Codex의 `--output-schema`와 같은 강제 옵션을 제공하지 않는 환경에서도 최소한 모델 지시와 wrapper 후처리 검증이 같은 schema contract를 보도록 하기 위해서다.
 
 changed file context는 파일당 256 KiB, 전체 1 MiB 예산 안에서만 임베드한다. 초과 파일은 `omitted_too_large` 또는 `omitted_for_total_budget`으로 표시하고 경로와 사유를 남긴다.
 
 Gemini CLI가 설치되어 있지 않거나 인증·쿼터·rate limit·context limit 때문에 실행되지 못하면 Validator FAIL이 아니라 `RESOURCE_FAILURE` / `HOLD`로 기록한다.
+
+Gemini CLI가 exit status 0으로 종료했더라도 stdout envelope 안의 `response`가 JSON이 아니거나 `validator-result.schema.json` 필수 필드를 만족하지 못하면 `MALFORMED_OUTPUT` Resource Failure로 기록한다. 이 경우 검증 실패가 아니라 runner/모델 출력 수집 실패로 취급하고, 유효한 Validator-B 결과가 나올 때까지 머지하지 않는다.
+
+Validator-B는 원칙적으로 Tier 3 전용이다. 단, `run-validator-b` 자체를 검증하는 runner smoke task에서는 `success_criteria` 또는 `known_risks`가 명시적으로 smoke 목적을 드러내는 경우에만 Tier 2 예외 실행을 허용한다.
+
+`validator-b-prompt-{N}.txt`는 Gemini CLI에 전달한 전체 prompt payload이며 재시도마다 커질 수 있다. 기본적으로 `.gitignore`로 신규 prompt artifact 커밋을 막고, 필요한 경우 stdout/run metadata와 정규화된 validator result만 보고서와 원장에 연결한다. 이미 커밋된 과거 prompt artifact는 감사 추적 목적상 보존한다.
 
 `scripts/run-validator-a.mjs` 또는 `scripts/run-validator-b.mjs` 자체를 수정하는 Task에서는 같은 wrapper 실행만으로 자기 자신을 검증했다고 보지 않는다. 먼저 fixture, `node --check`, `audit:harness` 같은 로컬 검증으로 수정 계층을 확인하고, 필요하면 별도 후속 smoke test Task에서 실제 Generator → Validator 파이프라인을 다시 실행한다.
 

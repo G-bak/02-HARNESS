@@ -1,0 +1,16 @@
+{
+  "task_id": "TASK-20260430-005",
+  "agent": "Generator",
+  "status": "PENDING_VALIDATION",
+  "artifacts": [],
+  "change_summary": "Intentionally defective negative smoke result. The required negative_smoke_output field is missing.",
+  "self_review": "This fixture should fail Validator-B because it omits a required output.",
+  "tier_reclassification_needed": false,
+  "log": [
+    {
+      "timestamp": "2026-04-30T14:58:00+09:00",
+      "action": "create_negative_fixture",
+      "result": "Required output intentionally omitted."
+    }
+  ]
+}

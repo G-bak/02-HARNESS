@@ -1,0 +1,12 @@
+{
+  "task_id": "TASK-20260430-005",
+  "title": "Validator-B negative smoke fixture",
+  "tier": "Tier3",
+  "objective": "Verify Validator-B detects a missing required output in a deliberately defective Generator result.",
+  "success_criteria": [
+    "Generator result must include negative_smoke_output with value present."
+  ],
+  "constraints": [
+    "This fixture is intentionally defective and should produce Validator-B FAIL."
+  ]
+}

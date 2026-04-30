@@ -38,6 +38,13 @@ function hasCorrection(events, predicate) {
   return correctionEvents(events).some((event) => predicate(event.details ?? {}, event));
 }
 
+function duplicateEventIdSuppressed(events, eventId) {
+  return hasCorrection(events, (details) =>
+    Array.isArray(details.duplicate_event_ids_suppressed)
+    && details.duplicate_event_ids_suppressed.includes(eventId)
+  );
+}
+
 function normalizedTier(value) {
   if (!value) return null;
   const text = String(value).trim();
@@ -130,6 +137,7 @@ for (const file of files) {
   const taskId = file.replace(/\.jsonl$/, '');
   const hasCreated = events.some((event) => eventType(event) === 'TASK_CREATED');
   const completed = events.filter((event) => eventType(event) === 'TASK_COMPLETED');
+  const seenEventIds = new Set();
 
   if (!hasCreated) {
     reportError(`${file}: missing TASK_CREATED`);
@@ -140,6 +148,13 @@ for (const file of files) {
   }
 
   for (const event of events) {
+    if (event.event_id) {
+      if (seenEventIds.has(event.event_id) && !duplicateEventIdSuppressed(events, event.event_id)) {
+        reportError(`${file}: duplicate event_id ${event.event_id}`);
+      }
+      seenEventIds.add(event.event_id);
+    }
+
     if (event.task_id && event.task_id !== taskId) {
       reportError(`${file}: event task_id ${event.task_id} does not match filename`);
     }

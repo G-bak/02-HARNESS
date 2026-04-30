@@ -1,0 +1,42 @@
+{
+  "task_id": "TASK-20260430-005",
+  "recorded_at": "2026-04-30T15:22:00+09:00",
+  "recorded_by": "Analyst",
+  "commands": [
+    {
+      "command": "node --check scripts/run-validator-a.mjs; node --check scripts/run-validator-b.mjs; node --check scripts/validate-ledger.mjs; node --check scripts/check-validator-b-regressions.mjs; node --check scripts/audit-harness.mjs",
+      "exit_code": 0,
+      "summary": "All changed JavaScript files parsed successfully."
+    },
+    {
+      "command": "node scripts/check-validator-b-regressions.mjs",
+      "exit_code": 0,
+      "summary": "PASS. Covered max-suffix event ids, malformed Validator-B output Resource Failure, structured negative FAIL result, and --approval-mode plan dry-run command shape."
+    },
+    {
+      "command": "npm run run:validator-b -- TASK-20260430-005 --input tasks/handoffs/TASK-20260430-005/validator-b-negative-input.json --gemini-bin gemini.cmd --attempt 1",
+      "exit_code": 0,
+      "summary": "Live Gemini negative smoke returned Validator-B FAIL with SPEC_MISMATCH and errors[] for missing negative_smoke_output."
+    },
+    {
+      "command": "npm run audit:harness",
+      "exit_code": 0,
+      "summary": "PASS. Includes validate-ledger duplicate event_id gate and check-validator-b-regressions."
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "summary": "PASS with CRLF conversion warnings only."
+    }
+  ],
+  "validator_b_negative_smoke": {
+    "result_path": "tasks/handoffs/TASK-20260430-005/validator-b-result-negative-1.json",
+    "verdict": "FAIL",
+    "expected": "FAIL",
+    "matched_expectation": true,
+    "evidence_type": "SPEC_MISMATCH"
+  },
+  "notes": [
+    "Validator-A attempt 2 could inspect files but could not execute node/npm in its read-only runtime; this artifact records parent-session command results as supporting evidence only."
+  ]
+}

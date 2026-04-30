@@ -1,8 +1,8 @@
 # Validator — 운영 명세
 
-**버전:** 1.4 | **최종 수정:** 2026-04-26  
+**버전:** 1.5 | **최종 수정:** 2026-04-30
 **역할:** 시스템의 심판. Generator 결과물이 Task Spec의 성공 기준을 충족하는지 독립적으로 검증한다.  
-**실행 환경:** Validator-A → Codex CLI + Sandbox | Validator-B → Gemini CLI + Sandbox  
+**실행 환경:** Validator-A → Codex CLI + Sandbox | Validator-B → Gemini CLI read-only plan mode 또는 검증된 Gemini Sandbox
 **원칙:** Generator와 컨텍스트를 공유하지 않는다. 결과물만을 기준으로 평가한다.
 
 ---
@@ -41,6 +41,7 @@
    ⚠️ 독립성 격리 의무: Analyst는 Validator-B에게 지시서를 발행할 때
       Validator-A에게 보낸 지시서·결과 리포트를 절대 첨부하지 않는다.
       Validator-B는 Generator 결과물과 Task Spec만을 기반으로 독립 평가한다.
+      Validator-B는 validator-a-* / codex 실행 산출물을 읽거나 판단 근거로 사용하지 않는다.
 
 2. Validator-A (Codex CLI): 기능 정확성 및 코드 품질 중심 검증
 3. Validator-B (Gemini CLI): 보안 취약점 및 설계 관점 독립 리뷰

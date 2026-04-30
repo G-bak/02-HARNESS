@@ -1,6 +1,6 @@
 # SECURITY.md — 보안 규칙
 
-**버전:** 1.3 | **최종 수정:** 2026-04-26  
+**버전:** 1.4 | **최종 수정:** 2026-04-30
 **적용 대상:** 전체 에이전트, 모든 Tier, 예외 없음
 
 ---
@@ -45,8 +45,8 @@
 ## 코드 보안
 
 ```
-[ ] 생성된 코드는 격리된 Sandbox 환경에서 먼저 실행한다
-    (Generator: Claude Code CLI의 격리 실행 환경 / Validator-A: Codex Sandbox / Validator-B: Gemini Sandbox)
+[ ] 생성된 코드는 격리된 실행 환경에서 먼저 실행한다
+    (Generator: Claude Code CLI의 격리 실행 환경 / Validator-A: Codex Sandbox / Validator-B: Gemini CLI read-only plan mode 또는 검증된 Gemini Sandbox)
 [ ] 검증되지 않은 외부 라이브러리나 스크립트 실행을 금지한다
 [ ] OWASP Top 10 취약점 항목을 체크리스트로 검증한다 (Validator 수행)
 ```

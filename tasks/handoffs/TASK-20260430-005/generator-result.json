@@ -1,0 +1,60 @@
+{
+  "task_id": "TASK-20260430-005",
+  "agent": "Generator",
+  "status": "PENDING_VALIDATION",
+  "branch": "task/TASK-20260430-005",
+  "artifacts": [
+    {
+      "type": "code",
+      "path": "scripts/lib/ledger-events.mjs",
+      "description": "Shared max-suffix event_id allocation and append-only ledger helper.",
+      "change_type": "CREATE"
+    },
+    {
+      "type": "code",
+      "path": "scripts/run-validator-a.mjs",
+      "description": "Use shared max-suffix event_id allocation.",
+      "change_type": "MODIFY"
+    },
+    {
+      "type": "code",
+      "path": "scripts/run-validator-b.mjs",
+      "description": "Use shared event_id allocation, record malformed Gemini output as Resource Failure, strengthen independence instructions, correct approval_mode metadata, remove dead code, and enforce Tier3-only except smoke.",
+      "change_type": "MODIFY"
+    },
+    {
+      "type": "code",
+      "path": "scripts/validate-ledger.mjs",
+      "description": "Detect duplicate event_id unless append-only correction explicitly suppresses a legacy duplicate.",
+      "change_type": "MODIFY"
+    },
+    {
+      "type": "test",
+      "path": "scripts/check-validator-b-regressions.mjs",
+      "description": "Regression checks for max-suffix event ids, malformed output Resource Failure, structured negative FAIL, and approval-mode plan command shape.",
+      "change_type": "CREATE"
+    },
+    {
+      "type": "doc",
+      "path": "docs/guides/validator-pipeline-ko.md",
+      "description": "Document plan-mode semantics, independence guard, malformed output handling, Tier2 smoke exception, and prompt artifact gitignore policy.",
+      "change_type": "MODIFY"
+    }
+  ],
+  "change_summary": "Closed combined Validator-B review findings with runner fixes, ledger validation hardening, behavior regression tests, live negative smoke evidence, and doc/policy alignment.",
+  "self_review": "Local node --check, check-validator-b-regressions, live Gemini negative smoke, audit:harness, and git diff --check passed before Validator-A handoff.",
+  "tier_reclassification_needed": false,
+  "tier_reclassification_reason": null,
+  "log": [
+    {
+      "timestamp": "2026-04-30T15:05:00+09:00",
+      "action": "implement_hardening",
+      "result": "Validator-B pipeline hardening changes applied."
+    },
+    {
+      "timestamp": "2026-04-30T15:15:00+09:00",
+      "action": "validate_locally",
+      "result": "node --check, audit:harness, git diff --check, and live Validator-B negative smoke passed."
+    }
+  ]
+}

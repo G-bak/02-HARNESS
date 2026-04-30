@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { assertNoSecretLikeContent } from './lib/secret-scan.mjs';
+import { appendLedger, nextEventId } from './lib/ledger-events.mjs';
 
 const root = process.cwd();
 const forbiddenFlags = new Set([
@@ -167,6 +168,13 @@ function assertValidatorBIndependence(data) {
   }
 }
 
+function assertNoValidatorArtifactReferences(value, label) {
+  const text = typeof value === 'string' ? value : JSON.stringify(value);
+  if (/validator[-_]?a|codex/i.test(text)) {
+    throw new Error(`Validator-B prompt context must not include Validator-A or Codex references in ${label}`);
+  }
+}
+
 function readContextFile(filePath, label, budget) {
   if (!fs.existsSync(filePath)) return { label, path: relativePath(filePath), status: 'missing', content: '' };
   const stat = fs.statSync(filePath);
@@ -188,6 +196,7 @@ function readContextFile(filePath, label, budget) {
   }
   const content = fs.readFileSync(filePath, 'utf8');
   assertNoSecretLikeContent(content, relativePath(filePath));
+  assertNoValidatorArtifactReferences(content, relativePath(filePath));
   budget.usedBytes += stat.size;
   return { label, path: relativePath(filePath), status: 'included', content };
 }
@@ -218,12 +227,26 @@ function inferTaskTier(handoff) {
   return spec.complexity_tier || spec.task_tier || spec.tier || 'Tier3';
 }
 
+function isValidatorBSmokeHandoff(handoff) {
+  const text = JSON.stringify([
+    handoff.data.success_criteria,
+    handoff.data.known_risks,
+    handoff.data.expected_output_path,
+  ]);
+  return /run-validator-b|validator-b.*smoke|smoke.*validator-b/i.test(text);
+}
+
+function assertValidatorBTierAllowed(handoff, taskTier) {
+  if (taskTier === 'Tier3') return;
+  if (isValidatorBSmokeHandoff(handoff)) return;
+  throw new Error(`Validator-B is Tier3-only except explicit runner smoke tasks; got ${taskTier}.`);
+}
+
 function commandArgs(args, promptPath) {
   if (args.sandbox !== 'read-only') {
     throw new Error('--sandbox must be read-only for Validator-B.');
   }
 
-  const promptFileRef = `@${relativePath(promptPath)}`;
   const cliArgs = [
     '--prompt',
     `${promptFileInstruction} ${relativePath(promptPath)}. Follow the instructions inside it. Do not echo the file. Return only the final validator-result JSON object.`,
@@ -240,12 +263,6 @@ function commandArgs(args, promptPath) {
   }
 
   return cliArgs;
-}
-
-function quoteCmdArg(value) {
-  const text = String(value);
-  if (!/[ \t"&|<>^]/.test(text)) return text;
-  return `"${text.replaceAll('"', '\\"')}"`;
 }
 
 function spawnCommand(command, args, options) {
@@ -284,6 +301,8 @@ function systemInstruction(handoff, reviewContext) {
     'You are an independent Tier 3 security and design reviewer using Gemini CLI.',
     'Evaluate only the Generator result, Task Spec, and changed-file context in this prompt.',
     'Do not use or infer from Validator-A inputs, Validator-A outputs, or any other validator result.',
+    'Do not read validator-a-* artifacts, codex artifacts, validator-a-result*.json, validator-a-events*.jsonl, validator-a-run*.json, or any file path containing Validator-A or Codex.',
+    'If such artifacts are visible in the workspace, ignore them and continue only with the prompt-provided context.',
     'Do not modify files. Do not merge. Do not browse the web. Do not reveal secrets or environment variable values.',
     'Return exactly one JSON object matching docs/schemas/validator-result.schema.json.',
     'Set agent to "Validator-B" and tool to "Gemini CLI".',
@@ -306,17 +325,6 @@ function systemInstruction(handoff, reviewContext) {
 
 function timestamp() {
   return new Date().toISOString();
-}
-
-function appendLedger(ledgerPath, event) {
-  fs.mkdirSync(path.dirname(ledgerPath), { recursive: true });
-  fs.appendFileSync(ledgerPath, `${JSON.stringify(event)}\n`, 'utf8');
-}
-
-function nextEventId(ledgerPath, taskId) {
-  if (!fs.existsSync(ledgerPath)) return `${taskId}-0001`;
-  const count = fs.readFileSync(ledgerPath, 'utf8').split(/\r?\n/).filter(Boolean).length;
-  return `${taskId}-${String(count + 1).padStart(4, '0')}`;
 }
 
 function parseJsonText(text, label) {
@@ -376,6 +384,7 @@ function validateValidatorResult(result, taskId) {
   if (!Array.isArray(result.criteria_results)) throw new Error('Validator criteria_results must be an array.');
   if (!Array.isArray(result.errors)) throw new Error('Validator errors must be an array.');
   if (!Array.isArray(result.log)) throw new Error('Validator log must be an array.');
+  if (result.criteria_results.length === 0) throw new Error('Validator criteria_results must include at least one item.');
   if (result.verdict === 'FAIL' && result.errors.length === 0) {
     throw new Error('Validator FAIL requires at least one errors[] item.');
   }
@@ -395,6 +404,47 @@ function classifyResourceFailure(result) {
   if (combined.includes('context') || combined.includes('token')) return 'CONTEXT_LIMIT';
   if (combined.includes('auth') || combined.includes('billing') || combined.includes('api key')) return 'AUTH_OR_BILLING';
   return 'TOOL_UNAVAILABLE';
+}
+
+function appendResourceFailure({
+  handoff,
+  args,
+  taskTier,
+  finishedAt,
+  result,
+  metadataPath,
+  stdoutPath,
+  stderrPath,
+  summary,
+  resourceErrorType,
+  message,
+}) {
+  appendLedger(handoff.ledgerPath, {
+    schema_version: 'work-history.v1',
+    event_id: nextEventId(handoff.ledgerPath, args.taskId),
+    task_id: args.taskId,
+    task_tier: taskTier,
+    agent: 'Analyst',
+    timestamp: finishedAt,
+    phase: 'VALIDATION',
+    event_type: 'RESOURCE_FAILURE',
+    status: 'HOLD',
+    summary,
+    details: {
+      resource_error_type: resourceErrorType ?? classifyResourceFailure(result ?? {}),
+      exit_status: result?.status ?? null,
+      signal: result?.signal ?? null,
+      message: message ?? result?.error?.message ?? null,
+      metadata_path: relativePath(metadataPath),
+    },
+    artifact_refs: [
+      { type: 'validator_stdout', path: relativePath(stdoutPath) },
+      { type: 'validator_stderr', path: relativePath(stderrPath) },
+      { type: 'validator_run_metadata', path: relativePath(metadataPath) },
+    ],
+    redaction: { applied: false, notes: 'Stdout/stderr artifacts must be reviewed before external sharing.' },
+    next_action: 'Resolve Validator-B resource failure and rerun validation before Tier 3 merge.',
+  });
 }
 
 function safeCommandForLog(command, args) {
@@ -421,6 +471,7 @@ function main() {
   const cliArgs = commandArgs(args, promptPath);
   const safeCommand = safeCommandForLog(args.geminiBin, cliArgs);
   const taskTier = inferTaskTier(handoff);
+  assertValidatorBTierAllowed(handoff, taskTier);
 
   console.log(`[validator-b] task: ${args.taskId}`);
   console.log(`[validator-b] input: ${relativePath(inputPath)}`);
@@ -450,7 +501,7 @@ function main() {
       expected_output_path: relativePath(handoff.outputPath),
       command_shape: safeCommand,
       sandbox: args.sandbox,
-      approval_policy: 'never',
+      approval_mode: 'plan',
       model: args.model,
       attempt: args.attempt,
     },
@@ -484,43 +535,45 @@ function main() {
     command_shape: safeCommand,
     actual_spawn_command: safeCommandForLog(spawned.actualCommand[0], spawned.actualCommand.slice(1)),
     sandbox: args.sandbox,
-    approval_policy: 'never',
+    approval_mode: 'plan',
     model: args.model,
     attempt: args.attempt,
   }, null, 2)}\n`, 'utf8');
 
   if (result.error || result.status !== 0 || !fs.existsSync(stdoutPath) || fs.statSync(stdoutPath).size === 0) {
-    const failureType = classifyResourceFailure(result);
-    appendLedger(handoff.ledgerPath, {
-      schema_version: 'work-history.v1',
-      event_id: nextEventId(handoff.ledgerPath, args.taskId),
-      task_id: args.taskId,
-      task_tier: taskTier,
-      agent: 'Analyst',
-      timestamp: finishedAt,
-      phase: 'VALIDATION',
-      event_type: 'RESOURCE_FAILURE',
-      status: 'HOLD',
+    appendResourceFailure({
+      handoff,
+      args,
+      taskTier,
+      finishedAt,
+      result,
+      metadataPath,
+      stdoutPath,
+      stderrPath,
       summary: 'Validator-B CLI invocation failed before a valid result was captured',
-      details: {
-        resource_error_type: failureType,
-        exit_status: result.status,
-        signal: result.signal,
-        message: result.error?.message ?? null,
-        metadata_path: relativePath(metadataPath),
-      },
-      artifact_refs: [
-        { type: 'validator_stdout', path: relativePath(stdoutPath) },
-        { type: 'validator_stderr', path: relativePath(stderrPath) },
-        { type: 'validator_run_metadata', path: relativePath(metadataPath) },
-      ],
-      redaction: { applied: false, notes: 'Stdout/stderr artifacts must be reviewed before external sharing.' },
-      next_action: 'Resolve Validator-B resource failure and rerun validation before Tier 3 merge.',
     });
     process.exit(result.status || 1);
   }
 
-  const parsed = validateValidatorResult(readGeminiResult(stdoutPath, args.taskId), args.taskId);
+  let parsed;
+  try {
+    parsed = validateValidatorResult(readGeminiResult(stdoutPath, args.taskId), args.taskId);
+  } catch (error) {
+    appendResourceFailure({
+      handoff,
+      args,
+      taskTier,
+      finishedAt,
+      result,
+      metadataPath,
+      stdoutPath,
+      stderrPath,
+      summary: 'Validator-B CLI returned malformed or schema-invalid output',
+      resourceErrorType: 'MALFORMED_OUTPUT',
+      message: error.message,
+    });
+    process.exit(1);
+  }
   fs.writeFileSync(handoff.outputPath, `${JSON.stringify(parsed, null, 2)}\n`, 'utf8');
 
   appendLedger(handoff.ledgerPath, {

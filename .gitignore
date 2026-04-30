@@ -7,3 +7,4 @@ secrets.*
 .claude/
 .playwright-mcp/
 memory/
+tasks/handoffs/**/validator-b-prompt-*.txt

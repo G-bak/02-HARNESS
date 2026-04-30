@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://landinghub.local/schemas/validator-handoff.schema.json",
   "title": "Validator Handoff",
-  "description": "Task-scoped handoff payload for isolated Validator-A Codex CLI execution.",
+  "description": "Task-scoped handoff payload for isolated Validator-A Codex CLI or Validator-B Gemini CLI execution.",
   "type": "object",
   "additionalProperties": false,
   "required": [

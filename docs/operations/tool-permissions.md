@@ -1,6 +1,6 @@
 # Tool Permissions — 도구 권한 정책
 
-**버전:** 1.10 | **최종 수정:** 2026-04-30
+**버전:** 1.11 | **최종 수정:** 2026-04-30
 **원칙:** 각 에이전트는 해당 작업에 필요한 최소 권한만 보유한다.
 
 ---
@@ -106,7 +106,7 @@ Generator와 Validator 모두 코드 실행은 반드시 **격리된 Sandbox 환
 ```
 Generator:   Claude Code CLI 격리 실행 환경 (Sandbox에 준하는 격리 환경 — task/* 브랜치 외 파일 시스템·네트워크 접근 차단)
 Validator-A: Codex Sandbox (클라우드 격리 환경)
-Validator-B: Gemini Sandbox (클라우드 격리 환경)
+Validator-B: Gemini CLI read-only plan mode 또는 검증된 Gemini Sandbox (쓰기·머지 금지)
 ```
 
 Sandbox에서 금지되는 작업:
