@@ -242,16 +242,16 @@ npm run run:validator-b -- TASK-20260430-001
 wrapper가 사용하는 Gemini CLI 기본 형태:
 
 ```text
-gemini --prompt "Read the full Validator-B review payload from stdin and return JSON only." --output-format json --sandbox
+gemini --prompt "Use read-only file access to read the Validator-B payload at tasks/handoffs/TASK-{ID}/validator-b-prompt-{N}.txt. Follow the instructions inside it. Do not echo the file. Return only the final validator-result JSON object." --output-format json --approval-mode plan
 ```
 
-전체 Validator-B review payload는 command-line 인자가 아니라 stdin으로 전달한다. Windows CreateProcess 인자 길이 제한 때문에 handoff JSON, Task Spec, Generator result, changed file context를 `--prompt` 값에 직접 넣지 않는다. `--prompt`에는 짧은 지시문만 둔다.
+전체 Validator-B review payload는 command-line 인자가 아니라 prompt artifact 파일에 저장하고, `--prompt`에는 짧은 파일 경로 지시문만 둔다. Windows CreateProcess 인자 길이 제한 때문에 handoff JSON, Task Spec, Generator result, changed file context를 `--prompt` 값에 직접 넣지 않는다. Gemini CLI 0.40.0은 `--prompt`와 stdin input을 함께 쓰면 거부하고, `@path`도 `--prompt`와 충돌하는 positional prompt로 처리하므로 일반 파일 경로를 읽도록 지시한다.
 
 `--model`은 `VALIDATOR_GEMINI_MODEL` 또는 CLI 옵션으로만 지정한다. 환경변수 값 자체는 로그에 기록하지 않는다.
 
 Validator-B handoff는 반드시 `agent: "Validator-B"`, `invocation.runtime: "Gemini CLI"`, `invocation.sandbox: "read-only"`여야 한다. Validator-B는 파일을 수정하지 않는 독립 검토자이므로 `workspace-write`는 허용하지 않는다.
 
-Gemini CLI의 `--sandbox`는 값 없는 enable flag다. `read-only`는 02-HARNESS handoff의 권한 라벨이며 Gemini CLI에 `--sandbox read-only` 형태로 넘기지 않는다. wrapper는 `read-only` 외 라벨을 거부하고 Gemini 실행에는 boolean `--sandbox`만 추가한다.
+Gemini CLI 0.40.0의 `--approval-mode plan`은 read-only mode로 제공된다. `read-only`는 02-HARNESS handoff의 권한 라벨이며 wrapper가 `read-only` 외 라벨을 거부한 뒤 Gemini 실행에는 `--approval-mode plan`을 전달한다. Docker/Podman 기반 `--sandbox`는 로컬 환경에서 장시간 block될 수 있어 Validator-B 기본 경로로 쓰지 않는다.
 
 wrapper는 refs, changed_files, previous_failures에 다른 validator 또는 Codex 실행 artifact가 섞이면 실행을 거부한다. Tier 3 독립성은 Analyst가 Validator-A/B 입력 파일을 따로 만들고, Validator-B 입력에 다른 validator 결과를 넣지 않는 방식으로 보장한다.
 

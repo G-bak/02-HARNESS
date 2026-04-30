@@ -1,0 +1,41 @@
+{
+  "task_id": "TASK-20260430-003",
+  "title": "Run live Validator-B Gemini smoke",
+  "tier": "Tier2",
+  "requested_by": "user",
+  "created_at": "2026-04-30T00:00:00+09:00",
+  "objective": "Verify the installed Gemini CLI works with scripts/run-validator-b.mjs and capture the live stdout envelope behavior.",
+  "scope": [
+    "Create a minimal Validator-B live smoke handoff.",
+    "Run scripts/run-validator-b.mjs with the installed Gemini CLI.",
+    "Capture whether live output parses into validator-result.schema.json.",
+    "If the stdout envelope, prompt transport, or read-only mode differs from current assumptions, patch the wrapper and rerun.",
+    "Record report, quality score, and Validator-A validation before merge."
+  ],
+  "success_criteria": [
+    "gemini CLI is detected and version is recorded.",
+    "run-validator-b live execution is attempted with a fresh Validator-B handoff.",
+    "Validator-B result artifact is produced and parses as Validator-B / Gemini CLI result, or a Resource Failure is recorded with clear cause.",
+    "If parser changes are required, node --check and audit:harness pass.",
+    "Validator-A validation passes before main merge."
+  ],
+  "constraints": [
+    "Do not record API keys, tokens, credentials, PII, or environment variable values.",
+    "Do not include Validator-A results in Validator-B handoff.",
+    "Treat Gemini auth/quota/rate/context failures as Resource Failure, not Validator-B FAIL.",
+    "Do not browse or fetch external content for this smoke."
+  ],
+  "target_files": [
+    "tasks/handoffs/TASK-20260430-003/*",
+    "logs/tasks/TASK-20260430-003.jsonl",
+    "reports/TASK-20260430-003.md",
+    "logs/quality-scores.jsonl"
+  ],
+  "validation_plan": [
+    "gemini --version",
+    "npm run run:validator-b -- TASK-20260430-003 --input tasks/handoffs/TASK-20260430-003/validator-b-input.json --gemini-bin gemini.cmd --attempt 1",
+    "npm run audit:harness",
+    "git diff --check",
+    "npm run run:validator-a -- TASK-20260430-003 --input tasks/handoffs/TASK-20260430-003/validator-a-input.json --codex-bin codex.cmd --attempt 1"
+  ]
+}

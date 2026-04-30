@@ -1,0 +1,77 @@
+{
+  "task_id": "TASK-20260430-003",
+  "recorded_by": "Analyst",
+  "recorded_at": "2026-04-30T00:00:00+09:00",
+  "purpose": "Live Gemini Validator-B smoke evidence.",
+  "environment": {
+    "gemini_version": "0.40.0",
+    "gemini_paths": [
+      "C:/Users/admin/AppData/Roaming/npm/gemini",
+      "C:/Users/admin/AppData/Roaming/npm/gemini.cmd"
+    ]
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "exit_status": 1,
+      "summary": "Gemini rejected --prompt plus stdin with 'Cannot use both a positional prompt and the --prompt (-p) flag together'."
+    },
+    {
+      "attempt": 2,
+      "exit_status": 1,
+      "summary": "Gemini rejected --prompt plus @path with the same positional prompt conflict."
+    },
+    {
+      "attempt": 3,
+      "exit_status": 1,
+      "summary": "cmd.exe mediation of gemini.cmd broke quoted prompt argv boundaries, causing the same positional prompt conflict."
+    },
+    {
+      "attempt": 4,
+      "exit_status": 0,
+      "summary": "PowerShell argv-array invocation reached Gemini and produced stdout envelope {session_id,response,stats}, but Gemini echoed the payload rather than final validator-result JSON."
+    },
+    {
+      "attempt": 5,
+      "exit_status": 0,
+      "summary": "Live Validator-B PASS. Wrapper parsed Gemini stdout response and wrote validator-b-result-1.json."
+    }
+  ],
+  "commands": [
+    {
+      "command": "gemini --version",
+      "exit_code": 0,
+      "summary": "Gemini CLI version 0.40.0 detected."
+    },
+    {
+      "command": "gemini.cmd -p \"Return JSON: {\\\"ok\\\":true}\" --output-format json",
+      "exit_code": 0,
+      "summary": "Minimal headless JSON prompt works when invoked directly from PowerShell."
+    },
+    {
+      "command": "gemini.cmd -p \"Return JSON: {\\\"ok\\\":true}\" --output-format json --approval-mode plan",
+      "exit_code": 0,
+      "summary": "Gemini read-only plan mode works for minimal JSON prompt."
+    },
+    {
+      "command": "npm run run:validator-b -- TASK-20260430-003 --input tasks/handoffs/TASK-20260430-003/validator-b-input.json --gemini-bin gemini.cmd --attempt 5",
+      "exit_code": 0,
+      "summary": "Live Validator-B PASS."
+    },
+    {
+      "command": "npm run audit:harness",
+      "exit_code": 0,
+      "summary": "Harness audit passed after wrapper changes."
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "summary": "Whitespace check passed with only CRLF conversion warnings."
+    }
+  ],
+  "stdout_envelope": {
+    "shape": "{ session_id, response, stats }",
+    "parsed_field": "response",
+    "notes": "response is a JSON string. It must contain the validator-result object; wrapper already parses response strings."
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "task_id": "TASK-20260430-003",
+  "agent": "Generator",
+  "status": "COMPLETE",
+  "artifacts": [
+    {
+      "path": "tasks/handoffs/TASK-20260430-003/smoke-target.md",
+      "type": "smoke_target"
+    },
+    {
+      "path": "scripts/run-validator-b.mjs",
+      "type": "script"
+    },
+    {
+      "path": "scripts/audit-harness.mjs",
+      "type": "script"
+    },
+    {
+      "path": "docs/guides/validator-pipeline-ko.md",
+      "type": "guide"
+    }
+  ],
+  "change_summary": [
+    "Prepared a minimal smoke target for live Validator-B Gemini CLI validation.",
+    "Adjusted Validator-B prompt transport for Gemini CLI 0.40.0 live behavior.",
+    "Changed Windows Gemini .cmd execution to PowerShell argv-array invocation to preserve prompt argument boundaries.",
+    "Changed Gemini read-only execution to --approval-mode plan after local --sandbox timed out."
+  ],
+  "self_review": [
+    "No product runtime changes are included.",
+    "The smoke target contains no secrets or PII."
+  ],
+  "tier_reclassification_needed": false,
+  "log": [
+    {
+      "timestamp": "2026-04-30T00:00:00+09:00",
+      "action": "prepare_smoke_target",
+      "result": "Created minimal context for live Validator-B run."
+    },
+    {
+      "timestamp": "2026-04-30T00:00:00+09:00",
+      "action": "live_smoke",
+      "result": "Validator-B live attempt 5 returned PASS through Gemini CLI 0.40.0."
+    }
+  ]
+}

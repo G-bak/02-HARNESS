@@ -1,0 +1,32 @@
+{
+  "task_id": "TASK-20260430-003",
+  "started_at": "2026-04-30T05:18:06.958Z",
+  "finished_at": "2026-04-30T05:20:10.177Z",
+  "exit_status": 0,
+  "signal": null,
+  "input_path": "tasks/handoffs/TASK-20260430-003/validator-b-input.json",
+  "output_path": "tasks/handoffs/TASK-20260430-003/validator-b-result-1.json",
+  "stdout_path": "tasks/handoffs/TASK-20260430-003/validator-b-stdout-5.json",
+  "stderr_path": "tasks/handoffs/TASK-20260430-003/validator-b-stderr-5.log",
+  "prompt_path": "tasks/handoffs/TASK-20260430-003/validator-b-prompt-5.txt",
+  "command_shape": [
+    "gemini.cmd",
+    "--prompt",
+    "<prompt omitted>",
+    "--output-format",
+    "json",
+    "--approval-mode",
+    "plan"
+  ],
+  "actual_spawn_command": [
+    "powershell.exe",
+    "-NoProfile",
+    "-NonInteractive",
+    "-Command",
+    "<gemini args passed via environment JSON>"
+  ],
+  "sandbox": "read-only",
+  "approval_policy": "never",
+  "model": null,
+  "attempt": 5
+}

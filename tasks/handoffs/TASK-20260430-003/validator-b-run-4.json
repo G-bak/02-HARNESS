@@ -1,0 +1,32 @@
+{
+  "task_id": "TASK-20260430-003",
+  "started_at": "2026-04-30T05:13:30.773Z",
+  "finished_at": "2026-04-30T05:17:10.557Z",
+  "exit_status": 0,
+  "signal": null,
+  "input_path": "tasks/handoffs/TASK-20260430-003/validator-b-input.json",
+  "output_path": "tasks/handoffs/TASK-20260430-003/validator-b-result-1.json",
+  "stdout_path": "tasks/handoffs/TASK-20260430-003/validator-b-stdout-4.json",
+  "stderr_path": "tasks/handoffs/TASK-20260430-003/validator-b-stderr-4.log",
+  "prompt_path": "tasks/handoffs/TASK-20260430-003/validator-b-prompt-4.txt",
+  "command_shape": [
+    "gemini.cmd",
+    "--prompt",
+    "Use read-only file access to read the full Validator-B review payload at tasks/handoffs/TASK-20260430-003/validator-b-prompt-4.txt and return JSON only.",
+    "--output-format",
+    "json",
+    "--approval-mode",
+    "plan"
+  ],
+  "actual_spawn_command": [
+    "powershell.exe",
+    "-NoProfile",
+    "-NonInteractive",
+    "-Command",
+    "<gemini args passed via environment JSON>"
+  ],
+  "sandbox": "read-only",
+  "approval_policy": "never",
+  "model": null,
+  "attempt": 4
+}

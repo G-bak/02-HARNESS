@@ -22,9 +22,11 @@ requireText('package.json', '"run:validator-b": "node scripts/run-validator-b.mj
 requireText('scripts/run-validator-b.mjs', "run-validator-b only accepts Validator-B handoff");
 requireText('scripts/run-validator-b.mjs', "Validator-B handoff must not include Validator-A or Codex references");
 requireText('scripts/run-validator-b.mjs', "assertNoSecretLikeContent(prompt, 'Validator-B prompt')");
-requireText('scripts/run-validator-b.mjs', "input: prompt");
+requireText('scripts/run-validator-b.mjs', "promptFileInstruction");
+requireText('scripts/run-validator-b.mjs', "fs.writeFileSync(promptPath, prompt, 'utf8')");
 requireText('scripts/run-validator-b.mjs', "--sandbox must be read-only for Validator-B");
-requireText('scripts/run-validator-b.mjs', "Gemini CLI --sandbox is a boolean enable flag");
+requireText('scripts/run-validator-b.mjs', "'--approval-mode'");
+requireText('scripts/run-validator-b.mjs', "'plan'");
 requireText('scripts/run-validator-a.mjs', "'github_commit'");
 requireText('scripts/run-validator-a.mjs', "'tier_reclassification_reason'");
 

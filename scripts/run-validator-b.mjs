@@ -7,13 +7,12 @@ const root = process.cwd();
 const forbiddenFlags = new Set([
   '--yolo',
   '--approval-mode=yolo',
-  '--approval-mode',
   'yolo',
   '--all-files',
 ]);
 const maxEmbeddedFileBytes = 256 * 1024;
 const maxEmbeddedContextBytes = 1024 * 1024;
-const stdinPromptInstruction = 'Read the full Validator-B review payload from stdin and return JSON only.';
+const promptFileInstruction = 'Use read-only file access to read the Validator-B payload at';
 
 function usage() {
   console.error(`Usage:
@@ -219,18 +218,19 @@ function inferTaskTier(handoff) {
   return spec.complexity_tier || spec.task_tier || spec.tier || 'Tier3';
 }
 
-function commandArgs(args) {
+function commandArgs(args, promptPath) {
   if (args.sandbox !== 'read-only') {
     throw new Error('--sandbox must be read-only for Validator-B.');
   }
 
+  const promptFileRef = `@${relativePath(promptPath)}`;
   const cliArgs = [
     '--prompt',
-    stdinPromptInstruction,
+    `${promptFileInstruction} ${relativePath(promptPath)}. Follow the instructions inside it. Do not echo the file. Return only the final validator-result JSON object.`,
     '--output-format',
     'json',
-    // Gemini CLI --sandbox is a boolean enable flag; this wrapper enforces read-only by rejecting every other sandbox label.
-    '--sandbox',
+    '--approval-mode',
+    'plan',
   ];
 
   if (args.model) cliArgs.push('--model', args.model);
@@ -250,10 +250,23 @@ function quoteCmdArg(value) {
 
 function spawnCommand(command, args, options) {
   if (process.platform === 'win32' && /\.(?:cmd|bat)$/i.test(command)) {
-    const commandLine = [command, ...args].map(quoteCmdArg).join(' ');
+    const script = [
+      '$ErrorActionPreference = "Stop"',
+      '$geminiArgs = ConvertFrom-Json -InputObject $env:VALIDATOR_GEMINI_ARGS_JSON',
+      '& $env:VALIDATOR_GEMINI_BIN @geminiArgs',
+      'exit $LASTEXITCODE',
+    ].join('; ');
     return {
-      result: spawnSync('cmd.exe', ['/d', '/s', '/c', commandLine], options),
-      actualCommand: ['cmd.exe', '/d', '/s', '/c', commandLine],
+      result: spawnSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', script], {
+        ...options,
+        env: {
+          ...process.env,
+          ...(options.env ?? {}),
+          VALIDATOR_GEMINI_BIN: command,
+          VALIDATOR_GEMINI_ARGS_JSON: JSON.stringify(args),
+        },
+      }),
+      actualCommand: ['powershell.exe', '-NoProfile', '-NonInteractive', '-Command', '<gemini args passed via environment JSON>'],
     };
   }
 
@@ -405,7 +418,7 @@ function main() {
   const stderrPath = path.join(outputDir, `validator-b-stderr-${args.attempt}.log`);
   const metadataPath = path.join(outputDir, `validator-b-run-${args.attempt}.json`);
   const promptPath = path.join(outputDir, `validator-b-prompt-${args.attempt}.txt`);
-  const cliArgs = commandArgs(args);
+  const cliArgs = commandArgs(args, promptPath);
   const safeCommand = safeCommandForLog(args.geminiBin, cliArgs);
   const taskTier = inferTaskTier(handoff);
 
@@ -449,7 +462,6 @@ function main() {
   const startedAt = timestamp();
   const spawned = spawnCommand(args.geminiBin, cliArgs, {
     cwd: root,
-    input: prompt,
     encoding: 'utf8',
     maxBuffer: 50 * 1024 * 1024,
   });

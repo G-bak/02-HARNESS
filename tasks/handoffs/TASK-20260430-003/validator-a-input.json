@@ -1,0 +1,42 @@
+{
+  "schema_version": "validator-handoff.v1",
+  "task_id": "TASK-20260430-003",
+  "agent": "Validator-A",
+  "invocation": {
+    "runtime": "Codex CLI",
+    "fresh_session_required": true,
+    "sandbox": "read-only",
+    "approval_policy": "never"
+  },
+  "refs": {
+    "spec": "tasks/specs/TASK-20260430-003.json",
+    "ledger": "logs/tasks/TASK-20260430-003.jsonl",
+    "generator_result": "tasks/handoffs/TASK-20260430-003/generator-result.json"
+  },
+  "changed_files": [
+    "scripts/run-validator-b.mjs",
+    "scripts/audit-harness.mjs",
+    "docs/guides/validator-pipeline-ko.md",
+    "tasks/handoffs/TASK-20260430-003/validator-b-input.json",
+    "tasks/handoffs/TASK-20260430-003/validator-b-result-1.json",
+    "tasks/handoffs/TASK-20260430-003/validation-evidence.json"
+  ],
+  "success_criteria": [
+    "gemini CLI is detected and version is recorded.",
+    "run-validator-b live execution is attempted with a fresh Validator-B handoff.",
+    "Validator-B result artifact is produced and parses as Validator-B / Gemini CLI result, or a Resource Failure is recorded with clear cause.",
+    "If parser changes are required, node --check and audit:harness pass.",
+    "Validator-A validation passes before main merge."
+  ],
+  "known_risks": [
+    "Gemini CLI live smoke required multiple wrapper transport adjustments.",
+    "Validator-A may not execute node/npm directly inside its own sandbox; validation-evidence.json records parent-session command results."
+  ],
+  "forbidden_context": [
+    "Do not include secrets, credentials, API keys, tokens, or PII.",
+    "Do not merge main from this validation step.",
+    "Do not treat Gemini auth/quota/rate/context failures as Validator-B FAIL."
+  ],
+  "expected_output_path": "tasks/handoffs/TASK-20260430-003/validator-a-result-1.json",
+  "expected_output_schema": "docs/schemas/validator-result.schema.json"
+}

@@ -1,0 +1,208 @@
+You are Validator-B for the 02-HARNESS system.
+You are an independent Tier 3 security and design reviewer using Gemini CLI.
+Evaluate only the Generator result, Task Spec, and changed-file context in this prompt.
+Do not use or infer from Validator-A inputs, Validator-A outputs, or any other validator result.
+Do not modify files. Do not merge. Do not browse the web. Do not reveal secrets or environment variable values.
+Return exactly one JSON object matching docs/schemas/validator-result.schema.json.
+Set agent to "Validator-B" and tool to "Gemini CLI".
+If you fail the task, every error must include severity, evidence_type, location, description, suggestion, and evidence.
+Do not wrap the JSON object in Markdown fences.
+
+<validator_result_schema_json>
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://landinghub.local/schemas/validator-result.schema.json",
+  "title": "Validator Result",
+  "description": "Structured Validator-A/B result consumed by 02-HARNESS automation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "task_id",
+    "agent",
+    "tool",
+    "tier",
+    "verdict",
+    "criteria_results",
+    "errors",
+    "github_commit",
+    "tier_reclassification_needed",
+    "tier_reclassification_reason",
+    "log"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "pattern": "^TASK-[0-9]{8}-[0-9]{3}$"
+    },
+    "agent": {
+      "enum": ["Validator-A", "Validator-B"]
+    },
+    "tool": {
+      "enum": ["Codex CLI", "Gemini CLI"]
+    },
+    "tier": {
+      "enum": ["Tier2", "Tier3"]
+    },
+    "verdict": {
+      "enum": ["PASS", "FAIL"]
+    },
+    "criteria_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["criterion", "result", "detail"],
+        "properties": {
+          "criterion": {
+            "type": "string"
+          },
+          "result": {
+            "enum": ["PASS", "FAIL"]
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "severity",
+          "evidence_type",
+          "location",
+          "description",
+          "suggestion",
+          "evidence"
+        ],
+        "properties": {
+          "severity": {
+            "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"]
+          },
+          "evidence_type": {
+            "enum": [
+              "EXECUTION_PROVEN",
+              "STATIC_PROVEN",
+              "SPEC_MISMATCH",
+              "INFERRED_RISK",
+              "SPEC_INTERPRETATION"
+            ]
+          },
+          "location": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "suggestion": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "github_commit": {
+      "type": ["string", "null"]
+    },
+    "tier_reclassification_needed": {
+      "type": "boolean"
+    },
+    "tier_reclassification_reason": {
+      "type": ["string", "null"]
+    },
+    "log": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["timestamp", "action", "result"],
+        "properties": {
+          "timestamp": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
+
+</validator_result_schema_json>
+
+<validator_handoff_json>
+{
+  "schema_version": "validator-handoff.v1",
+  "task_id": "TASK-20260430-003",
+  "agent": "Validator-B",
+  "invocation": {
+    "runtime": "Gemini CLI",
+    "fresh_session_required": true,
+    "sandbox": "read-only",
+    "approval_policy": "never"
+  },
+  "refs": {
+    "spec": "tasks/specs/TASK-20260430-003.json",
+    "ledger": "logs/tasks/TASK-20260430-003.jsonl",
+    "generator_result": "tasks/handoffs/TASK-20260430-003/generator-result.json"
+  },
+  "changed_files": [
+    "tasks/handoffs/TASK-20260430-003/smoke-target.md"
+  ],
+  "success_criteria": [
+    "gemini CLI is detected and version is recorded.",
+    "run-validator-b live execution is attempted with a fresh Validator-B handoff.",
+    "Validator-B result artifact is produced and parses as Validator-B / Gemini CLI result, or a Resource Failure is recorded with clear cause."
+  ],
+  "known_risks": [
+    "Gemini CLI may require authentication, quota, or sandbox support that is unavailable in this local environment.",
+    "Live stdout envelope may differ from parser assumptions."
+  ],
+  "forbidden_context": [
+    "Do not include another validator result artifact.",
+    "Do not include secrets, credentials, API keys, tokens, or PII.",
+    "Do not ask Validator-B to modify files or merge branches."
+  ],
+  "expected_output_path": "tasks/handoffs/TASK-20260430-003/validator-b-result-1.json",
+  "expected_output_schema": "docs/schemas/validator-result.schema.json"
+}
+
+</validator_handoff_json>
+
+<review_context_json>
+{
+  "budget": {
+    "used_bytes": 3077,
+    "max_bytes": 1048576
+  },
+  "files": [
+    {
+      "label": "task_spec",
+      "path": "tasks/specs/TASK-20260430-003.json",
+      "status": "included",
+      "content": "{\n  \"task_id\": \"TASK-20260430-003\",\n  \"title\": \"Run live Validator-B Gemini smoke\",\n  \"tier\": \"Tier2\",\n  \"requested_by\": \"user\",\n  \"created_at\": \"2026-04-30T00:00:00+09:00\",\n  \"objective\": \"Verify the installed Gemini CLI works with scripts/run-validator-b.mjs and capture the live stdout envelope behavior.\",\n  \"scope\": [\n    \"Create a minimal Validator-B live smoke handoff.\",\n    \"Run scripts/run-validator-b.mjs with the installed Gemini CLI.\",\n    \"Capture whether live output parses into validator-result.schema.json.\",\n    \"If the stdout envelope differs from current parser assumptions, patch readGeminiResult and rerun.\",\n    \"Record report, quality score, and Validator-A validation before merge.\"\n  ],\n  \"success_criteria\": [\n    \"gemini CLI is detected and version is recorded.\",\n    \"run-validator-b live execution is attempted with a fresh Validator-B handoff.\",\n    \"Validator-B result artifact is produced and parses as Validator-B / Gemini CLI result, or a Resource Failure is recorded with clear cause.\",\n    \"If parser changes are required, node --check and audit:harness pass.\",\n    \"Validator-A validation passes before main merge.\"\n  ],\n  \"constraints\": [\n    \"Do not record API keys, tokens, credentials, PII, or environment variable values.\",\n    \"Do not include Validator-A results in Validator-B handoff.\",\n    \"Treat Gemini auth/quota/rate/context failures as Resource Failure, not Validator-B FAIL.\",\n    \"Do not browse or fetch external content for this smoke.\"\n  ],\n  \"target_files\": [\n    \"tasks/handoffs/TASK-20260430-003/*\",\n    \"logs/tasks/TASK-20260430-003.jsonl\",\n    \"reports/TASK-20260430-003.md\",\n    \"logs/quality-scores.jsonl\"\n  ],\n  \"validation_plan\": [\n    \"gemini --version\",\n    \"npm run run:validator-b -- TASK-20260430-003 --input tasks/handoffs/TASK-20260430-003/validator-b-input.json --gemini-bin gemini.cmd --attempt 1\",\n    \"npm run audit:harness\",\n    \"git diff --check\",\n    \"npm run run:validator-a -- TASK-20260430-003 --input tasks/handoffs/TASK-20260430-003/validator-a-input.json --codex-bin codex.cmd --attempt 1\"\n  ]\n}\n"
+    },
+    {
+      "label": "generator_result",
+      "path": "tasks/handoffs/TASK-20260430-003/generator-result.json",
+      "status": "included",
+      "content": "{\n  \"task_id\": \"TASK-20260430-003\",\n  \"agent\": \"Generator\",\n  \"status\": \"COMPLETE\",\n  \"artifacts\": [\n    {\n      \"path\": \"tasks/handoffs/TASK-20260430-003/smoke-target.md\",\n      \"type\": \"smoke_target\"\n    }\n  ],\n  \"change_summary\": [\n    \"Prepared a minimal smoke target for live Validator-B Gemini CLI validation.\"\n  ],\n  \"self_review\": [\n    \"No product code changes are included.\",\n    \"The smoke target contains no secrets or PII.\"\n  ],\n  \"tier_reclassification_needed\": false,\n  \"log\": [\n    {\n      \"timestamp\": \"2026-04-30T00:00:00+09:00\",\n      \"action\": \"prepare_smoke_target\",\n      \"result\": \"Created minimal context for live Validator-B run.\"\n    }\n  ]\n}\n"
+    },
+    {
+      "label": "changed_file",
+      "path": "tasks/handoffs/TASK-20260430-003/smoke-target.md",
+      "status": "included",
+      "content": "# Validator-B Live Smoke Target\n\nThis file is intentionally simple. It exists only so the live Gemini Validator-B run has a small changed-file context to inspect.\n\nExpected review result: PASS if the Validator-B runner can invoke Gemini, parse the live stdout envelope, and write a valid `validator-result.schema.json` artifact.\n"
+    }
+  ]
+}
+</review_context_json>
