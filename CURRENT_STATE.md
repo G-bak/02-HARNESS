@@ -3,7 +3,7 @@
 > Analyst가 유지·갱신하는 파일입니다. 새 세션 시작 시 이 파일을 먼저 읽으세요.
 > 새 세션 시작 방법: `/clear` 후 → "CURRENT_STATE.md를 읽고 이어서 진행해줘."
 
-**마지막 갱신:** 2026-04-30 (TASK-20260430-002 완료 — Validator-B 파이프라인 하드닝)
+**마지막 갱신:** 2026-04-30 (TASK-20260430-003 완료 — Validator-B Gemini live smoke)
 
 ---
 
@@ -105,14 +105,14 @@
 
 현재 진행 중인 Task 없음.
 
-마지막 완료 Task: TASK-20260430-002 Validator-B 파이프라인 하드닝 (2026-04-30)
+마지막 완료 Task: TASK-20260430-003 Validator-B Gemini live smoke (2026-04-30)
 
 ---
 
 ## 남은 작업
 
-- **완료됨**: TASK-20260430-002에서 Validator-B prompt stdin 전달, read-only-only enforcement, context budget, 독립성 guard 확장, Validator-A schema parity, fixture glob 검증을 적용하고 Validator-A PASS 확인.
-- **후속 후보**: Gemini CLI 설치·인증 후 `run-validator-b` live smoke test. `--bare` 제거의 컨텍스트 격리 약화 trade-off 보강 (예: hooks/plugins 명시 비활성화 옵션 조합 탐색).
+- **완료됨**: TASK-20260430-003에서 Gemini CLI 0.40.0 live `run-validator-b` smoke를 수행하고 Validator-B attempt 5 PASS, Validator-A PASS, `npm run audit:harness` PASS를 확인.
+- **후속 후보**: 실제 Tier 3 Task에서 Validator-A/B 병렬 팬아웃을 한 번 더 end-to-end로 검증. `--bare` 제거의 컨텍스트 격리 약화 trade-off 보강 (예: hooks/plugins 명시 비활성화 옵션 조합 탐색).
 
 ---
 
