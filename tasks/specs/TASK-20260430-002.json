@@ -1,0 +1,53 @@
+{
+  "task_id": "TASK-20260430-002",
+  "title": "Harden Validator-B pipeline after code review",
+  "tier": "Tier2",
+  "requested_by": "user",
+  "created_at": "2026-04-30T00:00:00+09:00",
+  "objective": "Fix the Validator-B runner and related harness checks based on code review findings before live Tier 3 use.",
+  "scope": [
+    "Move large Gemini prompt payload out of command-line arguments and into stdin.",
+    "Restrict Validator-B to read-only operation and remove workspace-write acceptance.",
+    "Add total embedded context budget handling.",
+    "Expand Validator-B independence guard against Validator-A/Codex artifacts.",
+    "Add schema text to Validator-B prompt and stronger output validation parity.",
+    "Add required field parity to Validator-A result validation.",
+    "Make Validator-B fixture auditing resilient instead of hardcoded to one task path.",
+    "Update docs, fixtures, report, and validation evidence."
+  ],
+  "success_criteria": [
+    "run-validator-b no longer passes the full prompt as a CLI argv value.",
+    "run-validator-b rejects sandbox modes other than read-only and enables Gemini CLI sandboxing with the boolean --sandbox flag.",
+    "run-validator-b applies a total embedded context byte budget and marks omitted files.",
+    "run-validator-b rejects Validator-A/Codex references in refs and changed_files, not just selected phrases.",
+    "run-validator-b prompt includes the validator-result schema content or an equivalent schema contract.",
+    "run-validator-a validates github_commit and tier_reclassification_reason as required result fields.",
+    "validate-handoffs discovers Validator-B fixtures without a single task-specific hardcode.",
+    "node --check, Validator-B dry-run, audit:harness, and Validator-A validation pass."
+  ],
+  "constraints": [
+    "Do not include secrets or environment variable values.",
+    "Do not perform live Gemini execution unless Gemini CLI is available and configured.",
+    "Keep existing Task artifacts append-only where applicable.",
+    "Preserve Validator-B independence from Validator-A results."
+  ],
+  "target_files": [
+    "scripts/run-validator-b.mjs",
+    "scripts/run-validator-a.mjs",
+    "scripts/validate-handoffs.mjs",
+    "scripts/audit-harness.mjs",
+    "docs/guides/validator-pipeline-ko.md",
+    "tasks/fixtures/validator-b-input.json",
+    "tasks/handoffs/TASK-20260430-002/*",
+    "reports/TASK-20260430-002.md"
+  ],
+  "validation_plan": [
+    "node --check scripts/run-validator-b.mjs",
+    "node --check scripts/run-validator-a.mjs",
+    "node --check scripts/validate-handoffs.mjs",
+    "npm run run:validator-b -- TASK-20260430-002 --input tasks/handoffs/TASK-20260430-002/validator-b-input.json --gemini-bin gemini --attempt 1 --dry-run",
+    "npm run audit:harness",
+    "git diff --check",
+    "npm run run:validator-a -- TASK-20260430-002 --input tasks/handoffs/TASK-20260430-002/validator-a-input.json --codex-bin codex.cmd --attempt 1"
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "task_id": "TASK-20260430-002",
+  "recorded_by": "Analyst",
+  "recorded_at": "2026-04-30T00:00:00+09:00",
+  "purpose": "Evidence for Validator-B hardening after review findings.",
+  "commands": [
+    {
+      "command": "node --check scripts/run-validator-b.mjs",
+      "exit_code": 0,
+      "summary": "Syntax check passed."
+    },
+    {
+      "command": "node --check scripts/run-validator-a.mjs",
+      "exit_code": 0,
+      "summary": "Syntax check passed after adding required-field parity."
+    },
+    {
+      "command": "node --check scripts/validate-handoffs.mjs",
+      "exit_code": 0,
+      "summary": "Syntax check passed."
+    },
+    {
+      "command": "npm run run:validator-b -- TASK-20260430-002 --input tasks/handoffs/TASK-20260430-002/validator-b-input.json --gemini-bin gemini --attempt 1 --dry-run",
+      "exit_code": 0,
+      "summary": "Dry-run passed. Logged command shape uses only a short --prompt instruction plus --output-format json --sandbox; full review payload is not in argv. Gemini CLI --sandbox is a boolean enable flag, while this wrapper enforces read-only by rejecting other sandbox labels before spawn."
+    },
+    {
+      "command": "npm run run:validator-b -- TASK-20260430-002 --input tasks/handoffs/TASK-20260430-002/validator-b-input.json --gemini-bin gemini --sandbox workspace-write --attempt 1 --dry-run",
+      "exit_code": 1,
+      "expected_failure": true,
+      "summary": "Negative guard passed. Validator-B rejected workspace-write with '--sandbox must be read-only for Validator-B.'"
+    },
+    {
+      "command": "npm run validate:handoffs",
+      "exit_code": 0,
+      "summary": "Validator-B handoff fixtures were discovered and validated via globbed fixture scanning."
+    },
+    {
+      "command": "npm run audit:harness",
+      "exit_code": 0,
+      "summary": "Harness audit passed with Validator-B hardening checks."
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "summary": "Whitespace check passed with only CRLF conversion warnings."
+    }
+  ],
+  "review_findings_addressed": [
+    "Prompt payload no longer travels through argv.",
+    "Validator-B accepts only read-only sandbox label and enables Gemini CLI sandboxing with the boolean --sandbox flag.",
+    "Validator-B prompt embeds validator-result schema contract.",
+    "Total embedded context budget is enforced.",
+    "Validator-B independence guard checks refs, changed_files, and previous_failures for other-validator/Codex references.",
+    "Validator-A result validation now checks github_commit and tier_reclassification_reason.",
+    "Validator-B fixture validation is globbed instead of task-path hardcoded."
+  ],
+  "resource_notes": [
+    "Gemini CLI is still not installed locally, so live model smoke remains a follow-up."
+  ]
+}

@@ -242,12 +242,22 @@ npm run run:validator-b -- TASK-20260430-001
 wrapper가 사용하는 Gemini CLI 기본 형태:
 
 ```text
-gemini --prompt "<Validator-B prompt>" --output-format json --sandbox
+gemini --prompt "Read the full Validator-B review payload from stdin and return JSON only." --output-format json --sandbox
 ```
+
+전체 Validator-B review payload는 command-line 인자가 아니라 stdin으로 전달한다. Windows CreateProcess 인자 길이 제한 때문에 handoff JSON, Task Spec, Generator result, changed file context를 `--prompt` 값에 직접 넣지 않는다. `--prompt`에는 짧은 지시문만 둔다.
 
 `--model`은 `VALIDATOR_GEMINI_MODEL` 또는 CLI 옵션으로만 지정한다. 환경변수 값 자체는 로그에 기록하지 않는다.
 
-Validator-B handoff는 반드시 `agent: "Validator-B"`, `invocation.runtime: "Gemini CLI"`여야 한다. wrapper는 Validator-A 결과 파일명이나 Validator-A PASS/FAIL 문구가 handoff에 섞이면 실행을 거부한다. Tier 3 독립성은 Analyst가 Validator-A/B 입력 파일을 따로 만들고, Validator-B 입력에 Validator-A 결과를 넣지 않는 방식으로 보장한다.
+Validator-B handoff는 반드시 `agent: "Validator-B"`, `invocation.runtime: "Gemini CLI"`, `invocation.sandbox: "read-only"`여야 한다. Validator-B는 파일을 수정하지 않는 독립 검토자이므로 `workspace-write`는 허용하지 않는다.
+
+Gemini CLI의 `--sandbox`는 값 없는 enable flag다. `read-only`는 02-HARNESS handoff의 권한 라벨이며 Gemini CLI에 `--sandbox read-only` 형태로 넘기지 않는다. wrapper는 `read-only` 외 라벨을 거부하고 Gemini 실행에는 boolean `--sandbox`만 추가한다.
+
+wrapper는 refs, changed_files, previous_failures에 다른 validator 또는 Codex 실행 artifact가 섞이면 실행을 거부한다. Tier 3 독립성은 Analyst가 Validator-A/B 입력 파일을 따로 만들고, Validator-B 입력에 다른 validator 결과를 넣지 않는 방식으로 보장한다.
+
+Validator-B prompt에는 `docs/schemas/validator-result.schema.json` 원문을 포함한다. Gemini CLI가 Codex의 `--output-schema`와 같은 강제 옵션을 제공하지 않는 환경에서도 최소한 모델 지시와 wrapper 후처리 검증이 같은 schema contract를 보도록 하기 위해서다.
+
+changed file context는 파일당 256 KiB, 전체 1 MiB 예산 안에서만 임베드한다. 초과 파일은 `omitted_too_large` 또는 `omitted_for_total_budget`으로 표시하고 경로와 사유를 남긴다.
 
 Gemini CLI가 설치되어 있지 않거나 인증·쿼터·rate limit·context limit 때문에 실행되지 못하면 Validator FAIL이 아니라 `RESOURCE_FAILURE` / `HOLD`로 기록한다.
 

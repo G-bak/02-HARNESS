@@ -1,0 +1,28 @@
+2026-04-30T04:41:24.422662Z ERROR codex_core::tools::router: error=`"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "node --check .\\scripts\\run-validator-b.mjs"` rejected: blocked by policy
+2026-04-30T04:41:24.423160Z ERROR codex_core::tools::router: error=`"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "node --check .\\scripts\\run-validator-a.mjs"` rejected: blocked by policy
+2026-04-30T04:41:24.459558Z ERROR codex_core::tools::router: error=`"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "node --check .\\scripts\\validate-handoffs.mjs"` rejected: blocked by policy
+2026-04-30T04:41:24.460620Z ERROR codex_core::tools::router: error=`"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'npm run run:validator-b -- TASK-20260430-002 --input tasks/handoffs/TASK-20260430-002/validator-b-input.json --gemini-bin gemini --attempt 1 --dry-run'` rejected: blocked by policy
+2026-04-30T04:41:32.708736Z ERROR codex_core::tools::router: error=`"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Select-String -Path .\\scripts\\run-validator-b.mjs -Pattern \"cliArgs.push\\('--model'|--sandbox|input: prompt|maxEmbeddedContextBytes|validatorResultSchema|assertValidatorBIndependence\" -Context 2,2"` rejected: blocked by policy
+2026-04-30T04:41:32.709521Z ERROR codex_core::tools::router: error=`"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Select-String -Path .\\scripts\\run-validator-a.mjs -Pattern \"github_commit|tier_reclassification_reason|const required\" -Context 1,3"` rejected: blocked by policy
+2026-04-30T04:41:32.726081Z ERROR codex_core::tools::router: error=`"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Select-String -Path .\\scripts\\validate-handoffs.mjs -Pattern \"validatorBFixturePaths|collectFiles|TASK-20260430|validator-b-input\" -Context 2,4"` rejected: blocked by policy
+2026-04-30T04:41:32.726765Z ERROR codex_core::tools::router: error=`"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Select-String -Path .\\tasks\\handoffs\\TASK-20260430-002\\validator-b-input.json -Pattern \"Validator-A|Codex|validator-a|codex|workspace-write|read-only\" -Context 1,1"` rejected: blocked by policy
+2026-04-30T04:41:36.229544Z ERROR codex_core::tools::router: error=Exit code: 1
+Wall time: 0.5 seconds
+Output:
+속성을 설정할 수 없습니다. 속성 설정은 이 언어 모드의 핵심 유형에 대해서만 지원됩니다.
+위치 줄:1 문자:1
++ [Console]::OutputEncoding=[System.Text.Encoding]::UTF8;
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) [], RuntimeException
+    + FullyQualifiedErrorId : PropertySetterNotSupportedInConstrainedLanguage
+ 
+Select-Object : 'Index' 매개 변수를 바인딩할 수 없습니다. 값 "210..235"을(를) "System.Int32" 유형으로 변환할 수 없습니
+다. 오류: "입력 문자열의 형식이 잘못되었습니다."
+위치 줄:2 문자:66
++ ... Content .\scripts\run-validator-b.mjs | Select-Object -Index 210..235
++                                                                  ~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (:) [Select-Object], ParameterBindingException
+    + FullyQualifiedErrorId : CannotConvertArgumentNoMessage,Microsoft.PowerShell.Commands.SelectObjectCommand
+ 
+
+2026-04-30T04:41:41.876273Z ERROR codex_core::tools::router: error=`"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$lines=Get-Content .'"\\scripts\\run-validator-b.mjs; for("'$i=0;$i -lt $lines.Length;$i++){ if($i -ge 210 -and $i -le 240){ '"'{0}:{1}' -f ("'$i+1),$lines[$i] } }'` rejected: blocked by policy

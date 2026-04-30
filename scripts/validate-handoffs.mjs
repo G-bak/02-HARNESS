@@ -6,7 +6,6 @@ const schemaDir = path.join(root, 'docs', 'schemas');
 const generatorSchemaPath = path.join(schemaDir, 'generator-handoff.schema.json');
 const validatorSchemaPath = path.join(schemaDir, 'validator-handoff.schema.json');
 const retryFixturePath = path.join(root, 'tasks', 'handoffs', 'TASK-20260429-006', 'generator-input-retry-2.json');
-const validatorBFixturePath = path.join(root, 'tasks', 'handoffs', 'TASK-20260430-001', 'validator-b-input.json');
 
 let errors = 0;
 
@@ -35,7 +34,20 @@ for (const fileName of fs.readdirSync(schemaDir).filter((name) => name.endsWith(
 const generatorSchema = readJson(generatorSchemaPath);
 const validatorSchema = readJson(validatorSchemaPath);
 const retryFixture = readJson(retryFixturePath);
-const validatorBFixture = fs.existsSync(validatorBFixturePath) ? readJson(validatorBFixturePath) : null;
+
+function collectFiles(directoryPath, predicate) {
+  if (!fs.existsSync(directoryPath)) return [];
+  const results = [];
+  for (const entry of fs.readdirSync(directoryPath, { withFileTypes: true })) {
+    const fullPath = path.join(directoryPath, entry.name);
+    if (entry.isDirectory()) {
+      results.push(...collectFiles(fullPath, predicate));
+    } else if (predicate(fullPath)) {
+      results.push(fullPath);
+    }
+  }
+  return results;
+}
 
 if (generatorSchema && retryFixture) {
   const properties = generatorSchema.properties ?? {};
@@ -62,7 +74,19 @@ if (generatorSchema && retryFixture) {
   }
 }
 
-if (validatorSchema && validatorBFixture) {
+const validatorBFixturePaths = [
+  ...collectFiles(path.join(root, 'tasks', 'handoffs'), (filePath) => path.basename(filePath) === 'validator-b-input.json'),
+  ...collectFiles(path.join(root, 'tasks', 'fixtures'), (filePath) => path.basename(filePath) === 'validator-b-input.json'),
+].sort();
+
+if (validatorSchema && validatorBFixturePaths.length === 0) {
+  reportError('At least one Validator-B handoff fixture is required');
+}
+
+for (const validatorBFixturePath of validatorBFixturePaths) {
+  const validatorBFixture = readJson(validatorBFixturePath);
+  if (!validatorBFixture) continue;
+
   const properties = validatorSchema.properties ?? {};
   for (const key of validatorSchema.required ?? []) {
     if (!Object.hasOwn(validatorBFixture, key)) {
@@ -84,9 +108,18 @@ if (validatorSchema && validatorBFixture) {
   if (validatorBFixture.invocation?.runtime !== 'Gemini CLI') {
     reportError(`${relativePath(validatorBFixturePath)} must use Gemini CLI runtime`);
   }
-  const serialized = JSON.stringify(validatorBFixture);
-  if (/validator-a-result|Validator-A PASS|Validator-A FAIL/i.test(serialized)) {
-    reportError(`${relativePath(validatorBFixturePath)} must not include Validator-A result context`);
+  if (validatorBFixture.invocation?.sandbox !== 'read-only') {
+    reportError(`${relativePath(validatorBFixturePath)} must use read-only sandbox`);
+  }
+
+  const guardedValues = [
+    ...Object.values(validatorBFixture.refs ?? {}),
+    ...(validatorBFixture.changed_files ?? []),
+    ...(validatorBFixture.previous_failures ?? []).map((failure) => JSON.stringify(failure)),
+  ].filter((value) => typeof value === 'string');
+  const blocked = guardedValues.find((value) => /validator[-_]?a|codex/i.test(value));
+  if (blocked) {
+    reportError(`${relativePath(validatorBFixturePath)} must not include Validator-A or Codex references in refs/changed_files/previous_failures: ${blocked}`);
   }
 }
 

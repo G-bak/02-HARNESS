@@ -1,0 +1,70 @@
+{
+  "task_id": "TASK-20260430-002",
+  "agent": "Validator-A",
+  "tool": "Codex CLI",
+  "tier": "Tier2",
+  "verdict": "PASS",
+  "criteria_results": [
+    {
+      "criterion": "run-validator-b no longer passes the full prompt as a CLI argv value.",
+      "result": "PASS",
+      "detail": "scripts/run-validator-b.mjs builds Gemini argv with a short --prompt instruction only and passes the full prompt through spawnSync options.input. safeCommandForLog therefore logs only the short command shape."
+    },
+    {
+      "criterion": "run-validator-b rejects sandbox modes other than read-only and enables Gemini CLI sandboxing with the boolean --sandbox flag.",
+      "result": "PASS",
+      "detail": "commandArgs throws when args.sandbox is not read-only, parseHandoff requires invocation.sandbox read-only, and cliArgs includes the boolean --sandbox flag without a mode value."
+    },
+    {
+      "criterion": "run-validator-b applies a total embedded context byte budget and marks omitted files.",
+      "result": "PASS",
+      "detail": "maxEmbeddedContextBytes is enforced through budget.usedBytes in buildReviewContext/readContextFile, with omitted_for_total_budget and omitted_too_large statuses for excluded files."
+    },
+    {
+      "criterion": "run-validator-b rejects Validator-A/Codex references in refs and changed_files, not just selected phrases.",
+      "result": "PASS",
+      "detail": "assertValidatorBIndependence checks refs, changed_files, and previous_failures with /validator[-_]?a|codex/i and throws with the blocked reference."
+    },
+    {
+      "criterion": "run-validator-b prompt includes the validator-result schema content or an equivalent schema contract.",
+      "result": "PASS",
+      "detail": "systemInstruction reads docs/schemas/validator-result.schema.json and embeds it between validator_result_schema_json tags in the Validator-B prompt."
+    },
+    {
+      "criterion": "run-validator-a validates github_commit and tier_reclassification_reason as required result fields.",
+      "result": "PASS",
+      "detail": "scripts/run-validator-a.mjs validateValidatorResult required list includes github_commit and tier_reclassification_reason."
+    },
+    {
+      "criterion": "validate-handoffs discovers Validator-B fixtures without a single task-specific hardcode.",
+      "result": "PASS",
+      "detail": "scripts/validate-handoffs.mjs collects validator-b-input.json recursively from tasks/handoffs and tasks/fixtures, replacing the previous single TASK-20260430-001 validator-b fixture path."
+    },
+    {
+      "criterion": "node --check, Validator-B dry-run, audit:harness, and Validator-A validation pass.",
+      "result": "PASS",
+      "detail": "validation-evidence.json records exit_code 0 for node --check on the changed scripts, Validator-B dry-run, validate:handoffs, audit:harness, and git diff --check. Local node/npm execution attempts in this read-only Validator-A sandbox were rejected by policy, so the parent-session evidence artifact was used as allowed by the handoff known_risks; this Validator-A result is the validation pass."
+    }
+  ],
+  "errors": [],
+  "github_commit": null,
+  "tier_reclassification_needed": false,
+  "tier_reclassification_reason": null,
+  "log": [
+    {
+      "timestamp": "2026-04-30T00:00:00+09:00",
+      "action": "read_spec_and_handoff",
+      "result": "Read Task Spec, Generator result, Validator-A handoff, Validator-B handoff fixture, and validation evidence."
+    },
+    {
+      "timestamp": "2026-04-30T00:00:00+09:00",
+      "action": "static_validation",
+      "result": "Inspected run-validator-b, run-validator-a, validate-handoffs, audit-harness, fixtures, and guide changes against all success criteria."
+    },
+    {
+      "timestamp": "2026-04-30T00:00:00+09:00",
+      "action": "execution_validation",
+      "result": "git diff --check exited 0 with CRLF warnings only; node/npm commands were blocked by the Validator-A sandbox policy, so validation-evidence.json parent-session command results were used for those checks."
+    }
+  ]
+}

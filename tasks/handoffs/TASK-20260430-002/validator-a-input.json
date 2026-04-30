@@ -1,0 +1,48 @@
+{
+  "schema_version": "validator-handoff.v1",
+  "task_id": "TASK-20260430-002",
+  "agent": "Validator-A",
+  "invocation": {
+    "runtime": "Codex CLI",
+    "fresh_session_required": true,
+    "sandbox": "read-only",
+    "approval_policy": "never"
+  },
+  "refs": {
+    "spec": "tasks/specs/TASK-20260430-002.json",
+    "ledger": "logs/tasks/TASK-20260430-002.jsonl",
+    "generator_result": "tasks/handoffs/TASK-20260430-002/generator-result.json"
+  },
+  "changed_files": [
+    "scripts/run-validator-b.mjs",
+    "scripts/run-validator-a.mjs",
+    "scripts/validate-handoffs.mjs",
+    "scripts/audit-harness.mjs",
+    "docs/guides/validator-pipeline-ko.md",
+    "tasks/fixtures/validator-b-input.json",
+    "tasks/handoffs/TASK-20260430-001/validator-b-input.json",
+    "tasks/handoffs/TASK-20260430-002/validator-b-input.json",
+    "tasks/handoffs/TASK-20260430-002/validation-evidence.json"
+  ],
+  "success_criteria": [
+    "run-validator-b no longer passes the full prompt as a CLI argv value.",
+    "run-validator-b rejects sandbox modes other than read-only and enables Gemini CLI sandboxing with the boolean --sandbox flag.",
+    "run-validator-b applies a total embedded context byte budget and marks omitted files.",
+    "run-validator-b rejects Validator-A/Codex references in refs and changed_files, not just selected phrases.",
+    "run-validator-b prompt includes the validator-result schema content or an equivalent schema contract.",
+    "run-validator-a validates github_commit and tier_reclassification_reason as required result fields.",
+    "validate-handoffs discovers Validator-B fixtures without a single task-specific hardcode.",
+    "node --check, Validator-B dry-run, audit:harness, and Validator-A validation pass."
+  ],
+  "known_risks": [
+    "Gemini CLI is not installed locally, so live Validator-B model smoke remains a follow-up task.",
+    "Validator-A may not be able to execute node/npm in its own sandbox; validation-evidence.json records the parent-session command results."
+  ],
+  "forbidden_context": [
+    "Do not include secrets, credentials, API keys, tokens, or PII.",
+    "Do not merge main from this validation step.",
+    "Do not treat Gemini CLI resource failure as Validator-B FAIL."
+  ],
+  "expected_output_path": "tasks/handoffs/TASK-20260430-002/validator-a-result-1.json",
+  "expected_output_schema": "docs/schemas/validator-result.schema.json"
+}

@@ -273,7 +273,9 @@ function validateValidatorResult(result, taskId) {
     'verdict',
     'criteria_results',
     'errors',
+    'github_commit',
     'tier_reclassification_needed',
+    'tier_reclassification_reason',
     'log',
   ];
   for (const key of required) {

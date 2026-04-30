@@ -20,8 +20,13 @@ function requireText(filePath, text) {
 
 requireText('package.json', '"run:validator-b": "node scripts/run-validator-b.mjs"');
 requireText('scripts/run-validator-b.mjs', "run-validator-b only accepts Validator-B handoff");
-requireText('scripts/run-validator-b.mjs', "Validator-B handoff must not include Validator-A inputs or results");
+requireText('scripts/run-validator-b.mjs', "Validator-B handoff must not include Validator-A or Codex references");
 requireText('scripts/run-validator-b.mjs', "assertNoSecretLikeContent(prompt, 'Validator-B prompt')");
+requireText('scripts/run-validator-b.mjs', "input: prompt");
+requireText('scripts/run-validator-b.mjs', "--sandbox must be read-only for Validator-B");
+requireText('scripts/run-validator-b.mjs', "Gemini CLI --sandbox is a boolean enable flag");
+requireText('scripts/run-validator-a.mjs', "'github_commit'");
+requireText('scripts/run-validator-a.mjs', "'tier_reclassification_reason'");
 
 for (const [command, args] of checks) {
   const label = [command, ...args].join(' ');

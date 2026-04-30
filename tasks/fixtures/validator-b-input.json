@@ -1,0 +1,37 @@
+{
+  "schema_version": "validator-handoff.v1",
+  "task_id": "TASK-20260430-002",
+  "agent": "Validator-B",
+  "invocation": {
+    "runtime": "Gemini CLI",
+    "fresh_session_required": true,
+    "sandbox": "read-only",
+    "approval_policy": "never"
+  },
+  "refs": {
+    "spec": "tasks/specs/TASK-20260430-002.json",
+    "ledger": "logs/tasks/TASK-20260430-002.jsonl",
+    "generator_result": "tasks/handoffs/TASK-20260430-002/generator-result.json"
+  },
+  "changed_files": [
+    "scripts/run-validator-b.mjs",
+    "scripts/validate-handoffs.mjs",
+    "scripts/audit-harness.mjs"
+  ],
+  "success_criteria": [
+    "Validator-B passes prompt payload through stdin.",
+    "Validator-B only accepts read-only sandbox mode.",
+    "Validator-B applies a total context budget.",
+    "Validator-B rejects other-validator result references."
+  ],
+  "known_risks": [
+    "Gemini CLI live smoke still depends on local installation and authentication."
+  ],
+  "forbidden_context": [
+    "Do not include another validator result artifact.",
+    "Do not include secrets, credentials, API keys, tokens, or PII.",
+    "Do not ask Validator-B to modify files or merge branches."
+  ],
+  "expected_output_path": "tasks/handoffs/TASK-20260430-002/validator-b-result-1.json",
+  "expected_output_schema": "docs/schemas/validator-result.schema.json"
+}

@@ -1,0 +1,46 @@
+{
+  "task_id": "TASK-20260430-002",
+  "agent": "Generator",
+  "status": "COMPLETE",
+  "artifacts": [
+    {
+      "path": "scripts/run-validator-b.mjs",
+      "type": "script"
+    },
+    {
+      "path": "scripts/run-validator-a.mjs",
+      "type": "script"
+    },
+    {
+      "path": "scripts/validate-handoffs.mjs",
+      "type": "script"
+    },
+    {
+      "path": "tasks/fixtures/validator-b-input.json",
+      "type": "fixture"
+    },
+    {
+      "path": "tasks/handoffs/TASK-20260430-002/validation-evidence.json",
+      "type": "validation_evidence"
+    }
+  ],
+  "change_summary": [
+    "Moved Validator-B prompt payload to stdin to avoid Windows command-line length limits.",
+    "Restricted Validator-B sandbox label to read-only and enabled Gemini CLI sandboxing with its boolean --sandbox flag.",
+    "Added total embedded context budget and stronger independence checks.",
+    "Added validator-result schema contract to the Validator-B prompt.",
+    "Added Validator-A required-field parity and globbed Validator-B fixture validation."
+  ],
+  "self_review": [
+    "Dry-run should no longer place the full prompt in argv.",
+    "Live Gemini smoke still requires Gemini CLI installation and authentication."
+  ],
+  "tier_reclassification_needed": false,
+  "log": [
+    {
+      "timestamp": "2026-04-30T00:00:00+09:00",
+      "action": "fixture",
+      "result": "Synthetic Generator result for Validator-B hardening validation."
+    }
+  ]
+}

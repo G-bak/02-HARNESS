@@ -12,6 +12,8 @@ const forbiddenFlags = new Set([
   '--all-files',
 ]);
 const maxEmbeddedFileBytes = 256 * 1024;
+const maxEmbeddedContextBytes = 1024 * 1024;
+const stdinPromptInstruction = 'Read the full Validator-B review payload from stdin and return JSON only.';
 
 function usage() {
   console.error(`Usage:
@@ -22,7 +24,7 @@ Options:
   --dry-run                  Validate paths and print the Gemini command without executing it
   --gemini-bin <command>     Gemini CLI binary. Defaults to VALIDATOR_GEMINI_BIN or gemini
   --model <model>            Gemini model. Defaults to VALIDATOR_GEMINI_MODEL or current config
-  --sandbox <mode>           Handoff sandbox label. Defaults to read-only
+  --sandbox <mode>           Must be read-only for Validator-B. Defaults to read-only
   --attempt <n>              Attempt number. Defaults to 1
 `);
 }
@@ -126,11 +128,9 @@ function parseHandoff(inputPath, taskId) {
   if (data.agent !== 'Validator-B') throw new Error(`run-validator-b only accepts Validator-B handoff, got ${data.agent}`);
   if (data.invocation?.runtime !== 'Gemini CLI') throw new Error('Validator-B handoff invocation.runtime must be Gemini CLI.');
   if (data.invocation?.fresh_session_required !== true) throw new Error('Validator-B handoff must require fresh session.');
+  if (data.invocation?.sandbox !== 'read-only') throw new Error('Validator-B handoff invocation.sandbox must be read-only.');
 
-  const serialized = JSON.stringify(data);
-  if (/validator-a-result|Validator-A PASS|Validator-A FAIL/i.test(serialized)) {
-    throw new Error('Validator-B handoff must not include Validator-A inputs or results.');
-  }
+  assertValidatorBIndependence(data);
 
   const handoffDir = path.join(root, 'tasks', 'handoffs', taskId);
   const specPath = resolveInsideRoot(data.refs.spec);
@@ -155,7 +155,20 @@ function parseHandoff(inputPath, taskId) {
   };
 }
 
-function readContextFile(filePath, label) {
+function assertValidatorBIndependence(data) {
+  const guardedValues = [
+    ...Object.values(data.refs ?? {}),
+    ...(data.changed_files ?? []),
+    ...(data.previous_failures ?? []).map((failure) => JSON.stringify(failure)),
+  ].filter((value) => typeof value === 'string');
+
+  const blocked = guardedValues.find((value) => /validator[-_]?a|codex/i.test(value));
+  if (blocked) {
+    throw new Error(`Validator-B handoff must not include Validator-A or Codex references: ${blocked}`);
+  }
+}
+
+function readContextFile(filePath, label, budget) {
   if (!fs.existsSync(filePath)) return { label, path: relativePath(filePath), status: 'missing', content: '' };
   const stat = fs.statSync(filePath);
   if (stat.size > maxEmbeddedFileBytes) {
@@ -166,48 +179,61 @@ function readContextFile(filePath, label) {
       content: `File omitted because it is ${stat.size} bytes; Validator-B may inspect it from the workspace if needed.`,
     };
   }
+  if (budget.usedBytes + stat.size > budget.maxBytes) {
+    return {
+      label,
+      path: relativePath(filePath),
+      status: 'omitted_for_total_budget',
+      content: `File omitted because embedding it would exceed the ${budget.maxBytes} byte Validator-B prompt context budget.`,
+    };
+  }
   const content = fs.readFileSync(filePath, 'utf8');
   assertNoSecretLikeContent(content, relativePath(filePath));
+  budget.usedBytes += stat.size;
   return { label, path: relativePath(filePath), status: 'included', content };
 }
 
 function buildReviewContext(handoff) {
+  const budget = { usedBytes: 0, maxBytes: maxEmbeddedContextBytes };
   const files = [
-    readContextFile(handoff.specPath, 'task_spec'),
-    readContextFile(handoff.generatorResultPath, 'generator_result'),
+    readContextFile(handoff.specPath, 'task_spec', budget),
+    readContextFile(handoff.generatorResultPath, 'generator_result', budget),
   ];
 
   for (const file of handoff.data.changed_files ?? []) {
     const absolute = resolveInsideRoot(file);
-    files.push(readContextFile(absolute, 'changed_file'));
+    files.push(readContextFile(absolute, 'changed_file', budget));
   }
 
-  return files;
+  return {
+    budget: {
+      used_bytes: budget.usedBytes,
+      max_bytes: budget.maxBytes,
+    },
+    files,
+  };
 }
 
-function inferTaskTier(handoff, fallback = 'Tier3') {
-  try {
-    const spec = JSON.parse(fs.readFileSync(handoff.specPath, 'utf8'));
-    return spec.complexity_tier || spec.task_tier || spec.tier || fallback;
-  } catch {
-    return fallback;
-  }
+function inferTaskTier(handoff) {
+  const spec = JSON.parse(fs.readFileSync(handoff.specPath, 'utf8'));
+  return spec.complexity_tier || spec.task_tier || spec.tier || 'Tier3';
 }
 
-function commandArgs(args, prompt) {
-  if (args.sandbox !== 'read-only' && args.sandbox !== 'workspace-write') {
-    throw new Error('--sandbox must be read-only or workspace-write.');
+function commandArgs(args) {
+  if (args.sandbox !== 'read-only') {
+    throw new Error('--sandbox must be read-only for Validator-B.');
   }
 
   const cliArgs = [
     '--prompt',
-    prompt,
+    stdinPromptInstruction,
     '--output-format',
     'json',
+    // Gemini CLI --sandbox is a boolean enable flag; this wrapper enforces read-only by rejecting every other sandbox label.
+    '--sandbox',
   ];
 
   if (args.model) cliArgs.push('--model', args.model);
-  if (args.sandbox === 'read-only') cliArgs.push('--sandbox');
 
   for (const item of cliArgs) {
     if (forbiddenFlags.has(item)) throw new Error(`Forbidden Gemini CLI flag configured: ${item}`);
@@ -238,6 +264,8 @@ function spawnCommand(command, args, options) {
 }
 
 function systemInstruction(handoff, reviewContext) {
+  const schemaPath = path.join(root, 'docs', 'schemas', 'validator-result.schema.json');
+  const validatorResultSchema = fs.readFileSync(schemaPath, 'utf8');
   return [
     'You are Validator-B for the 02-HARNESS system.',
     'You are an independent Tier 3 security and design reviewer using Gemini CLI.',
@@ -247,6 +275,11 @@ function systemInstruction(handoff, reviewContext) {
     'Return exactly one JSON object matching docs/schemas/validator-result.schema.json.',
     'Set agent to "Validator-B" and tool to "Gemini CLI".',
     'If you fail the task, every error must include severity, evidence_type, location, description, suggestion, and evidence.',
+    'Do not wrap the JSON object in Markdown fences.',
+    '',
+    '<validator_result_schema_json>',
+    validatorResultSchema,
+    '</validator_result_schema_json>',
     '',
     '<validator_handoff_json>',
     handoff.raw,
@@ -372,7 +405,7 @@ function main() {
   const stderrPath = path.join(outputDir, `validator-b-stderr-${args.attempt}.log`);
   const metadataPath = path.join(outputDir, `validator-b-run-${args.attempt}.json`);
   const promptPath = path.join(outputDir, `validator-b-prompt-${args.attempt}.txt`);
-  const cliArgs = commandArgs(args, prompt);
+  const cliArgs = commandArgs(args);
   const safeCommand = safeCommandForLog(args.geminiBin, cliArgs);
   const taskTier = inferTaskTier(handoff);
 
@@ -416,6 +449,7 @@ function main() {
   const startedAt = timestamp();
   const spawned = spawnCommand(args.geminiBin, cliArgs, {
     cwd: root,
+    input: prompt,
     encoding: 'utf8',
     maxBuffer: 50 * 1024 * 1024,
   });
