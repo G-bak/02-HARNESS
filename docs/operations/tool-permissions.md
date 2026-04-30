@@ -1,6 +1,6 @@
 # Tool Permissions — 도구 권한 정책
 
-**버전:** 1.11 | **최종 수정:** 2026-04-30
+**버전:** 1.12 | **최종 수정:** 2026-04-30
 **원칙:** 각 에이전트는 해당 작업에 필요한 최소 권한만 보유한다.
 
 ---
@@ -10,9 +10,9 @@
 | 도구 | Analyst | Researcher | Generator | Validator-A | Validator-B |
 |---|:---:|:---:|:---:|:---:|:---:|
 | **파일 읽기** | ✅ | ❌ | ✅ | ✅ | ✅ |
-| **파일 쓰기** | ✅ (운영 기록 + 승인된 가이드 문서 한정) | ❌ | ✅ (task/* 한정) | ❌ | ❌ |
-| **파일 삭제** | ❌ | ❌ | ✅ (task/* 한정) | ❌ | ❌ |
-| **Shell 실행** | ✅ (감사·기록 전용 제한 명령) | ❌ | ✅ (Sandbox) | ✅ (Sandbox) | ✅ (Sandbox) |
+| **파일 쓰기** | ✅ (운영 기록 + 하네스 엔지니어링 한정) | ❌ | ✅ (task/* 한정) | ❌ | ❌ |
+| **파일 삭제** | ✅ (하네스 임시/생성물 정리 한정) | ❌ | ✅ (task/* 한정) | ❌ | ❌ |
+| **Shell 실행** | ✅ (감사·기록·하네스 검증 전용 제한 명령) | ❌ | ✅ (Sandbox) | ✅ (Sandbox) | ✅ (Sandbox) |
 | **웹 검색** | ❌ | ✅ | ❌ | ❌ | ❌ |
 | **외부 URL 접근** | ❌ | ✅ | ❌ | ❌ | ❌ |
 | **Git 읽기** | ✅ | ❌ | ✅ | ✅ | ✅ |
@@ -31,20 +31,22 @@
 
 ## Analyst 제한 Shell 권한
 
-Analyst는 구현·테스트 실행자가 아니지만, 원장 생성과 재진입 무결성 확인을 위해 제한된 Shell 읽기 권한을 가진다.
+Analyst는 제품 구현·제품 테스트 실행자가 아니지만, 원장 생성, 재진입 무결성 확인, 하네스 엔지니어링 검증을 위해 제한된 Shell 권한을 가진다.
 
 허용:
 
 ```
 Get-Content, Get-ChildItem, Select-String, rg, git status, git log, git show,
-날짜 확인 명령, 파일 존재 확인, logs/reports/CURRENT_STATE.md 기록에 필요한 최소 명령
+날짜 확인 명령, 파일 존재 확인, logs/reports/CURRENT_STATE.md 기록에 필요한 최소 명령,
+node --check, npm run audit:harness, scripts/check-*.mjs, scripts/validate-*.mjs,
+scripts/audit-*.mjs, scripts/clean-*.mjs
 ```
 
 금지:
 
 ```
-빌드/테스트 실행, 애플리케이션 실행, 외부 API 호출, 의존성 설치,
-시스템 설정 변경, main 머지, task/* 외 파일 생성 작업 대행
+제품 빌드/제품 테스트 실행, 애플리케이션 실행, 외부 API 호출, 의존성 설치,
+시스템 설정 변경, 승인 범위 밖 main 머지, 하네스 경계 밖 파일 생성 작업 대행
 ```
 
 예외:
@@ -54,7 +56,7 @@ Get-Content, Get-ChildItem, Select-String, rg, git status, git log, git show,
 
 ## Analyst 파일 쓰기 범위
 
-Analyst의 쓰기 권한은 운영 조정과 하네스 규칙 관리에 한정한다. 제품 코드, 앱 기능, 배포 설정을 직접 구현하는 권한이 아니다.
+Analyst의 쓰기 권한은 운영 조정과 하네스 엔지니어링 유지보수에 한정한다. 제품 코드, 앱 기능, 제품 자산, 배포 설정을 직접 구현하는 권한이 아니다.
 
 항상 허용:
 
@@ -64,7 +66,7 @@ reports/**
 CURRENT_STATE.md
 ```
 
-가이드 유지보수 Task에서만 허용:
+하네스 엔지니어링 유지보수 Task에서만 허용:
 
 ```text
 AGENTS.md
@@ -80,15 +82,21 @@ scripts/check-*.mjs
 scripts/validate-*.mjs
 scripts/notify-*.mjs
 scripts/audit-*.mjs
+scripts/run-generator.mjs
+scripts/run-validator-a.mjs
+scripts/run-validator-b.mjs
+scripts/clean-*.mjs
+scripts/lib/**
 package.json
 ```
 
 조건:
 
 1. 해당 작업의 `TASK_CREATED`가 먼저 기록되어야 한다.
-2. 변경 목적이 하네스 운영 규칙, 출력 형식, 검증 게이트, 자동 감사 스크립트 개선이어야 한다.
+2. 변경 목적이 하네스 운영 규칙, 출력 형식, 검증 게이트, runner wrapper, handoff tooling, 작업 이력 자동화, 자동 감사 스크립트 개선이어야 한다.
 3. 변경 파일과 검증 결과를 같은 Task 원장에 기록해야 한다.
 4. 제품 코드(`api/**`, `public/**`, `assets/**`, `wrangler.toml` 등)는 Generator 작업으로 분리한다.
+5. Tier 2/3 수준의 하네스 변경은 Generator 호출이 필수는 아니지만, 해당 Tier의 Validator 검증과 보고/품질 게이트를 따라야 한다.
 
 금지:
 

@@ -3,7 +3,7 @@
 > Analyst가 유지·갱신하는 파일입니다. 새 세션 시작 시 이 파일을 먼저 읽으세요.
 > 새 세션 시작 방법: `/clear` 후 → "CURRENT_STATE.md를 읽고 이어서 진행해줘."
 
-**마지막 갱신:** 2026-04-30 (TASK-20260430-005 완료 — Validator-B 파이프라인 하드닝)
+**마지막 갱신:** 2026-04-30 (TASK-20260430-006 완료 — Analyst 하네스 엔지니어링 권한 명확화)
 
 ---
 
@@ -21,16 +21,16 @@
 | 전체 에이전트 구조·절대규칙 | `AGENTS.md` | v1.7 | 2026-04-26 |
 | 시스템 아키텍처 | `ARCHITECTURE.md` | v1.2 | 2026-04-26 |
 | 보안 규칙 | `SECURITY.md` | v1.4 | 2026-04-30 |
-| Analyst 역할·보고·리셋 | `docs/agents/analyst.md` | v3.1 | 2026-04-30 |
+| Analyst 역할·보고·리셋 | `docs/agents/analyst.md` | v3.2 | 2026-04-30 |
 | Validator 역할·검증 절차 | `docs/agents/validator.md` | v1.5 | 2026-04-30 |
 | Generator 역할 | `docs/agents/generator.md` | v1.5 | 2026-04-27 |
 | Researcher 역할 | `docs/agents/researcher.md` | v1.6 | 2026-04-30 |
 | 머지 조건·승인 주체 (권위) | `docs/operations/git-branch-policy.md` | v1.9 | 2026-04-29 |
-| 도구 권한 | `docs/operations/tool-permissions.md` | v1.11 | 2026-04-30 |
+| 도구 권한 | `docs/operations/tool-permissions.md` | v1.12 | 2026-04-30 |
 | 외부 알림 정책 | `docs/operations/notification-policy.md` | v1.6 | 2026-04-26 |
 | 작업 이력 저장 정책 | `docs/operations/work-history-policy.md` | v1.15 | 2026-04-29 |
 | Tier 분류 기준 | `docs/workflows/tier-classification.md` | v1.3 | 2026-04-26 |
-| Task 수명 주기 | `docs/workflows/task-lifecycle.md` | v1.17 | 2026-04-27 |
+| Task 수명 주기 | `docs/workflows/task-lifecycle.md` | v1.18 | 2026-04-30 |
 | 실패 처리 | `docs/workflows/failure-handling.md` | v1.3 | 2026-04-25 |
 | 컨텍스트 관리 | `docs/workflows/context-management.md` | v1.1 | 2026-04-28 |
 | Task Spec 스키마 | `docs/schemas/task-spec.md` | v1.5 | 2026-04-27 |
@@ -71,7 +71,7 @@
 - **에이전트 인수인계 기준 순서**: `tasks/specs/TASK-{ID}.json` → `logs/tasks/TASK-{ID}.jsonl` → 관련 `logs/sessions/SESSION-{ID}.md` → `artifact_refs/changed_files/산출물` 순서로 확인하고, 필요한 최소 컨텍스트만 전달.
 - **대표 보고용 보고서 기준**: Tier 2/3 `reports/TASK-{ID}.md`는 Executive Summary를 첫 섹션으로 두고 상태·결론·서비스 영향·검증·남은 리스크·조치 필요 여부를 10줄 이내로 먼저 제시.
 - **보고서/품질 점수 게이트**: Tier 2/3, HOLD, Resource Failure, FAILED, Adjudication은 보고서 필수. Tier 2/3 및 운영 규칙 변경 작업은 품질 점수 필수. 필수 산출물 누락 시 `TASK_COMPLETED` 금지.
-- **Analyst 가이드 쓰기 권한**: 운영 기록은 항상 가능하며, 가이드 유지보수 Task에서는 권위 문서·운영 가이드·자동 감사 스크립트 수정 가능. 제품 코드와 배포 설정은 Generator 작업으로 분리.
+- **Analyst 하네스 엔지니어링 권한**: 운영 기록은 항상 가능하며, 하네스 엔지니어링 유지보수 Task에서는 권위 문서·운영 가이드·스키마·runner wrapper·audit/validation/check/clean 스크립트·completion gate·handoff tooling 수정 가능. 제품 코드, 앱 런타임, 제품 자산, 배포 설정은 Generator 작업으로 분리.
 - **Non-git 작업공간 모드**: git 저장소가 아닌 경우 브랜치/커밋/머지 이벤트를 기록하지 않고 `branch_omission_reason`을 원장에 남긴 뒤 로컬 검증과 보고서/품질 점수 게이트로 완료 판단.
 - **세션 로그 기준**: 작업 세션에는 세션 로그를 생성하거나 기존 세션 로그를 재사용한다. 초소형 Task에서 생략하면 `session_log_skipped_reason`을 완료 이벤트에 기록.
 - **자동 감사 스크립트**: `scripts/check-doc-headers.mjs`, `scripts/validate-ledger.mjs`, `scripts/check-completion-gates.mjs`로 권위 문서 헤더, 작업 원장 JSONL, 완료 게이트/보고서 stale 문구를 점검.
@@ -105,13 +105,13 @@
 
 현재 진행 중인 Task 없음.
 
-마지막 완료 Task: TASK-20260430-005 Validator-B 파이프라인 하드닝 (2026-04-30)
+마지막 완료 Task: TASK-20260430-006 Analyst 하네스 엔지니어링 권한 명확화 (2026-04-30)
 
 ---
 
 ## 남은 작업
 
-- **완료됨**: TASK-20260430-005에서 Validator-B negative smoke, malformed-output Resource Failure, event_id 충돌 방지, 독립성 guard, approval-mode 정합화, Tier 2 smoke 예외, audit gate를 구현하고 검증.
+- **완료됨**: TASK-20260430-006에서 Analyst가 하네스 엔지니어링 문서와 runner/audit/validation/tooling 스크립트를 직접 수정할 수 있음을 권위 문서에 명확히 반영.
 - **후속 후보**: Validator-A read-only 검증 명령 allowlist 또는 execution-blocked 케이스의 Resource Failure 분류 정비.
 
 ---

@@ -1,6 +1,6 @@
 # Task Lifecycle
 
-**버전:** 1.17 | **최종 수정:** 2026-04-27
+**버전:** 1.18 | **최종 수정:** 2026-04-30
 
 이 문서는 요청이 들어온 뒤 작업이 어떻게 시작되고, 검증되고, 종료되는지 정의한다.
 
@@ -12,7 +12,7 @@
   -> Analyst가 TASK 생성
   -> Tier 분류
   -> 필요 시 Researcher 호출
-  -> Generator 구현
+  -> Generator 구현 또는 Analyst 하네스 엔지니어링 직접 구현
   -> Validator 검증
   -> 필요 시 재수정 또는 Adjudication
   -> Analyst 최종 보고
@@ -93,7 +93,25 @@ Analyst가 다음을 판단한다.
 
 ## Phase 3: 구현
 
-Generator가 실제 변경을 수행한다.
+기본적으로 Generator가 실제 변경을 수행한다.
+
+예외적으로 하네스 엔지니어링 유지보수는 Analyst가 직접 변경할 수 있다. 이 예외는 우회 절차가 아니라 Analyst의 명시 권한이다.
+
+Analyst 직접 구현 대상:
+
+- 권위 문서와 운영 가이드
+- Task Spec, validator result, handoff, ledger, report, quality score 스키마
+- `scripts/run-generator.mjs`, `scripts/run-validator-a.mjs`, `scripts/run-validator-b.mjs` 같은 runner wrapper
+- `scripts/check-*.mjs`, `scripts/validate-*.mjs`, `scripts/audit-*.mjs`, `scripts/clean-*.mjs`, `scripts/lib/**` 같은 하네스 감사·검증·정리 자동화
+- completion gate, branch cleanup, notification, work-history, handoff tooling
+
+Analyst 직접 구현 금지 대상:
+
+- 제품 코드와 앱 런타임 기능
+- 제품 UI/UX, 제품 자산, 사용자-facing 기능 구조
+- 배포 설정, 인프라 설정, 시크릿 또는 환경변수 값
+
+하네스 엔지니어링 변경이 Tier 2/3로 분류되더라도 Generator 호출은 필수가 아니다. 대신 해당 Tier의 Validator 검증, 보고서, 품질 점수, merge/push 기록 게이트를 그대로 적용한다.
 
 구현 지시 전 Analyst는 인수인계 기준 순서를 확인한다.
 

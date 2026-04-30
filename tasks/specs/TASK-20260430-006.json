@@ -1,0 +1,27 @@
+{
+  "task_id": "TASK-20260430-006",
+  "title": "Clarify Analyst authority for harness engineering changes",
+  "tier": "Tier1",
+  "objective": "Update authority documents so Analyst may directly modify harness engineering artifacts, including operational guides, authority documents, runner wrappers, audit scripts, validation scripts, schemas, and task lifecycle tooling, while keeping product code and deployment settings under Generator ownership.",
+  "scope": [
+    "Clarify Analyst responsibilities in docs/agents/analyst.md.",
+    "Clarify Analyst write and shell permissions in docs/operations/tool-permissions.md.",
+    "Clarify task lifecycle implementation flow for harness engineering exceptions in docs/workflows/task-lifecycle.md.",
+    "Update CURRENT_STATE.md authority pointers and current state summary.",
+    "Record task ledger, session log, report, and quality score."
+  ],
+  "success_criteria": [
+    "Authority documents explicitly permit Analyst direct edits to harness engineering scripts and docs when the task is about harness/process/automation maintenance.",
+    "Authority documents explicitly exclude product code, app runtime behavior, product assets, and deployment settings from Analyst direct implementation.",
+    "Task lifecycle no longer implies Generator is mandatory for every Tier 2 harness engineering change.",
+    "CURRENT_STATE.md points to the updated authority document versions.",
+    "npm run audit:harness passes before completion.",
+    "Git history and task ledger record the change and push status."
+  ],
+  "constraints": [
+    "Do not change product runtime code.",
+    "Do not invoke Generator; the purpose is to codify the Analyst authority boundary requested by the user.",
+    "Use append-only task history.",
+    "Do not include secrets, tokens, or PII."
+  ]
+}
