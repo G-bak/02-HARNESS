@@ -3,7 +3,7 @@
 > Analyst가 유지·갱신하는 파일입니다. 새 세션 시작 시 이 파일을 먼저 읽으세요.
 > 새 세션 시작 방법: `/clear` 후 → "CURRENT_STATE.md를 읽고 이어서 진행해줘."
 
-**마지막 갱신:** 2026-04-30 (TASK-20260430-001 완료 — Validator-B Gemini CLI 파이프라인 구축)
+**마지막 갱신:** 2026-04-30 (TASK-20260430-002 완료 — Validator-B 파이프라인 하드닝)
 
 ---
 
@@ -94,6 +94,7 @@
 - **Handoff secret preflight**: `run-generator.mjs`, `run-validator-a.mjs`, `run-validator-b.mjs`는 raw handoff payload를 모델 CLI로 보내기 전에 common secret-like pattern을 검사한다.
 - **Handoff regression audit**: `npm run audit:harness`는 `scripts/validate-handoffs.mjs`를 포함하며, Generator retry fixture와 Validator-B handoff fixture가 schema와 계속 호환되는지 확인한다.
 - **Validator-B 자동화 경계**: `run-validator-b`는 Gemini CLI용 독립 Validator-B handoff 검증·prompt 구성·결과 정규화·원장 기록을 담당한다. Tier 3에서 Validator-B 입력에는 Validator-A 결과를 포함하지 않으며, Gemini CLI 미설치·인증·쿼터 문제는 FAIL이 아니라 Resource Failure/HOLD로 처리한다.
+- **Validator-B 실행 하드닝**: `run-validator-b`는 전체 prompt payload를 argv가 아니라 stdin으로 전달한다. Validator-B handoff는 `read-only` sandbox label만 허용하며, Gemini CLI에는 값 없는 boolean `--sandbox` flag만 전달한다. changed file context는 파일당 256 KiB, 전체 1 MiB budget으로 제한하고, Validator-A/Codex artifact 참조는 refs/changed_files/previous_failures에서 차단한다.
 - **Claude Code `--bare` 사용 금지 (headless)**: `--bare` 플래그는 OAuth 자동 로드도 silently skip한다 (공식 문서 미기재, INS-20260429-009-01 참조). headless wrapper 호출에서는 `--bare`를 사용하지 않는다. 컨텍스트 격리는 `--permission-mode auto` + `--allowedTools`/`--disallowedTools`로 보장한다.
 - **Claude Code `--json-schema` 응답 강제 한계**: `--json-schema`는 응답 wrapper를 JSON으로 만들지만 `result` 필드 안의 텍스트가 schema를 따른다고 보장하지 않는다 (INS-20260429-009-02 참조). 자동화 wrapper는 `result` JSON 파싱 외에 git diff 또는 다른 부수효과로 결과를 검증해야 한다.
 - **Claude Code OAuth 토큰 운영**: 자동화 호출용 OAuth 토큰은 `claude setup-token`(claude.ai 구독)으로 발급한다 (API 키 아님, 추가 과금 없음). `.dev.vars`에만 저장하고 어떤 커밋·로그·보고서에도 평문 포함 금지. wrapper는 `CLAUDE_CODE_OAUTH_TOKEN` env var로 자식 프로세스에 전달한다.
@@ -104,13 +105,13 @@
 
 현재 진행 중인 Task 없음.
 
-마지막 완료 Task: TASK-20260430-001 Validator-B Gemini CLI 파이프라인 구축 (2026-04-30)
+마지막 완료 Task: TASK-20260430-002 Validator-B 파이프라인 하드닝 (2026-04-30)
 
 ---
 
 ## 남은 작업
 
-- **완료됨**: TASK-20260430-001에서 Validator-B wrapper, npm command, audit gate, handoff fixture 구축 및 Validator-A PASS 확인.
+- **완료됨**: TASK-20260430-002에서 Validator-B prompt stdin 전달, read-only-only enforcement, context budget, 독립성 guard 확장, Validator-A schema parity, fixture glob 검증을 적용하고 Validator-A PASS 확인.
 - **후속 후보**: Gemini CLI 설치·인증 후 `run-validator-b` live smoke test. `--bare` 제거의 컨텍스트 격리 약화 trade-off 보강 (예: hooks/plugins 명시 비활성화 옵션 조합 탐색).
 
 ---
