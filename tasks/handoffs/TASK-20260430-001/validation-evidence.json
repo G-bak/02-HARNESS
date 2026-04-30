@@ -1,0 +1,42 @@
+{
+  "task_id": "TASK-20260430-001",
+  "recorded_by": "Analyst",
+  "recorded_at": "2026-04-30T10:55:00+09:00",
+  "purpose": "Evidence for Validator-A when its own sandbox policy cannot execute node/npm commands.",
+  "commands": [
+    {
+      "command": "node --check scripts/run-validator-b.mjs",
+      "exit_code": 0,
+      "summary": "Syntax check passed."
+    },
+    {
+      "command": "node --check scripts/validate-handoffs.mjs",
+      "exit_code": 0,
+      "summary": "Syntax check passed."
+    },
+    {
+      "command": "node --check scripts/audit-harness.mjs",
+      "exit_code": 0,
+      "summary": "Syntax check passed."
+    },
+    {
+      "command": "npm run run:validator-b -- TASK-20260430-001 --input tasks/handoffs/TASK-20260430-001/validator-b-input.json --gemini-bin gemini --attempt 1 --dry-run",
+      "exit_code": 0,
+      "summary": "Dry-run validated the Validator-B handoff and printed command shape: gemini --prompt <prompt omitted> --output-format json --sandbox. Ledger and output files were not changed."
+    },
+    {
+      "command": "npm run audit:harness",
+      "exit_code": 0,
+      "summary": "Harness audit passed: doc headers, ledger validation, handoff validation, generator parsing fixture, completion gates, final git-state check, and quality-score checks all passed."
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "summary": "Whitespace check passed with only CRLF conversion warnings."
+    }
+  ],
+  "resource_notes": [
+    "Gemini CLI is not installed locally, so live Validator-B model execution was not attempted.",
+    "Validator-B dry-run does not require Gemini installation and is the expected validation mode for this implementation task."
+  ]
+}

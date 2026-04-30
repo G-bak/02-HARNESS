@@ -1,0 +1,47 @@
+{
+  "task_id": "TASK-20260430-001",
+  "title": "Build Validator-B pipeline",
+  "tier": "Tier2",
+  "requested_by": "user",
+  "created_at": "2026-04-30T00:00:00+09:00",
+  "objective": "Add a repeatable Validator-B pipeline using Gemini CLI that mirrors the existing Validator-A automation while preserving Tier 3 validator independence.",
+  "scope": [
+    "Add a Validator-B runner script and package command.",
+    "Validate Gemini handoff/result schema compatibility.",
+    "Add secret preflight and resource-failure handling consistent with Validator-A.",
+    "Update harness audits and guides so Validator-B is discoverable and enforced.",
+    "Add dry-run or fixture validation for the new pipeline."
+  ],
+  "success_criteria": [
+    "package.json exposes a run:validator-b command.",
+    "scripts/run-validator-b.mjs exists and can execute in dry-run mode without invoking Gemini.",
+    "Validator-B runner writes normalized run metadata and result artifacts under tasks/handoffs/{TASK-ID}/.",
+    "Validator-B runner rejects handoffs with agent values other than Validator-B.",
+    "Validator-B runner performs the same common secret-like payload preflight as Generator and Validator-A before invoking a model CLI.",
+    "Harness audit includes Validator-B pipeline checks.",
+    "Relevant guides or state documents no longer imply Validator-B is missing after implementation.",
+    "node --check and npm run audit:harness pass."
+  ],
+  "constraints": [
+    "Do not include API keys, tokens, credentials, or PII in files, logs, reports, or command output.",
+    "Do not pass Validator-A result content into Validator-B handoffs.",
+    "Do not perform a main merge without required validation and completion records.",
+    "Keep implementation style aligned with scripts/run-validator-a.mjs."
+  ],
+  "target_files": [
+    "package.json",
+    "scripts/run-validator-b.mjs",
+    "scripts/audit-harness.mjs",
+    "docs/guides/validator-pipeline-ko.md",
+    "docs/guides/generator-pipeline-ko.md",
+    "CURRENT_STATE.md",
+    "logs/tasks/TASK-20260430-001.jsonl",
+    "reports/TASK-20260430-001.md"
+  ],
+  "validation_plan": [
+    "node --check scripts/run-validator-b.mjs",
+    "npm run run:validator-b -- TASK-20260430-001 --input tasks/handoffs/TASK-20260430-001/validator-b-input.json --gemini-bin gemini --attempt 1 --dry-run",
+    "npm run audit:harness",
+    "git diff --check"
+  ]
+}

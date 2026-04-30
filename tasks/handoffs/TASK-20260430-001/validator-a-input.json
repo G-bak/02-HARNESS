@@ -1,0 +1,48 @@
+{
+  "schema_version": "validator-handoff.v1",
+  "task_id": "TASK-20260430-001",
+  "agent": "Validator-A",
+  "invocation": {
+    "runtime": "Codex CLI",
+    "fresh_session_required": true,
+    "sandbox": "read-only",
+    "approval_policy": "never"
+  },
+  "refs": {
+    "spec": "tasks/specs/TASK-20260430-001.json",
+    "ledger": "logs/tasks/TASK-20260430-001.jsonl",
+    "generator_result": "tasks/handoffs/TASK-20260430-001/generator-result.json"
+  },
+  "changed_files": [
+    "scripts/run-validator-b.mjs",
+    "package.json",
+    "scripts/audit-harness.mjs",
+    "scripts/validate-handoffs.mjs",
+    "docs/guides/validator-pipeline-ko.md",
+    "docs/guides/generator-pipeline-ko.md",
+    "tasks/handoffs/TASK-20260430-001/validator-b-input.json"
+    ,
+    "tasks/handoffs/TASK-20260430-001/validation-evidence.json"
+  ],
+  "success_criteria": [
+    "package.json exposes a run:validator-b command.",
+    "scripts/run-validator-b.mjs exists and can execute in dry-run mode without invoking Gemini.",
+    "Validator-B runner writes normalized run metadata and result artifacts under tasks/handoffs/{TASK-ID}/.",
+    "Validator-B runner rejects handoffs with agent values other than Validator-B.",
+    "Validator-B runner performs the same common secret-like payload preflight as Generator and Validator-A before invoking a model CLI.",
+    "Harness audit includes Validator-B pipeline checks.",
+    "Relevant guides no longer imply Validator-B is missing after implementation.",
+    "node --check and npm run audit:harness pass."
+  ],
+  "known_risks": [
+    "Gemini CLI is not installed in the current local environment, so live Validator-B smoke cannot pass until configured.",
+    "Gemini CLI JSON envelope shape may differ by version; runner includes several result extraction paths but still needs live smoke after installation."
+  ],
+  "forbidden_context": [
+    "Do not include secrets, credentials, API keys, tokens, or PII.",
+    "Do not merge main from this validation step.",
+    "Do not treat Gemini CLI resource failure as Validator-B FAIL."
+  ],
+  "expected_output_path": "tasks/handoffs/TASK-20260430-001/validator-a-result-1.json",
+  "expected_output_schema": "docs/schemas/validator-result.schema.json"
+}

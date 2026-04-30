@@ -1,0 +1,5 @@
+2026-04-30T01:58:30.183375Z ERROR codex_core::tools::router: error=`"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'node --check scripts/run-validator-b.mjs'` rejected: blocked by policy
+2026-04-30T01:58:30.184849Z ERROR codex_core::tools::router: error=`"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'node --check scripts/validate-handoffs.mjs'` rejected: blocked by policy
+2026-04-30T01:58:30.190110Z ERROR codex_core::tools::router: error=`"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'node --check scripts/audit-harness.mjs'` rejected: blocked by policy
+2026-04-30T01:58:30.216379Z ERROR codex_core::tools::router: error=`"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'npm run run:validator-b -- TASK-20260430-001 --input tasks/handoffs/TASK-20260430-001/validator-b-input.json --gemini-bin gemini --attempt 1 --dry-run'` rejected: blocked by policy
+2026-04-30T01:58:30.216971Z ERROR codex_core::tools::router: error=`"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'npm run audit:harness'` rejected: blocked by policy

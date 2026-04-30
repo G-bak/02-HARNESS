@@ -1,6 +1,6 @@
 # Generator 실행 파이프라인 — 한국어 운영 가이드
 
-**버전:** 1.0 | **최종 수정:** 2026-04-28  
+**버전:** 1.1 | **최종 수정:** 2026-04-30
 **대상:** 02-HARNESS Analyst·운영자  
 **용도:** `scripts/run-generator.mjs`로 Claude CLI Generator를 실제 실행하고, 결과물과 원장을 누락 없이 남기는 방법을 설명한다.
 
@@ -284,12 +284,12 @@ Generator-Validator 반복 전략은 `docs/workflows/failure-handling.md`가 권
 아직 운영자/Analyst가 수행하는 부분:
 
 ```text
-[ ] Validator-A wrapper의 실제 모델 smoke test 결과 관찰
-[ ] Tier 3 Validator-B 독립 팬아웃 준비와 결과 취합
+[ ] Validator-A/B wrapper의 실제 모델 smoke test 결과 관찰
+[x] Tier 3 Validator-B 독립 팬아웃 입력과 실행 wrapper 준비
 [ ] Adjudication 판정과 Task Spec 보완
 ```
 
-즉 현재 파이프라인은 **Generator 실행·기록 파이프라인**과 **Validator-A 실행·retry·Conflict Report 생성 파이프라인**이 자동화되어 있다. 남은 핵심 검증은 실제 모델을 사용하는 Generator → Validator-A smoke test와 Tier 3의 Validator-B 독립 팬아웃이다.
+즉 현재 파이프라인은 **Generator 실행·기록 파이프라인**, **Validator-A 실행·retry·Conflict Report 생성 파이프라인**, **Validator-B Gemini CLI 실행·기록 파이프라인**이 자동화되어 있다. 남은 핵심 검증은 설치된 CLI와 인증을 사용하는 실제 모델 smoke test다.
 
 ---
 
@@ -327,4 +327,5 @@ Generator-Validator 반복 전략은 `docs/workflows/failure-handling.md`가 권
 
 | 버전 | 날짜 | 변경 |
 |---|---|---|
+| 1.1 | 2026-04-30 | Validator-B wrapper 구현 상태 반영 |
 | 1.0 | 2026-04-28 | 최초 작성. `scripts/run-generator.mjs` 운영 절차 문서화 |

@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process';
+import fs from 'node:fs';
 
 const checks = [
   ['node', ['scripts/check-doc-headers.mjs']],
@@ -9,6 +10,18 @@ const checks = [
   ['node', ['scripts/check-final-git-state.mjs']],
   ['node', ['scripts/check-quality-scores.mjs']],
 ];
+
+function requireText(filePath, text) {
+  const content = fs.readFileSync(filePath, 'utf8');
+  if (!content.includes(text)) {
+    throw new Error(`${filePath} must include ${text}`);
+  }
+}
+
+requireText('package.json', '"run:validator-b": "node scripts/run-validator-b.mjs"');
+requireText('scripts/run-validator-b.mjs', "run-validator-b only accepts Validator-B handoff");
+requireText('scripts/run-validator-b.mjs', "Validator-B handoff must not include Validator-A inputs or results");
+requireText('scripts/run-validator-b.mjs', "assertNoSecretLikeContent(prompt, 'Validator-B prompt')");
 
 for (const [command, args] of checks) {
   const label = [command, ...args].join(' ');

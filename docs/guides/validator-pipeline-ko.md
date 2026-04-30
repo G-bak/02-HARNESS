@@ -1,8 +1,8 @@
 # Validator 실행 파이프라인 — 한국어 운영 가이드
 
-**버전:** 1.0 | **최종 수정:** 2026-04-29  
+**버전:** 1.1 | **최종 수정:** 2026-04-30
 **대상:** 02-HARNESS Analyst·운영자  
-**용도:** `scripts/run-validator-a.mjs`와 `scripts/prepare-generator-retry.mjs`로 Validator-A 실행, FAIL 회복 입력 생성, Conflict Report 전환을 운영하는 방법을 설명한다.
+**용도:** `scripts/run-validator-a.mjs`, `scripts/run-validator-b.mjs`, `scripts/prepare-generator-retry.mjs`로 Validator 실행, FAIL 회복 입력 생성, Conflict Report 전환을 운영하는 방법을 설명한다.
 
 ---
 
@@ -22,11 +22,11 @@
 
 ## 1. 설계 원칙
 
-Validator-A 자동화는 판단을 대체하지 않는다. wrapper는 아래만 수행한다.
+Validator 자동화는 판단을 대체하지 않는다. wrapper는 아래만 수행한다.
 
 ```text
 [x] Validator handoff JSON 검증
-[x] Codex CLI command shape 고정
+[x] Codex/Gemini CLI command shape 고정
 [x] stdout JSONL, stderr, 마지막 메시지, 실행 메타데이터 저장
 [x] Validator 결과 JSON 필수 필드 검증
 [x] PASS/FAIL/RESOURCE_FAILURE를 원장에 기록
@@ -44,6 +44,7 @@ Validator-A 자동화는 판단을 대체하지 않는다. wrapper는 아래만 
 
 ```text
 tasks/handoffs/TASK-{ID}/validator-a-input.json
+tasks/handoffs/TASK-{ID}/validator-b-input.json
 ```
 
 스키마:
@@ -217,7 +218,42 @@ tasks/handoffs/TASK-{ID}/conflict-report-{N}.json
 [ ] PASS이면 별도 merge 단계에서 git-branch-policy.md의 2-commit squash 절차 수행
 ```
 
-`scripts/run-validator-a.mjs` 자체를 수정하는 Task에서는 같은 wrapper 실행만으로 자기 자신을 검증했다고 보지 않는다. 먼저 fixture, `node --check`, `audit:harness` 같은 로컬 검증으로 수정 계층을 확인하고, 필요하면 별도 후속 smoke test Task에서 실제 Generator → Validator-A 파이프라인을 다시 실행한다.
+## 3-B. Validator-B 실행
+
+Dry-run:
+
+```bash
+npm run run:validator-b -- TASK-20260430-001 --dry-run
+```
+
+입력 파일 지정:
+
+```bash
+npm run run:validator-b -- TASK-20260430-001 \
+  --input tasks/handoffs/TASK-20260430-001/validator-b-input.json
+```
+
+실제 실행:
+
+```bash
+npm run run:validator-b -- TASK-20260430-001
+```
+
+wrapper가 사용하는 Gemini CLI 기본 형태:
+
+```text
+gemini --prompt "<Validator-B prompt>" --output-format json --sandbox
+```
+
+`--model`은 `VALIDATOR_GEMINI_MODEL` 또는 CLI 옵션으로만 지정한다. 환경변수 값 자체는 로그에 기록하지 않는다.
+
+Validator-B handoff는 반드시 `agent: "Validator-B"`, `invocation.runtime: "Gemini CLI"`여야 한다. wrapper는 Validator-A 결과 파일명이나 Validator-A PASS/FAIL 문구가 handoff에 섞이면 실행을 거부한다. Tier 3 독립성은 Analyst가 Validator-A/B 입력 파일을 따로 만들고, Validator-B 입력에 Validator-A 결과를 넣지 않는 방식으로 보장한다.
+
+Gemini CLI가 설치되어 있지 않거나 인증·쿼터·rate limit·context limit 때문에 실행되지 못하면 Validator FAIL이 아니라 `RESOURCE_FAILURE` / `HOLD`로 기록한다.
+
+`scripts/run-validator-a.mjs` 또는 `scripts/run-validator-b.mjs` 자체를 수정하는 Task에서는 같은 wrapper 실행만으로 자기 자신을 검증했다고 보지 않는다. 먼저 fixture, `node --check`, `audit:harness` 같은 로컬 검증으로 수정 계층을 확인하고, 필요하면 별도 후속 smoke test Task에서 실제 Generator → Validator 파이프라인을 다시 실행한다.
+
+Validator 런타임의 read-only 정책이 `node`/`npm` 실행을 막아 로컬 검증을 직접 재현하지 못할 수 있다. 이 경우 Analyst는 실제 로컬 명령, exit code, 출력 요약을 `tasks/handoffs/{TASK-ID}/validation-evidence.json` 같은 artifact로 남기고 Generator result 또는 Validator handoff에서 참조하게 한 뒤 Validator를 재실행한다. 단, 증거 artifact는 명령 성공을 대체하는 임의 주장으로 쓰지 않고 실제 실행 결과를 요약해야 한다.
 
 ---
 
@@ -225,4 +261,5 @@ tasks/handoffs/TASK-{ID}/conflict-report-{N}.json
 
 | 버전 | 날짜 | 변경 |
 |---|---|---|
+| 1.1 | 2026-04-30 | Validator-B Gemini CLI wrapper와 Tier 3 독립 handoff 절차 추가, Validator 런타임 정책으로 로컬 명령 재현이 막힐 때 validation-evidence artifact를 연결하는 절차 명시 |
 | 1.0 | 2026-04-29 | 최초 작성. Validator-A wrapper와 retry handoff 자동화 절차 문서화 |

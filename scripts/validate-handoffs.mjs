@@ -4,7 +4,9 @@ import path from 'node:path';
 const root = process.cwd();
 const schemaDir = path.join(root, 'docs', 'schemas');
 const generatorSchemaPath = path.join(schemaDir, 'generator-handoff.schema.json');
+const validatorSchemaPath = path.join(schemaDir, 'validator-handoff.schema.json');
 const retryFixturePath = path.join(root, 'tasks', 'handoffs', 'TASK-20260429-006', 'generator-input-retry-2.json');
+const validatorBFixturePath = path.join(root, 'tasks', 'handoffs', 'TASK-20260430-001', 'validator-b-input.json');
 
 let errors = 0;
 
@@ -31,7 +33,9 @@ for (const fileName of fs.readdirSync(schemaDir).filter((name) => name.endsWith(
 }
 
 const generatorSchema = readJson(generatorSchemaPath);
+const validatorSchema = readJson(validatorSchemaPath);
 const retryFixture = readJson(retryFixturePath);
+const validatorBFixture = fs.existsSync(validatorBFixturePath) ? readJson(validatorBFixturePath) : null;
 
 if (generatorSchema && retryFixture) {
   const properties = generatorSchema.properties ?? {};
@@ -55,6 +59,34 @@ if (generatorSchema && retryFixture) {
 
   if (!retryFixture.retry || retryFixture.retry.attempt_no !== 2) {
     reportError(`${relativePath(retryFixturePath)} must remain a retry fixture with retry.attempt_no=2`);
+  }
+}
+
+if (validatorSchema && validatorBFixture) {
+  const properties = validatorSchema.properties ?? {};
+  for (const key of validatorSchema.required ?? []) {
+    if (!Object.hasOwn(validatorBFixture, key)) {
+      reportError(`${relativePath(validatorBFixturePath)} is missing required validator handoff field: ${key}`);
+    }
+  }
+
+  if (validatorSchema.additionalProperties === false) {
+    for (const key of Object.keys(validatorBFixture)) {
+      if (!Object.hasOwn(properties, key)) {
+        reportError(`${relativePath(validatorBFixturePath)} uses top-level field not allowed by validator-handoff.schema.json: ${key}`);
+      }
+    }
+  }
+
+  if (validatorBFixture.agent !== 'Validator-B') {
+    reportError(`${relativePath(validatorBFixturePath)} must remain a Validator-B handoff fixture`);
+  }
+  if (validatorBFixture.invocation?.runtime !== 'Gemini CLI') {
+    reportError(`${relativePath(validatorBFixturePath)} must use Gemini CLI runtime`);
+  }
+  const serialized = JSON.stringify(validatorBFixture);
+  if (/validator-a-result|Validator-A PASS|Validator-A FAIL/i.test(serialized)) {
+    reportError(`${relativePath(validatorBFixturePath)} must not include Validator-A result context`);
   }
 }
 
